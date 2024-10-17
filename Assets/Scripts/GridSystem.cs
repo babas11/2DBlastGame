@@ -27,5 +27,14 @@ public abstract class GridSystem<T> : MonoBehaviour
         return repository.Read("pathFile");
     }
 
+    protected void PutItemAt(int x, int y, Interactable item)
+    {
+        if (x < 0 || x >= dimensions.x || y < 0 || y >= dimensions.y)
+        {
+            Debug.LogWarning("Invalid position");
+            return;
+        }
+        matrix[x, y] = item;
+    }
 
 }
