@@ -5,15 +5,16 @@ using UnityEngine;
 [RequireComponent(typeof(SpriteRenderer))]
 public class Interactable : MonoBehaviour
 {
+
     SpriteRenderer spriteRenderer;
-    enum Type
+    enum InteractableType
     {
-        box,
+        box ,
         stone,
         vase
     }
 
-    Type type;
+    InteractableType type;
     
 
 }
