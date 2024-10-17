@@ -1,17 +1,124 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
+using Unity.VisualScripting;
 using UnityEngine;
 
 public class ObjectPool : MonoBehaviour
 {
+
     [SerializeField]
     Interactable prefab;
+
+    [SerializeField]
+    Interactable[] prefabs;
+    Dictionary<string , InteractableType> interactableTypes;
+    Dictionary<InteractableType , List<Interactable>> pools;
+/*
+    [SerializeField]
+    Interactable cubePrefab;
+
+    [SerializeField]
+    Interactable boxPrefab;
+
+    [SerializeField]
+    Interactable stonePrefab;
+
+    [SerializeField]
+    Interactable vasePrefab;
+
+    [SerializeField]
+    Interactable tntPrefab;
+*/
+    void Start()
+    {
+        SetupPools();
+    }
+
+    private void SetupPools()
+    {
+            interactableTypes = new Dictionary<string, InteractableType>(JsonStrings.InteractableTypes.Length);
+            pools = new Dictionary<InteractableType, List<Interactable>>();
+        
+        for(int i = 0; i != JsonStrings.InteractableTypes.Length; i++)
+        {
+            if((InteractableType)i == InteractableType.red || (InteractableType)i == InteractableType.blue || (InteractableType)i == InteractableType.green || (InteractableType)i == InteractableType.yellow || (InteractableType)i == InteractableType.random)
+            {
+                if(!interactableTypes.ContainsKey(JsonStrings.InteractableTypes[i]))
+                interactableTypes[JsonStrings.InteractableTypes[i]] = (InteractableType)i;            
+            }
+
+            interactableTypes[JsonStrings.InteractableTypes[i]] = (InteractableType)i;
+        }
+
+
+        foreach (InteractableType interactableType in Enum.GetValues(typeof(InteractableType)))
+        {
+            pools[interactableType] = new List<Interactable>();
+        }
+    }
 
     int poolSize;
     List<Interactable> pool;
     List<Interactable> Pool { get => pool; }
     bool isReady;
 
+    public void CreatePools(string type, int size = 1)
+    {
+        if (!interactableTypes.ContainsKey(type))
+        {
+            Debug.LogWarning($"Pool for {type} does not exist.");
+        };
+
+        
+    }
+
+    public Interactable GetElementFromPool(string type)
+    {
+        if (!interactableTypes.ContainsKey(type))
+        {
+            Debug.LogWarning($"Pool for {type} does not exist.");
+            return null;
+        }
+
+        var pooll = pools[interactableTypes[type]];
+
+
+        foreach (var element in pooll)
+        {
+            if (!element.isActiveAndEnabled)
+            {
+                element.gameObject.SetActive(true);
+                return element;
+            }
+        }
+
+        if (interactableTypes.TryGetValue(type, out InteractableType typeEnum ))
+        {
+        //GameObject newPoolElement = Instantiate(prefabs[(int)interactableTypes[type]].gameObject, transform);
+        int index = (int)interactableTypes[type];
+        if (index < 0 || index >= prefabs.Length)
+        {
+            Debug.LogWarning($"Prefab index {index} for type {type} is out of bounds. Please check the prefab array and interactable types.");
+            return null;
+        }
+
+        GameObject newPoolElement = Instantiate(prefabs[index].gameObject, transform);
+        Interactable interactable = newPoolElement.GetComponent<Interactable>();
+        print(interactable is null);
+
+        pooll.Add(interactable);
+        newPoolElement.SetActive(true);
+        return newPoolElement.GetComponent<Interactable>();
+        }
+
+         
+
+        Debug.LogWarning($"Prefab of type {type} not found.");
+        return null;
+
+
+    }
 
     public void CreatePool(int size = 1)
     {
@@ -54,6 +161,8 @@ public class ObjectPool : MonoBehaviour
 
     }
 
+    
+
     public void ReturnToPool(Interactable toPool)
     {
         if (toPool == null)
@@ -68,4 +177,20 @@ public class ObjectPool : MonoBehaviour
         toPool.gameObject.SetActive(false);
     }
    
+}
+
+static class JsonStrings
+{
+    public static string[] InteractableTypes = new string[]
+    {
+        "r",
+        "g",
+        "b",
+        "y",
+        "bo",
+        "t",
+        "s",
+        "v",
+        "rand"
+    };
 }

@@ -16,11 +16,9 @@ public class Interactable : MonoBehaviour
         spriteRenderer = GetComponent<SpriteRenderer>();
     }
 
-    void OnPointerDown()
-    {
-        Debug.Log("Interactable clicked");
-    }
+    
 }
+
 
 
 
@@ -33,6 +31,7 @@ public enum InteractableType
         cube,
         box ,
         stone,
+        random,
         vase
     }
 

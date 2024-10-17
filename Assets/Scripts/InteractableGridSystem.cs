@@ -45,13 +45,13 @@ public class InteractableGridSystem : GridSystem<Interactable>
             for (int x = Dimensions.x - 1; x >= 0; x--)
             {
                 // Create a new interactable
-                newInteractable = pool.GetElementFromPool();
+                newInteractable = pool.GetElementFromPool(stringMatrix[arrayIndex - 1]);
                 
                 // Set the interactable's position
                 newInteractable.transform.position = pos;
                 
                 // Place item at grid
-                PutItemAt(x, y, newInteractable);
+                //PutItemAt(x, y, newInteractable);
                 
                 // Setup InteractableS type
                 SetupInteractable(newInteractable, stringMatrix[arrayIndex - 1]);
