@@ -327,12 +327,14 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: a3bb2f37eec7742309573a1d5fa84457, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  prefab: {fileID: 4277116359607342860, guid: 08bbf7368bddf8941b94996c86dc790e, type: 3}
   prefabs:
+  - {fileID: 2143313331974981464, guid: b671c804b16f445e79e16b57456dbaa7, type: 3}
   - {fileID: 2143313331974981464, guid: 08bbf7368bddf8941b94996c86dc790e, type: 3}
+  - {fileID: 2143313331974981464, guid: fe09007b3305244899d7183798cef14b, type: 3}
+  - {fileID: 2143313331974981464, guid: 7c620b3768e0a4236ba24b51120e1a06, type: 3}
   - {fileID: 7580860253951080310, guid: e151ecc1860e5504d867a68a62eae04a, type: 3}
-  - {fileID: 5470597563362776149, guid: 96c16a83414146b41a46e160da75d6db, type: 3}
   - {fileID: 32819802142558215, guid: a3c4924bfe788de40829b1f9b0988896, type: 3}
+  - {fileID: 5470597563362776149, guid: 96c16a83414146b41a46e160da75d6db, type: 3}
   - {fileID: 370767549422196098, guid: da0a79c6e83b0bd409de63b832590be8, type: 3}
 --- !u!1 &1076984322
 GameObject:
@@ -513,12 +515,12 @@ GameObject:
   - component: {fileID: 1460251737}
   - component: {fileID: 1460251736}
   m_Layer: 0
-  m_Name: GameObject
+  m_Name: Player
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 0
+  m_IsActive: 1
 --- !u!212 &1460251736
 SpriteRenderer:
   m_ObjectHideFlags: 0
@@ -632,13 +634,6 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   dimensions: {x: 9, y: 10}
   verticalGridOffset: {x: 0, y: 0, z: 0}
-  interactableSprites:
-  - {fileID: 21300000, guid: 9b76118e30c632343a351f6c42a0e7db, type: 3}
-  - {fileID: 21300000, guid: 24ea5975acf39594d80a087d0c53eb87, type: 3}
-  - {fileID: 21300000, guid: 82f9dc7ad87b97a40bf015767a8451a8, type: 3}
-  - {fileID: 21300000, guid: d92dc9d0db9cf1f488e16c369ace2186, type: 3}
-  - {fileID: 21300000, guid: 1813d30b392b4a4409ec7be61d5a7641, type: 3}
-  objectHolder: {fileID: 1019301020}
 --- !u!1660057539 &9223372036854775807
 SceneRoots:
   m_ObjectHideFlags: 0

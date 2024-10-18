@@ -4,19 +4,25 @@ using Unity.VisualScripting;
 using UnityEngine;
 
 [RequireComponent(typeof(SpriteRenderer))]
-public class Interactable : MonoBehaviour
+public abstract class Interactable : MonoBehaviour
 {
 
     SpriteRenderer spriteRenderer;
-
-    public InteractableType type { get; set; }
+    
+    [SerializeField]
+    private InteractableType type;
+     [SerializeField]
+    public Vector2Int matrixPosition;
+    public InteractableType Type { get=> type; }
+    protected InteractableGridSystem interactableGridSystem;
 
     void Start()
     {
         spriteRenderer = GetComponent<SpriteRenderer>();
+        interactableGridSystem = FindObjectOfType<InteractableGridSystem>();
     }
 
-    void OnPointerDown()
+    protected virtual void OnMouseDown()
     {
         print("Clicked");
     }
@@ -28,16 +34,13 @@ public class Interactable : MonoBehaviour
 
 
 public enum InteractableType
-    {
-        red,
-        green ,
-        blue,
-        yellow,
-        box ,
-        stone,
-        tnt,
-        random,
-        vase
-    }
-
- 
+{
+    red,
+    green,
+    blue,
+    yellow,
+    box,
+    tnt,
+    stone,
+    vase,
+}

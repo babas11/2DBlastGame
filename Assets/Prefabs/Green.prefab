@@ -24,6 +24,10 @@ PrefabInstance:
       propertyPath: m_DrawMode
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 1308636310742388714, guid: c146bc244a32a4f8dbf87b48c49a5f10, type: 3}
+      propertyPath: m_WasSpriteAssigned
+      value: 1
+      objectReference: {fileID: 0}
     - target: {fileID: 6802335738225513533, guid: c146bc244a32a4f8dbf87b48c49a5f10, type: 3}
       propertyPath: m_LocalPosition.x
       value: 0
@@ -106,3 +110,4 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 192acd6c8bbe2bb458069d722039e82a, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  type: 1
