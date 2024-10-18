@@ -6,49 +6,55 @@ using UnityEngine;
 
 public class ObjectPool : MonoBehaviour
 {
-
-    [SerializeField]
-    Interactable prefab;
-
     [SerializeField]
     Interactable[] prefabs;
-    Dictionary<string , InteractableType> interactableTypes;
-    Dictionary<InteractableType , List<Interactable>> pools;
-/*
-    [SerializeField]
-    Interactable cubePrefab;
-
-    [SerializeField]
-    Interactable boxPrefab;
-
-    [SerializeField]
-    Interactable stonePrefab;
-
-    [SerializeField]
-    Interactable vasePrefab;
-
-    [SerializeField]
-    Interactable tntPrefab;
-*/
+    Dictionary<string, InteractableType> interactableTypes;
+    Dictionary<InteractableType, List<Interactable>> pools;
     void Start()
     {
         SetupPools();
+        
     }
 
     private void SetupPools()
     {
-            interactableTypes = new Dictionary<string, InteractableType>(JsonStrings.InteractableTypes.Length);
-            pools = new Dictionary<InteractableType, List<Interactable>>();
-        
-        for(int i = 0; i != JsonStrings.InteractableTypes.Length; i++)
-        {
-            if((InteractableType)i == InteractableType.red || (InteractableType)i == InteractableType.blue || (InteractableType)i == InteractableType.green || (InteractableType)i == InteractableType.yellow || (InteractableType)i == InteractableType.random)
-            {
-                if(!interactableTypes.ContainsKey(JsonStrings.InteractableTypes[i]))
-                interactableTypes[JsonStrings.InteractableTypes[i]] = (InteractableType)i;            
-            }
+        interactableTypes = new Dictionary<string, InteractableType>(JsonStrings.InteractableTypes.Length);
+        pools = new Dictionary<InteractableType, List<Interactable>>();
 
-            interactableTypes[JsonStrings.InteractableTypes[i]] = (InteractableType)i;
+        foreach (string typeString in JsonStrings.InteractableTypes)
+        {
+            switch (typeString)
+            {
+                case "r":
+                interactableTypes[typeString] = InteractableType.red;
+                    break;
+                case "g":
+                interactableTypes[typeString] = InteractableType.green;
+                    break;
+                case "b":
+                interactableTypes[typeString] = InteractableType.blue;
+                    break;
+                case "y":
+                interactableTypes[typeString] = InteractableType.yellow;
+                    break;
+                case "rand":
+                    interactableTypes[typeString] = (InteractableType)UnityEngine.Random.Range(0, 5);
+                    break;
+                case "bo":
+                    interactableTypes[typeString] = InteractableType.box;
+                    break;
+                case "t":
+                    interactableTypes[typeString] = InteractableType.tnt;
+                    break;
+                case "s":
+                    interactableTypes[typeString] = InteractableType.stone;
+                    break;
+                case "v":
+                    interactableTypes[typeString] = InteractableType.vase;
+                    break;
+                default:
+                    break;
+            }
         }
 
 
@@ -63,15 +69,18 @@ public class ObjectPool : MonoBehaviour
     List<Interactable> Pool { get => pool; }
     bool isReady;
 
-    public void CreatePools(string type, int size = 1)
+    public List<Interactable> GetPool(InteractableType type) =>pools[type];
+    public List<Interactable> GetPool(string s) 
     {
-        if (!interactableTypes.ContainsKey(type))
+        if(!interactableTypes.ContainsKey(s))
         {
-            Debug.LogWarning($"Pool for {type} does not exist.");
-        };
+            Debug.LogWarning($"Pool for {s} does not exist.");
+            return null;
+        }
+        return pools[interactableTypes[s]];
+    }    
 
-        
-    }
+    
 
     public Interactable GetElementFromPool(string type)
     {
@@ -93,26 +102,26 @@ public class ObjectPool : MonoBehaviour
             }
         }
 
-        if (interactableTypes.TryGetValue(type, out InteractableType typeEnum ))
+        if (interactableTypes.TryGetValue(type, out InteractableType typeEnum))
         {
-        //GameObject newPoolElement = Instantiate(prefabs[(int)interactableTypes[type]].gameObject, transform);
-        int index = (int)interactableTypes[type];
-        if (index < 0 || index >= prefabs.Length)
-        {
-            Debug.LogWarning($"Prefab index {index} for type {type} is out of bounds. Please check the prefab array and interactable types.");
-            return null;
+            //GameObject newPoolElement = Instantiate(prefabs[(int)interactableTypes[type]].gameObject, transform);
+            int index = (int)interactableTypes[type];
+            if (index < 0 || index >= prefabs.Length)
+            {
+                Debug.LogWarning($"Prefab index {index} for type {type} is out of bounds. Please check the prefab array and interactable types.");
+                return null;
+            }
+
+            GameObject newPoolElement = Instantiate(prefabs[index].gameObject, transform);
+            Interactable interactable = newPoolElement.GetComponent<Interactable>();
+            print(interactable is null);
+
+            pooll.Add(interactable);
+            newPoolElement.SetActive(true);
+            return newPoolElement.GetComponent<Interactable>();
         }
 
-        GameObject newPoolElement = Instantiate(prefabs[index].gameObject, transform);
-        Interactable interactable = newPoolElement.GetComponent<Interactable>();
-        print(interactable is null);
 
-        pooll.Add(interactable);
-        newPoolElement.SetActive(true);
-        return newPoolElement.GetComponent<Interactable>();
-        }
-
-         
 
         Debug.LogWarning($"Prefab of type {type} not found.");
         return null;
@@ -120,7 +129,7 @@ public class ObjectPool : MonoBehaviour
 
     }
 
-    public void CreatePool(int size = 1)
+    /*public void CreatePool(int size = 1)
     {
         if (size < 1) throw new ArgumentException("Pool size cannot be less than 1");
         poolSize = size;
@@ -134,9 +143,9 @@ public class ObjectPool : MonoBehaviour
 
         }
         isReady = true;
-    }
+    }*/
 
-    public Interactable GetElementFromPool()
+    /*public Interactable GetElementFromPool()
     {
         if (!isReady || pool == null)
         {
@@ -159,11 +168,11 @@ public class ObjectPool : MonoBehaviour
         return newPoolElement.GetComponent<Interactable>();
 
 
-    }
+    }*/
 
-    
 
-    public void ReturnToPool(Interactable toPool)
+
+    /*public void ReturnToPool(Interactable toPool)
     {
         if (toPool == null)
         {
@@ -175,8 +184,8 @@ public class ObjectPool : MonoBehaviour
             pool.Add(toPool);
         }
         toPool.gameObject.SetActive(false);
-    }
-   
+    }*/
+
 }
 
 static class JsonStrings

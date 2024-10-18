@@ -16,6 +16,11 @@ public class Interactable : MonoBehaviour
         spriteRenderer = GetComponent<SpriteRenderer>();
     }
 
+    void OnPointerDown()
+    {
+        print("Clicked");
+    }
+
     
 }
 
@@ -28,9 +33,9 @@ public enum InteractableType
         green ,
         blue,
         yellow,
-        cube,
         box ,
         stone,
+        tnt,
         random,
         vase
     }

@@ -24,8 +24,6 @@ public class InteractableGridSystem : GridSystem<Interactable>
     {
         BuildMatrix();
         BuildInteractableGridSystem(ReadGrid());
-
-        
     }
 /*
 
@@ -51,11 +49,8 @@ public class InteractableGridSystem : GridSystem<Interactable>
                 newInteractable.transform.position = pos;
                 
                 // Place item at grid
-                //PutItemAt(x, y, newInteractable);
-                
-                // Setup InteractableS type
-                SetupInteractable(newInteractable, stringMatrix[arrayIndex - 1]);
-                
+                PutItemAt(x, y, newInteractable);
+                                
                 // Adjust next items one space to the right
                 pos += Vector3.right/2;
                 
@@ -75,7 +70,7 @@ public class InteractableGridSystem : GridSystem<Interactable>
 
     }
 
-    void SetupInteractable(Interactable interactable, string type)
+    /*void SetupInteractable(Interactable interactable, string type)
     {
         // Configure the interactable based on the type
         switch (type)
@@ -129,7 +124,7 @@ public class InteractableGridSystem : GridSystem<Interactable>
                     break;
             
         }
-    }
+    }*/
 
 
 }
