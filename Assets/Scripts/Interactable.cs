@@ -6,12 +6,26 @@ using UnityEngine;
 [RequireComponent(typeof(SpriteRenderer))]
 public abstract class Interactable : Mover
 {
+    public readonly static Dictionary<string, InteractableType> interactableStringTypes = new Dictionary<string, InteractableType>
+        {
+            {"r", InteractableType.red},
+            {"g", InteractableType.green},
+            {"b", InteractableType.blue},
+            {"y", InteractableType.yellow},
+            {"bo", InteractableType.box},
+            {"t", InteractableType.tnt},
+            {"s", InteractableType.stone},
+            {"v", InteractableType.vase},
+        };
 
     SpriteRenderer spriteRenderer;
     
     [SerializeField]
     private InteractableType type;
-     [SerializeField]
+
+  
+    
+    [SerializeField]
     public Vector2Int matrixPosition;
     public InteractableType Type { get=> type; }
     protected InteractableGridSystem interactableGridSystem;
@@ -27,16 +41,12 @@ public abstract class Interactable : Mover
         print("Clicked");
     }
 
-    public void Animateblast()
-    {
-        
-    }
-
-
-
-    
 }
 
+public interface IObstacle
+{
+    void Explode();
+}
 
 
 
@@ -50,4 +60,5 @@ public enum InteractableType
     tnt,
     stone,
     vase,
+    random
 }

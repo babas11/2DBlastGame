@@ -1,10 +1,14 @@
-public class Stone : Interactable
+public class Stone : Interactable, IObstacle
 {
-    override protected void OnMouseDown()
+    public void Explode()
+    {
+        print("Stone Exploded");
+    }
+
+     override protected void OnMouseDown()
     {
         print("Cube Clicked");
     }
-    
 }
 
  

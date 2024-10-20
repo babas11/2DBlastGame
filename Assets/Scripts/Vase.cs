@@ -1,9 +1,12 @@
 public class Vase : Interactable
 {
+    public void Explode()
+    {
+        print("Vase Exploded");
+    }
+
     override protected void OnMouseDown()
     {
-        print("Cube Clicked");
+        print("Vase Clicked");
     }
 }
-
- 
