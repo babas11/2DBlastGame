@@ -4,7 +4,7 @@ using Unity.VisualScripting;
 using UnityEngine;
 
 [RequireComponent(typeof(SpriteRenderer))]
-public abstract class Interactable : MonoBehaviour
+public abstract class Interactable : Mover
 {
 
     SpriteRenderer spriteRenderer;
@@ -15,7 +15,7 @@ public abstract class Interactable : MonoBehaviour
     public Vector2Int matrixPosition;
     public InteractableType Type { get=> type; }
     protected InteractableGridSystem interactableGridSystem;
-
+ 
     void Start()
     {
         spriteRenderer = GetComponent<SpriteRenderer>();
@@ -26,6 +26,13 @@ public abstract class Interactable : MonoBehaviour
     {
         print("Clicked");
     }
+
+    public void Animateblast()
+    {
+        
+    }
+
+
 
     
 }
