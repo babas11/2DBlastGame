@@ -54,7 +54,7 @@ public class InteractableGridSystem : GridSystem<Interactable>
             {
                 // Create a new interactable
 
-                print(arrayIndex);
+                //print(arrayIndex);
                 newInteractable = interactablePool.GetPooledObject(stringMatrix[arrayIndex]);
                 toAnimate.Add(newInteractable);
                 // Set the interactable's position
@@ -182,48 +182,51 @@ public class InteractableGridSystem : GridSystem<Interactable>
             obsticles.Add(GetItemAt(pos.x, pos.y));
         }
 
-        if(obsticles.Count > 0)
+        if (obsticles.Count > 0)
         {
             return true;
-        }else
+        }
+        else
         {
             return false;
         }
-         
+
     }
 
-    
+
 
     public IEnumerator Blast(List<Interactable> matchingInteractables, Transform pressedInteractable)
     {
-        
-        foreach(var matqchingInteractable in matchingInteractables)
+        for (int i = 0; i < matchingInteractables.Count ; i++)
         {
-            if(LookForObsticles(out List<Interactable> obsticles, matqchingInteractable)){
-                foreach(var obsticle in obsticles)
-                {
-                    (obsticle as IObstacle).Explode();
-                }
+            if(i == matchingInteractables.Count - 1){
+                yield return StartCoroutine(matchingInteractables[i].ScaleToZero(.5f,0));
+                print("2");
+            }
+            else
+            {
+                print("1");
+                StartCoroutine(matchingInteractables[i].ScaleToZero(.5f,0));
             }
         }
-
+        print("3");
         foreach (var matchingInteractable in matchingInteractables)
         {
             var partical1 = blastParticlePool.GetPooledObject(matchingInteractable.Type);
             partical1.transform.position = matchingInteractable.transform.position;
-            float randScale = Random.Range(0.1f, .3f);
-            partical1.transform.localScale = new Vector3(randScale, randScale, randScale);
+            float randScale = Random.Range(0.1f, .15f);
+            partical1.transform.localScale = new Vector3(randScale, randScale, 1);
 
 
             var partical2 = blastParticlePool.GetPooledObject(matchingInteractable.Type);
             partical2.transform.position = matchingInteractable.transform.position;
-            randScale = Random.Range(0.1f, .3f);
-            partical2.transform.localScale = new Vector3(randScale, randScale, randScale);
+            randScale = Random.Range(0.1f, .15f);
+            partical2.transform.localScale = new Vector3(randScale, randScale, 1);
 
             var partical3 = blastParticlePool.GetPooledObject(matchingInteractable.Type);
             partical3.transform.position = matchingInteractable.transform.position;
-            randScale = Random.Range(0.1f, .3f);
-            partical3.transform.localScale = new Vector3(randScale, randScale, randScale);
+            randScale = Random.Range(0.1f, .15f);
+            partical3.transform.localScale = new Vector3(randScale, randScale, 1);
 
             StartCoroutine(MoveAndFadeFragment1(partical1.gameObject, 1f, .7f, matchingInteractable.transform.position));
             StartCoroutine(MoveAndFadeFragment1(partical2.gameObject, 1f, .7f, matchingInteractable.transform.position));
@@ -232,6 +235,37 @@ public class InteractableGridSystem : GridSystem<Interactable>
         }
 
 
+        foreach (var matqchingInteractable in matchingInteractables)
+        {
+            if (LookForObsticles(out List<Interactable> obsticles, matqchingInteractable))
+            {
+                foreach (var obsticle in obsticles)
+                {
+                    List<BlastParticle> obsticlePArticles = new List<BlastParticle>();
+
+                    for (int i = 0; i < 3; i++)
+                    {
+                        var particle = blastParticlePool.GetPooledObject(obsticle.Type);
+                        particle.transform.position = obsticle.transform.position;
+                        float randScale = Random.Range(0.1f, .15f);
+                        particle.transform.localScale = new Vector3(randScale, randScale, 1);
+
+                        obsticlePArticles.Add(particle);
+                    }
+
+                    for (int i = 0; i < obsticlePArticles.Count; i++)
+                    {
+                        StartCoroutine(MoveAndFadeFragment1(obsticlePArticles[i].gameObject, 1f, .7f, obsticle.transform.position));
+
+                    }
+                }
+
+                foreach (var obsticle in obsticles)
+                {
+                    obsticle.gameObject.SetActive(false);
+                }
+            }
+        }
 
 
         foreach (var matchingInteractable in matchingInteractables)

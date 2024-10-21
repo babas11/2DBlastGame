@@ -12,9 +12,9 @@ public class Mover : MonoBehaviour
 
     private float howFar;
 
-    public bool idle {get; set;}
+    public bool idle { get; set; }
 
-    
+
 
 
     public IEnumerator MoveToPosition(Vector3 targetPosition, float speed)
@@ -38,6 +38,8 @@ public class Mover : MonoBehaviour
 
         idle = true;
     }
+
+
 
     private float Easing(float howFar)
     {
@@ -67,5 +69,40 @@ public class Mover : MonoBehaviour
     }
 
 
-    
+    public IEnumerator ScaleToZero(float speed, float toScale)
+    {
+        if (speed <= 0)
+        {
+            Debug.LogWarning("Speed must be a positive number");
+            yield break;
+        }
+
+        Vector3 fromScale = transform.localScale * 1.1f; // Slightly larger than current scale
+        float howFar = 0f;
+        idle = false;
+        Vector3 toScaleVector = new Vector3(toScale, toScale, 1);
+        // Set the initial scale to the larger scale
+        transform.localScale = fromScale;
+
+        while (howFar < 1f)
+        {
+            howFar += Time.deltaTime * speed;
+            if (howFar > 1f)
+            {
+                howFar = 1f;
+            }
+
+            float easedValue = EasingElastic(howFar);
+            transform.localScale = Vector3.LerpUnclamped(fromScale, toScaleVector, easedValue);
+            if(transform.localScale.x < 0.1f)
+            {
+                break;
+            }
+
+            yield return null;
+        }
+
+
+
+    }
 }
