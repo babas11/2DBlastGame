@@ -2,9 +2,8 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
-using Unity.VisualScripting;
-using UnityEditor;
 using UnityEngine;
+using UnityEngine.UIElements;
 using Random = UnityEngine.Random;
 
 public class InteractableGridSystem : GridSystem<Interactable>
@@ -23,6 +22,12 @@ public class InteractableGridSystem : GridSystem<Interactable>
     BlastParticlePooler blastParticlePool;
     Mover mover;
 
+    bool initialized = false;
+
+    [SerializeField]
+    private static readonly string[] random = { "random" };
+
+
 
 
     private void Awake()
@@ -33,33 +38,43 @@ public class InteractableGridSystem : GridSystem<Interactable>
     private void Start()
     {
         BuildMatrix();
-        StartCoroutine(BuildInteractableGridSystem(ReadGrid()));
+        StartCoroutine(MoveGridDown());
 
+
+    }
+
+    IEnumerator MoveGridDown()
+    {
+        StartCoroutine(BuildInteractableGridSystem(ReadGrid()));
+        yield return StartCoroutine(backGround.GetComponent<Mover>().MoveToPosition(new Vector3(transform.position.x,backGround.transform.position.y) - verticalOfscreenGridOffset, 1f));
+        initialized = true;
     }
 
     IEnumerator BuildInteractableGridSystem(string[] stringMatrix)
     {
-        Vector3 pos = Vector3.zero;
-        int sortingOrder = 10;
-        Interactable newInteractable;
-        List<Interactable> toAnimate = new List<Interactable>();
-        int arrayIndex = Dimensions.x * Dimensions.y - 1;
-        print("Grid built");
-        StartCoroutine(backGround.GetComponent<Mover>().MoveToPosition(backGround.transform.position -
-                                                        verticalOfscreenGridOffset, 1f));
-        for (int y = Dimensions.y - 1; y > -1; y--)
+            Vector3 onScreenPosition;
+    int sortingOrder = Dimensions.y;
+    Interactable newInteractable;
+    List<Interactable> toAnimate = new List<Interactable>();
+
+    int arrayIndex = 0;
+
+    for (int y = 0; y < Dimensions.y; y++)
+    {
+        for (int x = 0; x < Dimensions.x; x++)
         {
-            print("y: " + y);
-            for (int x = Dimensions.x - 1; x > -1; x--)
+            if (IsEmpty(x, y))
             {
-                // Create a new interactable
+                // Print debug information
+                print($"{x}, {y}, {GridPositionToWorldPosition(x, y)}");
 
-                //print(arrayIndex);
+                // Get a new interactable from the pool
                 newInteractable = interactablePool.GetPooledObject(stringMatrix[arrayIndex]);
-                toAnimate.Add(newInteractable);
-                // Set the interactable's position
-                newInteractable.transform.position = pos + verticalOfscreenGridOffset;
+                arrayIndex++;
 
+                // Set the interactable's position
+                onScreenPosition = transform.position + GridPositionToWorldPosition(x, y);
+                newInteractable.transform.position = onScreenPosition + verticalOfscreenGridOffset;
 
                 // Place item at grid
                 PutItemAt(x, y, newInteractable);
@@ -67,46 +82,42 @@ public class InteractableGridSystem : GridSystem<Interactable>
                 // Tell interactable where it is
                 newInteractable.matrixPosition = new Vector2Int(x, y);
 
+                // Set sorting order for visual stacking
                 newInteractable.GetComponent<SpriteRenderer>().sortingOrder = sortingOrder;
 
-
-
-                //arrayIndex;
-                arrayIndex--;
-                // Animate the interactable to its position
-                //StartCoroutine(newInteractable.MoveToPosition(pos, 2));
-
-                // Adjust next items one space to the right
-                pos.x += Vector3.right.x / 2;
-
-
+                // Add to animation list
+                toAnimate.Add(newInteractable);
             }
-            // Draw next row on top of the previous one to visual box order
-            sortingOrder -= 1;
-
-            // Reset x position
-            pos.x = 0;
-
-            // and move one space down
-            pos.y += Vector3.down.y / 2;
-            foreach (var interactable in toAnimate)
-            {
-                StartCoroutine(interactable.MoveToPosition(interactable.transform.position - verticalOfscreenGridOffset, 1f));
-            }
-            toAnimate.Clear();
         }
-        yield return new WaitForSeconds(2f);
+
+        // Animate the interactables in the current row to their positions
+        foreach (var interactable in toAnimate)
+        {
+            StartCoroutine(interactable.MoveToPosition(interactable.transform.position - verticalOfscreenGridOffset, 1f));
+        }
+
+        // Clear the list for the next row
+        toAnimate.Clear();
+
+        // Increment sorting order for the next row
+        sortingOrder++;
+    }
+
+    yield return new WaitForSeconds(2f);
+
     }
 
 
 
+
+    //
     public bool LookForMatch(out List<Interactable> matchList, Interactable startInteractable)
     {
         List<Interactable> matches = new List<Interactable>();
 
         SearForMatches(startInteractable, matches);
 
-        //Debug.Log("Matches found: " + matches.Count);
+        //For Test purposes
         foreach (var match in matches)
         {
             //Debug.Log(match.matrixPosition);
@@ -114,9 +125,10 @@ public class InteractableGridSystem : GridSystem<Interactable>
 
         matchList = matches;
 
-        return matches.Count > 0;
+        return matches.Count > 1;
     }
 
+    // Recursive function to search for matching interactables standing next to each other
     private void SearForMatches(Interactable startInteractable, List<Interactable> matches)
     {
         matches.Add(startInteractable);
@@ -125,34 +137,37 @@ public class InteractableGridSystem : GridSystem<Interactable>
         //for left direction
         Vector2Int newPos = startInteractable.matrixPosition + Vector2Int.left;
 
-        if (CheckBounds(newPos) && GetItemAt(newPos.x, newPos.y).Type == startInteractable.Type && !matches.Contains(GetItemAt(newPos.x, newPos.y)))
+        if (CheckBounds(newPos) && !IsEmpty(newPos.x, newPos.y) && GetItemAt(newPos.x, newPos.y).Type == startInteractable.Type && !matches.Contains(GetItemAt(newPos.x, newPos.y)))
         {
             SearForMatches(GetItemAt(newPos.x, newPos.y), matches);
         }
 
         //for right direction
         newPos = startInteractable.matrixPosition + Vector2Int.right;
-        if (CheckBounds(newPos) && GetItemAt(newPos.x, newPos.y).Type == startInteractable.Type && !matches.Contains(GetItemAt(newPos.x, newPos.y)))
+        if (CheckBounds(newPos) && !IsEmpty(newPos.x, newPos.y) && GetItemAt(newPos.x, newPos.y).Type == startInteractable.Type && !matches.Contains(GetItemAt(newPos.x, newPos.y)))
         {
             SearForMatches(GetItemAt(newPos.x, newPos.y), matches);
         }
 
         //for up direction
         newPos = startInteractable.matrixPosition + Vector2Int.up;
-        if (CheckBounds(newPos) && GetItemAt(newPos.x, newPos.y).Type == startInteractable.Type && !matches.Contains(GetItemAt(newPos.x, newPos.y)))
+        if (CheckBounds(newPos) && !IsEmpty(newPos.x, newPos.y) && GetItemAt(newPos.x, newPos.y).Type == startInteractable.Type && !matches.Contains(GetItemAt(newPos.x, newPos.y)))
         {
             SearForMatches(GetItemAt(newPos.x, newPos.y), matches);
         }
 
         //for down direction
         newPos = startInteractable.matrixPosition + Vector2Int.down;
-        if (CheckBounds(newPos) && GetItemAt(newPos.x, newPos.y).Type == startInteractable.Type && !matches.Contains(GetItemAt(newPos.x, newPos.y)))
+
+        if (CheckBounds(newPos) && !IsEmpty(newPos.x, newPos.y) && GetItemAt(newPos.x, newPos.y).Type == startInteractable.Type && !matches.Contains(GetItemAt(newPos.x, newPos.y)))
         {
             SearForMatches(GetItemAt(newPos.x, newPos.y), matches);
         }
     }
 
-    bool LookForObsticles(out List<Interactable> obsticles, Interactable startInteractable)
+
+    // Check if there are any obsticles on the axis of the matching interactables in one unit in the matrix
+    bool LookForObsticlesOnAxis(out List<Interactable> obsticles, Interactable startInteractable)
     {
         obsticles = new List<Interactable>();
 
@@ -194,95 +209,189 @@ public class InteractableGridSystem : GridSystem<Interactable>
     }
 
 
-
-    public IEnumerator Blast(List<Interactable> matchingInteractables, Transform pressedInteractable)
+    int[] GetSortingOrderList<T>(List<T> list) where T : Component
     {
-        for (int i = 0; i < matchingInteractables.Count ; i++)
+        int[] sortingOrderList = new int[list.Count];
+        for (int i = 0; i < list.Count; i++)
         {
-            if(i == matchingInteractables.Count - 1){
-                yield return StartCoroutine(matchingInteractables[i].ScaleToZero(.5f,0));
-                print("2");
+            var spriteRenderer = list[i].GetComponent<SpriteRenderer>();
+            if (spriteRenderer != null)
+            {
+                sortingOrderList[i] = spriteRenderer.sortingOrder;
             }
             else
             {
-                print("1");
-                StartCoroutine(matchingInteractables[i].ScaleToZero(.5f,0));
+                throw new ArgumentException("All elements in the list must have a SpriteRenderer component.");
             }
         }
-        print("3");
-        foreach (var matchingInteractable in matchingInteractables)
+        return sortingOrderList;
+    }
+
+    void SetSortingOrderBasedOnPosition<T>(List<T> list, int minimumSortingOrderValue) where T : Interactable
+    {
+        // Store the original sorting orders
+        var originalSortingOrder = GetSortingOrderList(list);
+
+        // Sort by matrix position.y in descending order
+        list.Sort((x, y) => y.matrixPosition.y.CompareTo(x.matrixPosition.y));
+
+        // Set sorting order based on new position, the higher the y value, the higher the sorting layer
+        for (int i = 0; i < list.Count; i++)
         {
-            var partical1 = blastParticlePool.GetPooledObject(matchingInteractable.Type);
-            partical1.transform.position = matchingInteractable.transform.position;
-            float randScale = Random.Range(0.1f, .15f);
-            partical1.transform.localScale = new Vector3(randScale, randScale, 1);
-
-
-            var partical2 = blastParticlePool.GetPooledObject(matchingInteractable.Type);
-            partical2.transform.position = matchingInteractable.transform.position;
-            randScale = Random.Range(0.1f, .15f);
-            partical2.transform.localScale = new Vector3(randScale, randScale, 1);
-
-            var partical3 = blastParticlePool.GetPooledObject(matchingInteractable.Type);
-            partical3.transform.position = matchingInteractable.transform.position;
-            randScale = Random.Range(0.1f, .15f);
-            partical3.transform.localScale = new Vector3(randScale, randScale, 1);
-
-            StartCoroutine(MoveAndFadeFragment1(partical1.gameObject, 1f, .7f, matchingInteractable.transform.position));
-            StartCoroutine(MoveAndFadeFragment1(partical2.gameObject, 1f, .7f, matchingInteractable.transform.position));
-            StartCoroutine(MoveAndFadeFragment1(partical3.gameObject, 1f, .7f, matchingInteractable.transform.position));
-            yield return null;
-        }
-
-
-        foreach (var matqchingInteractable in matchingInteractables)
-        {
-            if (LookForObsticles(out List<Interactable> obsticles, matqchingInteractable))
+            var spriteRenderer = list[i].GetComponent<SpriteRenderer>();
+            if (spriteRenderer != null)
             {
-                foreach (var obsticle in obsticles)
-                {
-                    List<BlastParticle> obsticlePArticles = new List<BlastParticle>();
-
-                    for (int i = 0; i < 3; i++)
-                    {
-                        var particle = blastParticlePool.GetPooledObject(obsticle.Type);
-                        particle.transform.position = obsticle.transform.position;
-                        float randScale = Random.Range(0.1f, .15f);
-                        particle.transform.localScale = new Vector3(randScale, randScale, 1);
-
-                        obsticlePArticles.Add(particle);
-                    }
-
-                    for (int i = 0; i < obsticlePArticles.Count; i++)
-                    {
-                        StartCoroutine(MoveAndFadeFragment1(obsticlePArticles[i].gameObject, 1f, .7f, obsticle.transform.position));
-
-                    }
-                }
-
-                foreach (var obsticle in obsticles)
-                {
-                    obsticle.gameObject.SetActive(false);
-                }
+                spriteRenderer.sortingOrder = minimumSortingOrderValue + (list.Count - i); // Higher y-value gets higher sortingOrder
+            }
+            else
+            {
+                Debug.LogError("SpriteRenderer is missing in the object");
             }
         }
 
 
-        foreach (var matchingInteractable in matchingInteractables)
-        {
-            matchingInteractable.gameObject.SetActive(false);
-        }
-        pressedInteractable.gameObject.SetActive(false);
+    }
 
+    void ResetSortingOrder<T>(List<T> list, int[] originalSortingOrder) where T : Component
+    {
+        // Revert to original sorting order
+        for (int i = 0; i < list.Count; i++)
+        {
+            var spriteRenderer = list[i].GetComponent<SpriteRenderer>();
+            if (spriteRenderer != null)
+            {
+                spriteRenderer.sortingOrder = originalSortingOrder[i];
+            }
+            else
+            {
+                Debug.LogError("SpriteRenderer is missing in the object");
+            }
+        }
     }
 
 
 
 
-    private IEnumerator MoveAndFadeFragment1(GameObject particle, float fragmentMoveDistance, float explosionDuration, Vector3 startPosition)
+    public IEnumerator Blast(List<Interactable> matchingInteractables, Transform pressedInteractable)
+    {
+
+        // Set the pressed interactable as the parent of all matching interactables in order to scale them together
+        foreach (var matchingInteractable in matchingInteractables)
+        {
+            matchingInteractable.transform.parent = pressedInteractable.transform;
+        }
+
+        // Adding the pressed interactable to the list of matching interactables for the ease of operations
+        matchingInteractables.Add(pressedInteractable.GetComponent<Interactable>());
+
+
+        // Get the sorting order of the matching interactables
+        var sortingOrderListCopy = GetSortingOrderList(matchingInteractables);
+
+        // Set the sorting order of the matching interactables to be on top of all other interactables
+        SetSortingOrderBasedOnPosition(matchingInteractables, 13);
+
+
+        //Scale up and down for visual eye cathing responsive effect
+
+        StartCoroutine(pressedInteractable.GetComponent<Interactable>().CartoonishScaleToTarget(2f, 1.3f, 1f));
+
+
+
+        // Wait until all interactables are idle
+        yield return new WaitUntil(() => matchingInteractables.All(x => x.idle));
+
+
+        // For each matching interactable, create its blast particlea and animate it
+        foreach (var matchingInteractable in matchingInteractables)
+        {
+            List<BlastParticle> particles = ArrangeBlastParticles(matchingInteractables, 1, 0.2f, 0.3f);
+
+            foreach (var particle in particles)
+            {
+                StartCoroutine(ParticleDissolution(particle.gameObject, 1f, 2f, matchingInteractable.transform.position));
+            }
+            yield return null;
+        }
+
+        // For each Obsticle that is adjacent to a matching interactable, call their blast particles and animate them
+        foreach (var matqchingInteractable in matchingInteractables)
+        {
+            if (LookForObsticlesOnAxis(out List<Interactable> obsticles, matqchingInteractable))
+            {
+                List<BlastParticle> obsticlePArticles = ArrangeBlastParticles(obsticles, 3, 0.07f, 0.2f);
+                foreach (var obsticle in obsticles)
+                {
+
+                    for (int i = 0; i < obsticlePArticles.Count; i++)
+                    {
+                        StartCoroutine(ParticleDissolution(obsticlePArticles[i].gameObject, 1f, 2f, obsticle.transform.position));
+                    }
+                }
+
+                // Remove the obsticles from the grid and return them to the pool
+                RemoveInteractables(obsticles);
+            }
+        }
+
+        //Reset interactables sorting order to original state
+        ResetSortingOrder(matchingInteractables, sortingOrderListCopy);
+
+        // Reset the parent of the matching interactables
+        matchingInteractables.All(x => x.transform.parent = interactablePool.transform);
+
+        // Remove the matching interactables from grid and return them to the pool  
+        RemoveInteractables(matchingInteractables);
+
+        StartCoroutine(BuildInteractableGridSystem(ReadGrid()));
+
+    }
+
+
+    // Arrange the blast particles amount,size and position and 
+    List<BlastParticle> ArrangeBlastParticles(List<Interactable> matchingInteractables, int countOfDesiredParticles, float minmimumScale, float maximumScale)
+    {
+        if (countOfDesiredParticles < 1)
+        {
+            Debug.LogError("Count of desired particles must be greater than 0");
+            return null;
+        }
+        if (minmimumScale < 0 || maximumScale < 0)
+        {
+            Debug.LogError("Minimum and maximum scale must be greater than 0");
+            return null;
+        }
+        List<BlastParticle> particles = new List<BlastParticle>();
+        foreach (var interactable in matchingInteractables)
+        {
+            for (int i = 0; i < countOfDesiredParticles; i++)
+            {
+                var particle = blastParticlePool.GetPooledObject(matchingInteractables[0].Type);
+                particle.transform.position = interactable.transform.position;
+                float randScale = Random.Range(minmimumScale, maximumScale);
+                particle.transform.localScale = new Vector3(randScale, randScale, 1);
+                particles.Add(particle);
+            }
+        }
+
+        return particles;
+    }
+
+
+    private void RemoveInteractables(List<Interactable> matchingInteractables)
+    {
+        // Remove the matching interactables from the grid
+        matchingInteractables.ForEach(x => RemoveItemAt(x.matrixPosition.x, x.matrixPosition.y));
+
+        // Return the matching interactables to the pool
+        matchingInteractables.ForEach(x => interactablePool.ReturnObjectToPool(x));
+    }
+
+
+    private IEnumerator ParticleDissolution(GameObject particle, float fragmentMoveDistance, float explosionDuration, Vector3 startPosition)
     {
         // Choose an initial upward direction with randomness to spread the particles
-        Vector3 initialDirection = (Vector3.up + new Vector3(Random.Range(-1.5f, 1.5f), Random.Range(0.5f, 1.5f), 0)).normalized;
+        Vector3 initialDirection = (Vector3.up + new Vector3(Random.Range(-1f, 1f), Random.Range(1f, -1f), 0)).normalized;
 
         // Vary the distance each particle will travel slightly for randomness
         float randomFragmentMoveDistance = fragmentMoveDistance * Random.Range(0.8f, 1.2f);
@@ -303,7 +412,7 @@ public class InteractableGridSystem : GridSystem<Interactable>
             float t = elapsed / upwardDuration;
 
             // Move fragment upwards in the calculated direction
-            Vector3 upwardPosition = startPosition + (initialDirection * randomFragmentMoveDistance) * (t / 4);
+            Vector3 upwardPosition = startPosition + (initialDirection * randomFragmentMoveDistance) * (t / 6);
             particle.transform.position = upwardPosition;
 
             // Rotate fragment

@@ -92,6 +92,24 @@ public class InteractablePooler : MonoBehaviour, IObjectPooler<Interactable, str
         toBeReturned.gameObject.SetActive(false);
     }
 
+     public void ReturnObjectToPool(List<Interactable> toBeReturned)
+    {
+        foreach (var interactable in toBeReturned)
+        {
+            if (interactable == null)
+            {
+                Debug.LogError("Cannot return a null object to the pool.");
+                return;
+            }
+        }
+
+        foreach (var interactable in toBeReturned)
+        {
+            ReturnObjectToPool(interactable);
+        }
+    }
+
+
     private InteractableType GetTypeFromPrefab(Interactable prefab)
     {
         string prefabName = prefab.name.ToLower();

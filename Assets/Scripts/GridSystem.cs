@@ -1,5 +1,6 @@
 using System.Collections;
 using System.Collections.Generic;
+using System.Numerics;
 using UnityEngine;
 
 public abstract class GridSystem<T> : MonoBehaviour
@@ -7,11 +8,11 @@ public abstract class GridSystem<T> : MonoBehaviour
     //Testing pupose
     [SerializeField]
     Vector2Int dimensions = new Vector2Int(8, 9);
-    public Vector2Int Dimensions{ get => dimensions;}
+    public Vector2Int Dimensions { get => dimensions; }
 
     [SerializeField]
     T[,] matrix;
-    
+
 
     protected void BuildMatrix()
     {
@@ -43,9 +44,9 @@ public abstract class GridSystem<T> : MonoBehaviour
     {
         if (x < 0 || x >= dimensions.x || y < 0 || y >= dimensions.y)
         {
-            
-            Debug.Log(x.ToString() + " "+ y.ToString());
-            Debug.LogWarning("Invalid position" + x.ToString() + " "+ y.ToString());
+
+            Debug.Log(x.ToString() + " " + y.ToString());
+            Debug.LogWarning("Invalid position" + x.ToString() + " " + y.ToString());
             return default;
         }
         return matrix[x, y];
@@ -59,6 +60,41 @@ public abstract class GridSystem<T> : MonoBehaviour
     protected bool CheckBounds(Vector2Int position)
     {
         return CheckBounds(position.x, position.y);
+    }
+
+    protected void RemoveItemAt(int x, int y)
+    {
+        if (x < 0 || x >= dimensions.x || y < 0 || y >= dimensions.y)
+        {
+            Debug.LogWarning("Invalid position");
+            return;
+        }
+        if (!CheckBounds(x, y)) Debug.LogError($"{x}, {y} are not on the grid");
+
+        matrix[x, y] = default(T);
+    }
+
+    public bool IsEmpty(int x, int y)
+    {
+        if (!CheckBounds(x, y)) Debug.LogError($"{x}, {y} are not on the grid");
+
+
+        //return data[x, y] == null;
+        return EqualityComparer<T>.Default.Equals(matrix[x, y], default(T));
+    }
+
+    public UnityEngine.Vector3 GridPositionToWorldPosition(int x, int y)
+    {
+        if (!CheckBounds(x, y)) 
+    {
+        Debug.LogError($"{x}, {y} are not on the grid");
+    
+    }
+    float xPosition = x * 0.5f + transform.position.x;
+
+    float yPosition = y * 0.57f + transform.position.y;
+
+    return new UnityEngine.Vector3(xPosition, yPosition, 0);
     }
 
 }

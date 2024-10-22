@@ -88,6 +88,23 @@ public class BlastParticlePooler : MonoBehaviour, IObjectPooler<BlastParticle, I
         toBeReturned.gameObject.SetActive(false);
     }
 
+    public void ReturnObjectToPool(List<BlastParticle> toBeReturned)
+    {
+        foreach (var particle in toBeReturned)
+        {
+            if (particle == null)
+            {
+                Debug.LogError("Cannot return a null particle to the pool.");
+                return;
+            }
+        }
+
+        foreach (var particle in toBeReturned)
+        {
+            ReturnObjectToPool(particle);
+        }
+    }
+
     private BlastParticle GetParticlePrefabByType(InteractableType type)
     {
         foreach (var entry in particlePrefabEntries)

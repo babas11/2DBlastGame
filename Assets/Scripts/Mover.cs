@@ -68,41 +68,69 @@ public class Mover : MonoBehaviour
         }
     }
 
-
-    public IEnumerator ScaleToZero(float speed, float toScale)
+    public IEnumerator CartoonishScaleToTarget(float speed, float overshootScale, float targetScale)
+{
+    if (speed <= 0)
     {
-        if (speed <= 0)
-        {
-            Debug.LogWarning("Speed must be a positive number");
-            yield break;
-        }
-
-        Vector3 fromScale = transform.localScale * 1.1f; // Slightly larger than current scale
-        float howFar = 0f;
-        idle = false;
-        Vector3 toScaleVector = new Vector3(toScale, toScale, 1);
-        // Set the initial scale to the larger scale
-        transform.localScale = fromScale;
-
-        while (howFar < 1f)
-        {
-            howFar += Time.deltaTime * speed;
-            if (howFar > 1f)
-            {
-                howFar = 1f;
-            }
-
-            float easedValue = EasingElastic(howFar);
-            transform.localScale = Vector3.LerpUnclamped(fromScale, toScaleVector, easedValue);
-            if(transform.localScale.x < 0.1f)
-            {
-                break;
-            }
-
-            yield return null;
-        }
-
-
-
+        Debug.LogWarning("Speed must be a positive number");
+        yield break;
     }
+
+    if (targetScale < 0)
+    {
+        Debug.LogWarning("Target scale must be non-negative");
+        yield break;
+    }
+    idle = false;
+    Vector3 fromScale = transform.localScale;
+    Vector3 toOvershootScale = fromScale * overshootScale; // Overshoot scale for the "pop" effect
+    Vector3 toTargetScale = new Vector3(targetScale, targetScale, targetScale); // Target scale specified by user
+
+    float howFar = 0f;
+
+    // Phase 1: Quickly grow to an overshoot scale
+    float growDuration = 0.2f / speed; // Adjust duration based on speed input
+    while (howFar < 1f)
+    {
+        howFar += Time.deltaTime / growDuration;
+        if (howFar > 1f)
+        {
+            howFar = 1f;
+        }
+
+        float easedValue = EasingOutQuad(howFar); // Using Quadratic easing for a quick but smooth effect
+        transform.localScale = Vector3.LerpUnclamped(fromScale, toOvershootScale, easedValue);
+
+        yield return null;
+    }
+
+    // Reset howFar for next phase
+    howFar = 0f;
+
+    // Phase 2: Smoothly shrink to target scale
+    float shrinkDuration = 0.3f / speed; // Adjust duration based on speed input
+    while (howFar < 1f)
+    {
+        howFar += Time.deltaTime / shrinkDuration;
+        if (howFar > 1f)
+        {
+            howFar = 1f;
+        }
+
+        float easedValue = EasingOutQuad(howFar); // Using a simple easing for a smooth shrink down to target scale
+        transform.localScale = Vector3.LerpUnclamped(toOvershootScale, toTargetScale, easedValue);
+
+        yield return null;
+    }
+
+    // Ensure scale is exactly the target scale at the end
+    transform.localScale = toTargetScale;
+    idle = true;
+}
+
+private float EasingOutQuad(float t)
+{
+    return 1 - (1 - t) * (1 - t); // A quick, smooth quadratic easing function
+}
+
 }
