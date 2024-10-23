@@ -70,19 +70,19 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 7048563434237669301, guid: c146bc244a32a4f8dbf87b48c49a5f10, type: 3}
       propertyPath: m_SpriteTilingProperty.border.w
-      value: 0.0035714286
+      value: 0.0035211267
       objectReference: {fileID: 0}
     - target: {fileID: 7048563434237669301, guid: c146bc244a32a4f8dbf87b48c49a5f10, type: 3}
       propertyPath: m_SpriteTilingProperty.border.x
-      value: 0.0035714286
+      value: 0.0035211267
       objectReference: {fileID: 0}
     - target: {fileID: 7048563434237669301, guid: c146bc244a32a4f8dbf87b48c49a5f10, type: 3}
       propertyPath: m_SpriteTilingProperty.border.y
-      value: 0.0035714286
+      value: 0.0035211267
       objectReference: {fileID: 0}
     - target: {fileID: 7048563434237669301, guid: c146bc244a32a4f8dbf87b48c49a5f10, type: 3}
       propertyPath: m_SpriteTilingProperty.border.z
-      value: 0.0035714286
+      value: 0.0035211267
       objectReference: {fileID: 0}
     - target: {fileID: 7048563434237669301, guid: c146bc244a32a4f8dbf87b48c49a5f10, type: 3}
       propertyPath: m_SpriteTilingProperty.drawMode
@@ -98,15 +98,15 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 7048563434237669301, guid: c146bc244a32a4f8dbf87b48c49a5f10, type: 3}
       propertyPath: m_SpriteTilingProperty.oldSize.x
-      value: 0.50714284
+      value: 0.5
       objectReference: {fileID: 0}
     - target: {fileID: 7048563434237669301, guid: c146bc244a32a4f8dbf87b48c49a5f10, type: 3}
       propertyPath: m_SpriteTilingProperty.oldSize.y
-      value: 0.57857144
+      value: 0.57042253
       objectReference: {fileID: 0}
     - target: {fileID: 7581675275785504965, guid: c146bc244a32a4f8dbf87b48c49a5f10, type: 3}
       propertyPath: m_Name
-      value: Box
+      value: bo
       objectReference: {fileID: 0}
     m_RemovedComponents:
     - {fileID: 7022935656069499754, guid: c146bc244a32a4f8dbf87b48c49a5f10, type: 3}
@@ -135,8 +135,5 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   type: 4
-  particles:
-  - {fileID: 2005943023583013728, guid: 6ec1b597a8e60754dbe2839a631ce726, type: 3}
-  - {fileID: 2005943023583013728, guid: 5a780a137d8009c4fbb6ec1028acecaa, type: 3}
-  - {fileID: 2005943023583013728, guid: 992c4cca5d7e96341960d3de26b29bf8, type: 3}
   matrixPosition: {x: 0, y: 0}
+  health: 1

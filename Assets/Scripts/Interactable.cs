@@ -43,11 +43,6 @@ public abstract class Interactable : Mover
 
 }
 
-public interface IObstacle
-{
-    void Explode();
-}
-
 
 
 public enum InteractableType

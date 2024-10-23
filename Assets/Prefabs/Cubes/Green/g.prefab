@@ -82,7 +82,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 7581675275785504965, guid: c146bc244a32a4f8dbf87b48c49a5f10, type: 3}
       propertyPath: m_Name
-      value: Green
+      value: g
       objectReference: {fileID: 0}
     m_RemovedComponents:
     - {fileID: 7022935656069499754, guid: c146bc244a32a4f8dbf87b48c49a5f10, type: 3}
@@ -111,6 +111,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   type: 1
-  particles:
-  - {fileID: 5185257944130564186, guid: 6549d0b3d2bc84b44b8f2bec22b35ad5, type: 3}
   matrixPosition: {x: 0, y: 0}
+  cubeSprites:
+  - {fileID: 21300000, guid: 82f9dc7ad87b97a40bf015767a8451a8, type: 3}
+  - {fileID: 21300000, guid: ab8cda8b77c586c4991fb94e1623efc6, type: 3}

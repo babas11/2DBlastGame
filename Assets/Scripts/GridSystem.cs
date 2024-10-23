@@ -14,7 +14,7 @@ public abstract class GridSystem<T> : MonoBehaviour
     T[,] matrix;
 
 
-    protected void BuildMatrix()
+    public void BuildMatrix()
     {
         // Read grid's attributes and initialize its properties
         if (dimensions.x < 1 || dimensions.y < 1)
@@ -24,13 +24,13 @@ public abstract class GridSystem<T> : MonoBehaviour
         matrix = new T[dimensions.x, dimensions.y];
     }
 
-    protected string[] ReadGrid()
+    public string[] ReadGrid()
     {
         JsonRepository repository = new JsonRepository();
         return repository.Read("pathFile");
     }
 
-    protected void PutItemAt(int x, int y, T item)
+    public void PutItemAt(int x, int y, T item)
     {
         if (x < 0 || x >= dimensions.x || y < 0 || y >= dimensions.y)
         {
@@ -40,7 +40,7 @@ public abstract class GridSystem<T> : MonoBehaviour
         matrix[x, y] = item;
     }
 
-    protected T GetItemAt(int x, int y)
+    public T GetItemAt(int x, int y)
     {
         if (x < 0 || x >= dimensions.x || y < 0 || y >= dimensions.y)
         {
@@ -52,17 +52,17 @@ public abstract class GridSystem<T> : MonoBehaviour
         return matrix[x, y];
     }
 
-    protected bool CheckBounds(int x, int y)
+    public bool CheckBounds(int x, int y)
     {
         return x >= 0 && x < dimensions.x && y >= 0 && y < dimensions.y;
     }
 
-    protected bool CheckBounds(Vector2Int position)
+    public bool CheckBounds(Vector2Int position)
     {
         return CheckBounds(position.x, position.y);
     }
 
-    protected void RemoveItemAt(int x, int y)
+    public void RemoveItemAt(int x, int y)
     {
         if (x < 0 || x >= dimensions.x || y < 0 || y >= dimensions.y)
         {
@@ -97,5 +97,6 @@ public abstract class GridSystem<T> : MonoBehaviour
 
     return new UnityEngine.Vector3(xPosition, yPosition, 0);
     }
+    
 
 }

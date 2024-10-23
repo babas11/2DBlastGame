@@ -110,7 +110,7 @@ public class InteractablePooler : MonoBehaviour, IObjectPooler<Interactable, str
     }
 
 
-    private InteractableType GetTypeFromPrefab(Interactable prefab)
+    public InteractableType GetTypeFromPrefab(Interactable prefab)
     {
         string prefabName = prefab.name.ToLower();
         switch (prefabName)

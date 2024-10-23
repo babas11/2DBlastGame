@@ -194,7 +194,7 @@ public class Mover : MonoBehaviour
     }
     
     
-    public IEnumerator CartoonishScaleToTarget(float speed, float overshootScale, float targetScale)
+    public IEnumerator CartoonishScaleToTarget(float speed, float overshootScale, float targetScale, bool givenIdle = false)
 {
     if (speed <= 0)
     {
@@ -207,7 +207,7 @@ public class Mover : MonoBehaviour
         Debug.LogWarning("Target scale must be non-negative");
         yield break;
     }
-    idle = false;
+    idle = givenIdle;
     Vector3 fromScale = transform.localScale;
     Vector3 toOvershootScale = fromScale * overshootScale; // Overshoot scale for the "pop" effect
     Vector3 toTargetScale = new Vector3(targetScale, targetScale, targetScale); // Target scale specified by user
