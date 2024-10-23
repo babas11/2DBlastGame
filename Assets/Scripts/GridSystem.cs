@@ -90,9 +90,10 @@ public abstract class GridSystem<T> : MonoBehaviour
         Debug.LogError($"{x}, {y} are not on the grid");
     
     }
-    float xPosition = x * 0.5f + transform.position.x;
+    
+    float xPosition = x * 0.5f + transform.position.x + .25f;
 
-    float yPosition = y * 0.57f + transform.position.y;
+    float yPosition = y * 0.5f + transform.position.y + 0.285f;
 
     return new UnityEngine.Vector3(xPosition, yPosition, 0);
     }

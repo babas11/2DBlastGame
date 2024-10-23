@@ -2,6 +2,7 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using Random = UnityEngine.Random;
 
 public class Mover : MonoBehaviour
 {
@@ -32,19 +33,42 @@ public class Mover : MonoBehaviour
             {
                 howFar = 1;
             }
-            transform.position = Vector3.LerpUnclamped(from, to, EasingElastic(howFar));
+            transform.position = Vector3.Lerp(from, to, EasingElastic(howFar));
             yield return null;
         } while (howFar != 1);
 
         idle = true;
     }
 
-
-
-    private float Easing(float howFar)
+    public IEnumerator JumpToPosition(Vector3 targetPosition, float speed)
     {
-        return howFar * howFar;
+        if (speed <= 0) { Debug.LogWarning("Speed must be a positive number"); }
+        Vector3 from = transform.position;
+        Vector3 to = targetPosition;
+        float howFar = 0;
+        idle = false;
+        float jumpHeight = 1.0f; // Height of the jump
+
+        idle = false;
+        do
+        {
+            howFar += Time.deltaTime * speed;
+            if (howFar > 1)
+            {
+                howFar = 1;
+            }
+            float yOffset = Mathf.Sin(Mathf.PI * howFar) * jumpHeight;
+            transform.position = Vector3.Lerp(from, to, howFar) + new Vector3(0, yOffset, 0);
+            yield return null;
+        } while (howFar != 1);
+
+        idle = true;
     }
+
+    
+
+
+
 
     private float EasingElastic(float howFar)
     {
@@ -68,6 +92,108 @@ public class Mover : MonoBehaviour
         }
     }
 
+     public IEnumerator MoveToPositionWithJump(Vector3 targetPosition, float speed, float jumpHeight)
+    {
+        if (speed <= 0) { Debug.LogWarning("Speed must be a positive number"); }
+        Vector3 from = transform.position;
+        Vector3 to = targetPosition;
+        float howFar = 0;
+        idle = false;
+
+        idle = false;
+        do
+        {
+            howFar += Time.deltaTime * speed;
+            if (howFar > 1)
+            {
+                howFar = 1;
+            }
+            transform.position = Vector3.Lerp(from, to, howFar);
+            yield return null;
+        } while (howFar != 1);
+
+        // Add a small jump after reaching the position
+        float jumpDuration = 0.3f;
+        float jumpTime = 0;
+        while (jumpTime < jumpDuration)
+        {
+            jumpTime += Time.deltaTime;
+            float yOffset = Mathf.Sin((jumpTime / jumpDuration) * Mathf.PI) * jumpHeight;
+            transform.position = new Vector3(transform.position.x, to.y + yOffset, transform.position.z);
+            yield return null;
+        }
+
+        idle = true;
+    }
+
+    public IEnumerator ParticleDissolution(float fragmentMoveDistance, float explosionDuration, Vector3 startPosition)
+    {
+        // Choose an initial upward direction with randomness to spread the particles
+        Vector3 initialDirection = (Vector3.up + new Vector3(Random.Range(-1f, 1f), Random.Range(1f, -1f), 0)).normalized;
+
+        // Vary the distance each particle will travel slightly for randomness
+        float randomFragmentMoveDistance = fragmentMoveDistance * Random.Range(0.8f, 1.2f);
+
+        float upwardDuration = explosionDuration * 0.1f; // 30% of the duration spent going up
+        float fallDuration = explosionDuration * 0.9f;   // 70% of the duration spent falling
+
+        float elapsed = 0f;
+        float rotationSpeed = Random.Range(250f, 300f); // Random rotation speed for each fragment
+        float horizontalMovementDuringFall = Random.Range(-0.5f, 0.5f);
+
+
+        // Upward phase
+        while (elapsed < upwardDuration)
+        {
+            float t = elapsed / upwardDuration;
+
+            // Move fragment upwards in the calculated direction
+            Vector3 upwardPosition = startPosition + (initialDirection * randomFragmentMoveDistance) * (t / 6);
+            transform.position = upwardPosition;
+
+            // Rotate fragment
+            transform.Rotate(0, 0, rotationSpeed * Time.deltaTime);
+
+            elapsed += Time.deltaTime;
+            yield return null;
+        }
+
+        // Reset elapsed time for the fall portion
+        elapsed = 0f;
+        Vector3 currentPosition = transform.position;
+        float verticalVelocity = 0f;  // Initial velocity for falling down
+
+        // Falling phase with gravity
+        while (elapsed < fallDuration)
+        {
+            // Apply gravity effect
+            verticalVelocity += -25 * Time.deltaTime;  // Gravity pulling the particle down
+
+            // Update the fragment's position to simulate falling
+            currentPosition.y += verticalVelocity * Time.deltaTime;
+
+            currentPosition.x += horizontalMovementDuringFall * Time.deltaTime;
+
+            // Apply the new position
+            transform.position = currentPosition;
+
+            // Rotate fragment
+            transform.Rotate(0, 0, rotationSpeed * Time.deltaTime);
+
+            elapsed += Time.deltaTime;
+            yield return null;
+        }
+
+    }
+    
+
+    
+    private float Easing(float howFar)
+    {
+        return howFar * howFar;
+    }
+    
+    
     public IEnumerator CartoonishScaleToTarget(float speed, float overshootScale, float targetScale)
 {
     if (speed <= 0)

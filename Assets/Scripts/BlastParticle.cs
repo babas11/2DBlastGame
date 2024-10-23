@@ -1,6 +1,6 @@
 using UnityEngine;
 
-public class BlastParticle: MonoBehaviour
+public class BlastParticle: Mover
 {
 
 }
