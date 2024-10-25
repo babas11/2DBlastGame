@@ -257,7 +257,8 @@ public class InteractableGridSystem : GridSystem<Interactable>
 
         // Set sorting order for visual stacking
         ReorderAllInteractablesSortingOrder();
-        if (initialized)
+        
+        if (!initialized)
         {
             WriteGrid(levelDataHandler, levelUI);
         }

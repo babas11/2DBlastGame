@@ -29,12 +29,10 @@ public class LevelDataHandler : MonoBehaviour
     string SavePath => Path.Combine(Application.streamingAssetsPath, "Save.json");
     string DefaultPath => Path.Combine(Application.streamingAssetsPath, levelToLoadString);
 
-    private string jsonFilePath;
 
-    void Awake()
+    void Start()
     {
         DontDestroyOnLoad(this.gameObject);
-        jsonFilePath = jsonFilePath = Path.Combine(Application.streamingAssetsPath, levelToLoadString);
         ReadGrid();
     }
 

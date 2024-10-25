@@ -49,7 +49,7 @@ public class MirroredButtonHandler : Mover, IPointerDownHandler
 
     void Start()
     {
-        string leveltext = levelDataHandler.levelData.level_number.ToString();
+        string leveltext = $"Level {levelDataHandler.levelData.level_number}";
         SetButtonText(text, leveltext);
 
     }

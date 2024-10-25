@@ -22,7 +22,7 @@ public abstract class GridSystem<T> : MonoBehaviour
 
     public void InitializeGrid(LevelDataHandler levelDataHandler){
         
-        dimensions.x = levelDataHandler.levelData.grid_width;
+        dimensions.x = levelDataHandler.levelData.grid_width ;
         dimensions.y = levelDataHandler.levelData.grid_height;
         BuildMatrix();
     }
