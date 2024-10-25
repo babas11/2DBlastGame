@@ -4,32 +4,23 @@ using UnityEngine;
 
 public class Stone : Interactable, IObstacle
 {
-     public int Health{ get => health ; }
-    
-    [SerializeField]
-    private int health;
-    private int defaultHealth = 2;
 
-    void OnEnable()
+    public int Health { get; private set; } = 1;
+    public override bool CanFall => false;
+
+    public void TakeDamage(int damage, bool isTNTBlast)
     {
-        health = defaultHealth;
+        if (isTNTBlast)
+        {
+            //Decrease health by damage
+            Health -= damage;
+            //Limit health to 0
+            Health = Mathf.Max(Health, 0);
+            //Play animation to visual feedback
+            StartCoroutine(CartoonishScaleToTarget(2.5f, 1.3f, 1f));
+        }
     }
-
-    
-    void Start()
-    {
-        health = defaultHealth;
-    }
-   
-    
-    public void TakeDamage(){
-        health--;
-        StartCoroutine(CartoonishScaleToTarget(2.5f, 1.3f, 1f));
-    }
-
-    public void ResetHealth(){
-        health = defaultHealth;
-    }   
+  
 }
 
  

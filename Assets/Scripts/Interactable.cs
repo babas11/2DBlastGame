@@ -6,22 +6,19 @@ using UnityEngine;
 [RequireComponent(typeof(SpriteRenderer))]
 public abstract class Interactable : Mover
 {
-    public readonly static Dictionary<string, InteractableType> interactableStringTypes = new Dictionary<string, InteractableType>
-        {
-            {"r", InteractableType.red},
-            {"g", InteractableType.green},
-            {"b", InteractableType.blue},
-            {"y", InteractableType.yellow},
-            {"bo", InteractableType.box},
-            {"t", InteractableType.tnt},
-            {"s", InteractableType.stone},
-            {"v", InteractableType.vase},
-        };
+    void Awake()
+    {
+        uiController = GameObject.FindObjectOfType<UI>();
+    }
+
+    public virtual bool CanFall => true;
 
     SpriteRenderer spriteRenderer;
     
     [SerializeField]
     private InteractableType type;
+
+    UI uiController;
 
   
     
@@ -38,7 +35,7 @@ public abstract class Interactable : Mover
 
     protected virtual void OnMouseDown()
     {
-        print("Clicked");
+        uiController.DecreaseMoves();
     }
 
 }

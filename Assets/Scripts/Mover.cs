@@ -4,12 +4,14 @@ using System.Collections.Generic;
 using UnityEngine;
 using Random = UnityEngine.Random;
 
+
+
+
 public class Mover : MonoBehaviour
 {
     private Vector3 from;
     private Vector3 to;
 
-    private float speed = .1f;
 
     private float howFar;
 
@@ -40,32 +42,7 @@ public class Mover : MonoBehaviour
         idle = true;
     }
 
-    public IEnumerator JumpToPosition(Vector3 targetPosition, float speed)
-    {
-        if (speed <= 0) { Debug.LogWarning("Speed must be a positive number"); }
-        Vector3 from = transform.position;
-        Vector3 to = targetPosition;
-        float howFar = 0;
-        idle = false;
-        float jumpHeight = 1.0f; // Height of the jump
 
-        idle = false;
-        do
-        {
-            howFar += Time.deltaTime * speed;
-            if (howFar > 1)
-            {
-                howFar = 1;
-            }
-            float yOffset = Mathf.Sin(Mathf.PI * howFar) * jumpHeight;
-            transform.position = Vector3.Lerp(from, to, howFar) + new Vector3(0, yOffset, 0);
-            yield return null;
-        } while (howFar != 1);
-
-        idle = true;
-    }
-
-    
 
 
 
@@ -126,7 +103,7 @@ public class Mover : MonoBehaviour
         idle = true;
     }
 
-    public IEnumerator ParticleDissolution(float fragmentMoveDistance, float explosionDuration, Vector3 startPosition)
+    public IEnumerator ParticleDissolution(float fragmentMoveDistance, float explosionDuration, Vector3 startPosition, BlastParticle particle = null)
     {
         // Choose an initial upward direction with randomness to spread the particles
         Vector3 initialDirection = (Vector3.up + new Vector3(Random.Range(-1f, 1f), Random.Range(1f, -1f), 0)).normalized;
@@ -184,6 +161,10 @@ public class Mover : MonoBehaviour
             yield return null;
         }
 
+        if (particle != null)
+        {
+            particle.gameObject.SetActive(false);
+        }
     }
     
 
@@ -251,12 +232,13 @@ public class Mover : MonoBehaviour
 
     // Ensure scale is exactly the target scale at the end
     transform.localScale = toTargetScale;
+    transform.parent = GameObject.FindAnyObjectByType<BlastParticlePooler>().transform;
     idle = true;
 }
 
 private float EasingOutQuad(float t)
 {
-    return 1 - (1 - t) * (1 - t); // A quick, smooth quadratic easing function
+    return 1 - (1 - t) * (1 - t); // A quick, smooth easing function
 }
 
 }

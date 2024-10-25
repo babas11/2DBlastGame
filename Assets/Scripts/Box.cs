@@ -5,44 +5,27 @@ using UnityEngine;
 
 public class Box : Interactable, IObstacle
 {
-    public int Health{ get => health ; }
-    
-    [SerializeField]
-    private int health;
-    private int defaultHealth = 2;
+    public int Health { get; private set; } = 1;
+    public override bool CanFall => false;
 
-    void OnEnable()
+    public void TakeDamage(int damage, bool isTNTBlast)
     {
-        health = defaultHealth;
-    }
+        //Decrease health by damage
+        Health -= damage;
 
-    
-    void Start()
-    {
-        health = defaultHealth;
-    }
-   
-    
-    public void TakeDamage(){
-        health--;
+        //Limit health to 0
+        Health = Mathf.Max(Health, 0);
+
+        //Play animation to visual feedback
         StartCoroutine(CartoonishScaleToTarget(2.5f, 1.3f, 1f));
     }
 
-    public void ResetHealth(){
-        health = defaultHealth;
-    }   
-
-    override protected void OnMouseDown()
-    {
-        print("Box Clicked");
-    }
-
-  
 }
+
 
 public interface IObstacle
 {
     int Health { get; }
-    void TakeDamage();
-    void ResetHealth();
+    void TakeDamage(int damage, bool isTNTBlast);
+
 }

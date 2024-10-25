@@ -142,7 +142,7 @@ public class BlastParticlePooler : MonoBehaviour, IObjectPooler<BlastParticle, I
             Debug.LogError("Cannot return a null particle to the pool.");
             return;
         }
-
+        toBeReturned.transform.localScale = Vector3.one;
         toBeReturned.gameObject.SetActive(false);
     }
 

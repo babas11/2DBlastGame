@@ -11,6 +11,8 @@ public class Cube : Interactable
         TNT
     }
 
+    public override bool CanFall => true;
+
     [SerializeField]
     CubeState tntState = CubeState.Default;
     public CubeState TNTState
@@ -40,6 +42,7 @@ public class Cube : Interactable
     {
         if (this.idle && interactableGridSystem.LookInteractableForMatchingAdjacent(out List<Interactable> matchList, this))
         {
+            base.OnMouseDown();
             StartCoroutine(interactableGridSystem.Blast(matchList, this.transform));
         }
         else

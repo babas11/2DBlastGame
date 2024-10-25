@@ -82,15 +82,15 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 7048563434237669301, guid: c146bc244a32a4f8dbf87b48c49a5f10, type: 3}
       propertyPath: m_SpriteTilingProperty.oldSize.x
-      value: 1.42
+      value: 0.49824563
       objectReference: {fileID: 0}
     - target: {fileID: 7048563434237669301, guid: c146bc244a32a4f8dbf87b48c49a5f10, type: 3}
       propertyPath: m_SpriteTilingProperty.oldSize.y
-      value: 1.62
+      value: 0.56842107
       objectReference: {fileID: 0}
     - target: {fileID: 7581675275785504965, guid: c146bc244a32a4f8dbf87b48c49a5f10, type: 3}
       propertyPath: m_Name
-      value: Vase
+      value: v
       objectReference: {fileID: 0}
     m_RemovedComponents:
     - {fileID: 7022935656069499754, guid: c146bc244a32a4f8dbf87b48c49a5f10, type: 3}
@@ -119,8 +119,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   type: 7
-  particles:
-  - {fileID: 2005943023583013728, guid: c14e9fada187e4847a9a2866a0cf7db8, type: 3}
-  - {fileID: 2005943023583013728, guid: aadccb7f50c92dd44a2cca0132413f91, type: 3}
-  - {fileID: 2005943023583013728, guid: 01478c17467fad4448b61072cb9a6ecd, type: 3}
   matrixPosition: {x: 0, y: 0}
+  sprites:
+  - {fileID: 21300000, guid: bb0dd12e38ecbac44809ab225f067c2c, type: 3}
+  - {fileID: 21300000, guid: e3ee8378d88dd3747ae9dfc4e4ab3d50, type: 3}

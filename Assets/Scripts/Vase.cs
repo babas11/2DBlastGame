@@ -4,30 +4,50 @@ using UnityEngine;
 
 public class Vase : Interactable, IObstacle
 {
-     public int Health{ get => health ; }
-    
-    [SerializeField]
-    private int health;
-    private int defaultHealth = 2;
+    [SerializeField] private 
+    Sprite[] sprites;
+    public int Health { get; private set; } = 2;
+    public override bool CanFall => true; // Vase falls down vertically
 
-    void OnEnable()
+    private bool hasTakenDamageFromCurrentTNTBlast = false;
+
+    public void TakeDamage(int damage, bool isTNTBlast)
     {
-        health = defaultHealth;
+        if (isTNTBlast)
+        {
+            if (!hasTakenDamageFromCurrentTNTBlast)
+            {
+                Health -= damage;
+                Health = Mathf.Max(Health, 0);
+                hasTakenDamageFromCurrentTNTBlast = true;
+                StartCoroutine(CartoonishScaleToTarget(2.5f, 1.3f, 1f));
+            }
+        }
+        else
+        {
+            // Normal blast, Vase can take multiple damages
+            Health -= damage;
+            Health = Mathf.Max(Health, 0);
+            StartCoroutine(CartoonishScaleToTarget(2.5f, 1.3f, 1f));
+        }
+        ChangeSprite();
     }
 
-    
-    void Start()
+    void ChangeSprite()
     {
-        health = defaultHealth;
-    }
-   
-    
-    public void TakeDamage(){
-        health--;
-        StartCoroutine(CartoonishScaleToTarget(2.5f, 1.3f, 1f));
+        if(Health > 1)
+        {
+            
+        }else
+        {
+            GetComponent<SpriteRenderer>().sprite = sprites[1];
+        }
+        
     }
 
-    public void ResetHealth(){
-        health = defaultHealth;
-    }   
+    public void ResetDamageFlag()
+    {
+        hasTakenDamageFromCurrentTNTBlast = false;
+    }
+
 }

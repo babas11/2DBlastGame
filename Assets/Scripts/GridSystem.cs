@@ -7,7 +7,7 @@ public abstract class GridSystem<T> : MonoBehaviour
 {
     //Testing pupose
     [SerializeField]
-    Vector2Int dimensions = new Vector2Int(8, 9);
+    Vector2Int dimensions = new Vector2Int(9, 7);
     public Vector2Int Dimensions { get => dimensions; }
 
     [SerializeField]
@@ -24,10 +24,12 @@ public abstract class GridSystem<T> : MonoBehaviour
         matrix = new T[dimensions.x, dimensions.y];
     }
 
-    public string[] ReadGrid()
+    public string[] ReadGrid(JsonRepository repository)
     {
-        JsonRepository repository = new JsonRepository();
-        return repository.Read("pathFile");
+        return new string[]
+        {
+           "bo", "bo", "bo", "bo", "bo", "bo", "bo", "bo", "bo", "bo", "bo", "bo", "bo", "bo", "bo", "bo", "bo", "bo", "bo", "bo", "bo", "bo", "bo", "bo", "bo", "bo", "bo", "r", "r", "r", "r", "g", "b", "b", "b", "b", "y", "y", "y", "y", "g", "y", "y", "y", "y", "b", "b", "b", "b", "y", "r", "r", "r", "r", "rand", "rand", "rand", "rand", "y", "rand", "rand", "rand", "rand", "rand", "rand", "rand", "rand", "rand", "rand", "rand", "rand", "rand", "rand", "rand", "rand", "rand", "rand", "rand", "rand", "rand", "rand", "rand", "rand", "rand", "rand", "rand", "rand", "rand", "rand", "rand"
+        };
     }
 
     public void PutItemAt(int x, int y, T item)
