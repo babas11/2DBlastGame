@@ -4,7 +4,11 @@ using UnityEngine;
 
 public class Stone : Interactable, IObstacle
 {
-
+    private UI ui;
+    private void Start()
+    {
+        ui = FindObjectOfType<UI>();
+    }
     public int Health { get; private set; } = 1;
     public override bool CanFall => false;
 
@@ -16,11 +20,17 @@ public class Stone : Interactable, IObstacle
             Health -= damage;
             //Limit health to 0
             Health = Mathf.Max(Health, 0);
-            //Play animation to visual feedback
-            StartCoroutine(CartoonishScaleToTarget(2.5f, 1.3f, 1f));
+        }
+        if (Health == 0)
+        {
+            UpdateObjectives();
         }
     }
-  
+
+    public void UpdateObjectives()
+    {
+         ui.UpdateObjectives(this);
+    }
 }
 
  

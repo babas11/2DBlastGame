@@ -12,7 +12,7 @@ GameObject:
   - component: {fileID: 3071043722028702250}
   - component: {fileID: 7043210180879086458}
   m_Layer: 5
-  m_Name: Obsticle
+  m_Name: ObsticleUI
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0

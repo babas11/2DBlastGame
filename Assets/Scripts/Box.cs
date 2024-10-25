@@ -5,6 +5,11 @@ using UnityEngine;
 
 public class Box : Interactable, IObstacle
 {
+    private UI ui;
+    private void Start()
+    {
+        ui = FindObjectOfType<UI>();
+    }
     public int Health { get; private set; } = 1;
     public override bool CanFall => false;
 
@@ -16,10 +21,17 @@ public class Box : Interactable, IObstacle
         //Limit health to 0
         Health = Mathf.Max(Health, 0);
 
-        //Play animation to visual feedback
-        StartCoroutine(CartoonishScaleToTarget(2.5f, 1.3f, 1f));
+        if(Health == 0)
+        {
+            //Destroy the object
+            UpdateObjectives();
+        }
     }
 
+    public void UpdateObjectives()
+    {
+        ui.UpdateObjectives(this);
+    }
 }
 
 
@@ -27,5 +39,7 @@ public interface IObstacle
 {
     int Health { get; }
     void TakeDamage(int damage, bool isTNTBlast);
+
+    void UpdateObjectives();
 
 }

@@ -1,17 +1,31 @@
 using System.Collections;
 using System.Collections.Generic;
 using System.Numerics;
+using Unity.VisualScripting;
 using UnityEngine;
+using UnityEngine.Scripting;
 
 public abstract class GridSystem<T> : MonoBehaviour
 {
     //Testing pupose
-    [SerializeField]
-    Vector2Int dimensions = new Vector2Int(9, 7);
+
+[SerializeField]
+    Vector2Int dimensions ;
     public Vector2Int Dimensions { get => dimensions; }
+
+
 
     [SerializeField]
     T[,] matrix;
+
+ 
+
+    public void InitializeGrid(LevelDataHandler levelDataHandler){
+        
+        dimensions.x = levelDataHandler.levelData.grid_width;
+        dimensions.y = levelDataHandler.levelData.grid_height;
+        BuildMatrix();
+    }
 
 
     public void BuildMatrix()
@@ -24,12 +38,14 @@ public abstract class GridSystem<T> : MonoBehaviour
         matrix = new T[dimensions.x, dimensions.y];
     }
 
-    public string[] ReadGrid(JsonRepository repository)
+    public string[] ReadGrid(LevelDataHandler levelDataHandler)
     {
-        return new string[]
-        {
-           "bo", "bo", "bo", "bo", "bo", "bo", "bo", "bo", "bo", "bo", "bo", "bo", "bo", "bo", "bo", "bo", "bo", "bo", "bo", "bo", "bo", "bo", "bo", "bo", "bo", "bo", "bo", "r", "r", "r", "r", "g", "b", "b", "b", "b", "y", "y", "y", "y", "g", "y", "y", "y", "y", "b", "b", "b", "b", "y", "r", "r", "r", "r", "rand", "rand", "rand", "rand", "y", "rand", "rand", "rand", "rand", "rand", "rand", "rand", "rand", "rand", "rand", "rand", "rand", "rand", "rand", "rand", "rand", "rand", "rand", "rand", "rand", "rand", "rand", "rand", "rand", "rand", "rand", "rand", "rand", "rand", "rand", "rand"
-        };
+        return levelDataHandler.levelData.grid.ToArray();
+    }
+
+    public void WriteGrid(LevelDataHandler levelDataHandler)
+    {
+        levelDataHandler.SaveLevel();
     }
 
     public void PutItemAt(int x, int y, T item)

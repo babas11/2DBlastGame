@@ -232,7 +232,10 @@ public class Mover : MonoBehaviour
 
     // Ensure scale is exactly the target scale at the end
     transform.localScale = toTargetScale;
-    transform.parent = GameObject.FindAnyObjectByType<BlastParticlePooler>().transform;
+    if(TryGetComponent(out BlastParticle particle))
+    {
+        transform.parent = GameObject.FindAnyObjectByType<BlastParticlePooler>().transform;
+    }
     idle = true;
 }
 

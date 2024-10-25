@@ -21,7 +21,7 @@ public class InteractableGridSystem : GridSystem<Interactable>
     [SerializeField]
     float gridUnit = .5f;
 
-    JsonRepository jsonRepo;
+    //JsonRepository jsonRepo;
 
     // Grid unit size is 0.5f, but prefabs is 0.57f. in order to look show debth  
     [SerializeField]
@@ -81,6 +81,10 @@ public class InteractableGridSystem : GridSystem<Interactable>
     InteractablePooler interactablePool;
     BlastParticlePooler blastParticlePool;
     Mover mover;
+    LevelDataHandler levelDataHandler;
+    UI levelUI;
+
+
 
     // To control grid population by the initialization state
     bool initialized = false;
@@ -93,21 +97,24 @@ public class InteractableGridSystem : GridSystem<Interactable>
     {
         interactablePool = GameObject.FindObjectOfType<InteractablePooler>();
         blastParticlePool = GameObject.FindObjectOfType<BlastParticlePooler>();
-        JsonRepository jsonRepo = GetComponent<JsonRepository>();
+        //JsonRepository jsonRepo = GetComponent<JsonRepository>();
     }
     private void Start()
     {
-
+        levelUI = FindObjectOfType<UI>();
+        levelDataHandler = FindObjectOfType<LevelDataHandler>();
+        InitializeGrid(levelDataHandler);
+        BuildMatrix();
         SetupGrid();
+        levelUI.SetupUI(levelDataHandler.levelData);
 
     }
 
     private void SetupGrid()
     {
-        BuildMatrix();
         PositioningGridOnTheScreen();
         ResizeAndPlaceBackground();
-        StartCoroutine(BuildInteractableGridSystem(ReadGrid(jsonRepo)));
+        StartCoroutine(BuildInteractableGridSystem(ReadGrid(levelDataHandler)));
         initialized = true;
     }
 
@@ -348,7 +355,7 @@ public class InteractableGridSystem : GridSystem<Interactable>
         ReorderAllInteractablesSortingOrder();
 
         //Fill the remaining empty spaces by repopulating
-        StartCoroutine(BuildInteractableGridSystem(ReadGrid(jsonRepo)));
+        StartCoroutine(BuildInteractableGridSystem(ReadGrid(levelDataHandler)));
 
     }
 
@@ -363,7 +370,7 @@ public class InteractableGridSystem : GridSystem<Interactable>
         // Looking for the obstacles near the blasted area
         if (!isTNTBlast)
         {
-            // Collect all unique interactables adjacent to the matching interactables
+            // Collect all unique obstacles adjacent to the matching interactables
             foreach (var matchingInteractable in matchingInteractables)
             {
                 if (LookForMatchingsOnAxis(out HashSet<Interactable> foundObstacles, matchingInteractable))
@@ -388,7 +395,7 @@ public class InteractableGridSystem : GridSystem<Interactable>
 
 
         // Process each unique obstacle
-        List<Interactable> selectedInteractablesList = selectedInteractables.ToList();
+        List<Interactable> selectedInteractablesList = selectedInteractables.Distinct().ToList();
         for (int i = 0; i < selectedInteractablesList.Count; i++)
         {
             // Arrange blast particles for this obstacle
@@ -419,23 +426,16 @@ public class InteractableGridSystem : GridSystem<Interactable>
                     StartCoroutine(selectedInteractablesList[i].GetComponent<Interactable>().CartoonishScaleToTarget(blasAnimationSpeed,
                                                                                                     blastAnimationMaxScale,
                                                                                                     blasAnimationMinScale));
-                    if (i == selectedInteractablesList.Count - 1 )
-                    {
-                        yield return StartCoroutine(selectedInteractablesList[i].GetComponent<Interactable>().CartoonishScaleToTarget(blasAnimationSpeed,
-                                                                                                    blastAnimationMaxScale,
-                                                                                                    blasAnimationMinScale));
 
-                    }
-                    RemoveInteractables(selectedInteractablesList[i]);
+
                 }
 
-                // Reset damage flag for Vase after processing TNT blast
-                if (isTNTBlast && obstacleComponent is Vase vase)
-                {
-                    vase.ResetDamageFlag();
-                }
+
             }
+
         }
+        yield return null;
+        RemoveInteractables(selectedInteractablesList);
 
     }
 
@@ -444,8 +444,8 @@ public class InteractableGridSystem : GridSystem<Interactable>
     public IEnumerator TNTBlast(Interactable pressedInteractable, int range)
     {
 
-        HashSet<Interactable> interactablesToExplode = new HashSet<Interactable>();
-        interactablesToExplode = GetInteractablesWithinRange(pressedInteractable.matrixPosition, range).ToHashSet();
+
+        var interactablesToExplode = GetInteractablesWithinRange(pressedInteractable.matrixPosition, range).ToHashSet();
         interactablesToExplode.Remove(pressedInteractable);
         var interactablesToExplodeList = interactablesToExplode.ToList();
 
@@ -487,7 +487,7 @@ public class InteractableGridSystem : GridSystem<Interactable>
                                                                       particleMaxScaleAfterCubeBlast);
                 foreach (var particle in particles)
                 {
-                    StartCoroutine(particle.ParticleDissolution(1f, 2f, interactablesToExplodeList[i].transform.position));
+                    StartCoroutine(particle.ParticleDissolution(1f, 2f, interactablesToExplodeList[i].transform.position,particle));
                 }
 
                 if (i == interactablesToExplodeList.Count - 1)
@@ -504,32 +504,35 @@ public class InteractableGridSystem : GridSystem<Interactable>
                 }
 
             }
-
-
-            if (interactablesToExplodeList[i] is Vase vase && interactablesToExplodeList[i].matrixPosition != pressedInteractable.matrixPosition)
+            if (interactablesToExplodeList[i] is Tnt nextTnt && interactablesToExplodeList[i].matrixPosition != pressedInteractable.matrixPosition && range < 3 && !nextTnt.Exploded)
             {
-                vase.TakeDamage(1, true);
+                interactablesToExplodeList.Remove(nextTnt);
+                yield return StartCoroutine(HandleObsticlesNearBlastedArea(interactablesToExplodeList, isTNTBlast: true));
 
-            }
-            if (interactablesToExplodeList[i] is Tnt nextTnt && interactablesToExplodeList[i].matrixPosition != pressedInteractable.matrixPosition && range < 3)
-            {
-                interactablesToExplode.Remove(nextTnt);
-                yield return StartCoroutine(HandleObsticlesNearBlastedArea(interactablesToExplode.ToList(), isTNTBlast: true));
+                interactablesToExplodeList.Where(x => x is IObstacle)
+                                 .Where(x => (x as IObstacle).Health > 0)
+                                 .ToList()
+                                 .ForEach(x => interactablesToExplodeList.Remove(x));
 
-                RemoveInteractables(interactablesToExplode.ToList());
-                RemoveInteractables(pressedInteractable);
-                StartCoroutine(nextTnt.Explode(true));
+                RemoveInteractables(interactablesToExplodeList);
+                yield return StartCoroutine(nextTnt.Explode(true));
             }
 
         }
 
 
-        yield return StartCoroutine(HandleObsticlesNearBlastedArea(interactablesToExplode.ToList(), isTNTBlast: true));
-        RemoveInteractables(interactablesToExplode.ToList());
+        yield return StartCoroutine(HandleObsticlesNearBlastedArea(interactablesToExplodeList, isTNTBlast: true));
+        interactablesToExplodeList.Where(x => x is IObstacle)
+                                  .Where(x => (x as IObstacle).Health > 0)
+                                  .ToList()
+                                  .ForEach(x => interactablesToExplodeList.Remove(x));
+
+
+        RemoveInteractables(interactablesToExplodeList.ToList());
         RemoveInteractables(pressedInteractable);
 
         GridFallDown();
-        StartCoroutine(BuildInteractableGridSystem(ReadGrid(jsonRepo)));
+        StartCoroutine(BuildInteractableGridSystem(ReadGrid(levelDataHandler)));
         yield return null;
     }
 
@@ -776,7 +779,7 @@ public class InteractableGridSystem : GridSystem<Interactable>
     }
 
 
-//Gridd fall down mechanism after removing interactables
+    //Gridd fall down mechanism after removing interactables
     private void GridFallDown()
     {
         for (int x = 0; x < Dimensions.x; x++)
@@ -787,7 +790,7 @@ public class InteractableGridSystem : GridSystem<Interactable>
                 {
                     for (int yAbove = y + 1; yAbove < Dimensions.y; yAbove++)
                     {
-                        if (!IsEmpty(x, yAbove) && GetItemAt(x, yAbove).idle)
+                        if (!IsEmpty(x, yAbove))
                         {
                             var interactable = GetItemAt(x, yAbove);
 
@@ -800,7 +803,7 @@ public class InteractableGridSystem : GridSystem<Interactable>
 
                             if (canFall)
                             {
-                                MoveInteractable(interactable, x, y, yAbove);
+                                StartCoroutine(MoveInteractable(interactable, x, y, yAbove));
                                 break;
                             }
                         }
@@ -811,7 +814,7 @@ public class InteractableGridSystem : GridSystem<Interactable>
     }
 
 
-    private void MoveInteractable(Interactable interactable, int x, int y, int yNotEmpty)
+    private IEnumerator MoveInteractable(Interactable interactable, int x, int y, int yNotEmpty)
     {
 
         // Remove its old position
@@ -826,7 +829,7 @@ public class InteractableGridSystem : GridSystem<Interactable>
         interactable.GetComponent<SpriteRenderer>().sortingOrder = yNotEmpty;
 
         //Start animation 
-        StartCoroutine(interactable.MoveToPositionWithJump(GridPositionToWorldPosition(x, y), 3.5f, 0.1f));
+        yield return StartCoroutine(interactable.MoveToPositionWithJump(GridPositionToWorldPosition(x, y), 3.5f, 0.1f));
 
     }
 
