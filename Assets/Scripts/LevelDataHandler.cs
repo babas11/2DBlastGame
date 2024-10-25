@@ -27,6 +27,7 @@ public class LevelDataHandler : MonoBehaviour
     }
 
     string SavePath => Path.Combine(Application.streamingAssetsPath, "Save.json");
+    string DefaultPath => Path.Combine(Application.streamingAssetsPath, levelToLoadString);
 
     private string jsonFilePath;
 
@@ -34,37 +35,34 @@ public class LevelDataHandler : MonoBehaviour
     {
         DontDestroyOnLoad(this.gameObject);
         jsonFilePath = jsonFilePath = Path.Combine(Application.streamingAssetsPath, levelToLoadString);
-        ReadGrid(jsonFilePath);
+        ReadGrid();
     }
 
 
 
-    void ReadGrid(string path)
+    void ReadGrid()
     {
 
         if (File.Exists(SavePath))
         {
-            print(SavePath);
+            var savedContent = File.ReadAllText(SavePath);
+            levelData = JsonUtility.FromJson<LevelData>(savedContent);
 
         }
         else
         {
-            if (!File.Exists(path))
-            {
-                Debug.LogError("File not found");
-            }
-            path = Path.Combine(Application.streamingAssetsPath, levelToLoadString);
+            var fileContents = File.ReadAllText(DefaultPath);
+            levelData = JsonUtility.FromJson<LevelData>(fileContents);
+
         }
-        var fileContents = File.ReadAllText(path);
-        levelData = JsonUtility.FromJson<LevelData>(fileContents);
+
 
     }
 
-    public void SaveLevel()
+    public void SaveLevel(LevelData newlevelData)
     {
-        jsonFilePath = jsonFilePath = Path.Combine(Application.streamingAssetsPath, "Save.json");
-        string json = JsonUtility.ToJson(levelData, true);
-        File.WriteAllText(jsonFilePath, json);
+        string json = JsonUtility.ToJson(newlevelData, true);
+        File.WriteAllText(DefaultPath, json);
     }
 
 

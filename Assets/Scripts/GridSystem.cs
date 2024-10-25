@@ -9,7 +9,7 @@ public abstract class GridSystem<T> : MonoBehaviour
 {
     //Testing pupose
 
-[SerializeField]
+
     Vector2Int dimensions ;
     public Vector2Int Dimensions { get => dimensions; }
 
@@ -43,9 +43,23 @@ public abstract class GridSystem<T> : MonoBehaviour
         return levelDataHandler.levelData.grid.ToArray();
     }
 
-    public void WriteGrid(LevelDataHandler levelDataHandler)
+    public void WriteGrid(LevelDataHandler levelDataHandler,UI ui)
     {
-        levelDataHandler.SaveLevel();
+        LevelData newLevelData = new LevelData();   
+        newLevelData.grid = new List<string>();
+        for (int i = 0; i < dimensions.y; i++)
+        {
+            for (int j = 0; j < dimensions.x; j++)
+            {
+                newLevelData.grid.Add(GetItemAt(i, j).ToString());
+            }
+        }
+        newLevelData.grid_width = dimensions.x;
+        newLevelData.grid_height = dimensions.y;
+        newLevelData.move_count = ui.Moves;
+        newLevelData.level_number = levelDataHandler.levelData.level_number;
+
+        levelDataHandler.SaveLevel(newLevelData);
     }
 
     public void PutItemAt(int x, int y, T item)

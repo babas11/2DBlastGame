@@ -90,6 +90,5 @@ public class MirroredButtonHandler : Mover, IPointerDownHandler
 
         yield return StartCoroutine(CartoonishScaleToTarget(2, 1.1f, 1f));
         SceneManager.LoadScene("LevelScene");
-        //GameObject.FindObjectOfType<InteractableGridSystem>().levelDataHandler = this.levelDataHandler;
     }
 }

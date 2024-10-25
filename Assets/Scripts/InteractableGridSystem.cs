@@ -97,11 +97,12 @@ public class InteractableGridSystem : GridSystem<Interactable>
     {
         interactablePool = GameObject.FindObjectOfType<InteractablePooler>();
         blastParticlePool = GameObject.FindObjectOfType<BlastParticlePooler>();
-        //JsonRepository jsonRepo = GetComponent<JsonRepository>();
+        levelUI = FindObjectOfType<UI>();
+
     }
     private void Start()
     {
-        levelUI = FindObjectOfType<UI>();
+
         levelDataHandler = FindObjectOfType<LevelDataHandler>();
         InitializeGrid(levelDataHandler);
         BuildMatrix();
@@ -192,6 +193,7 @@ public class InteractableGridSystem : GridSystem<Interactable>
 
     public IEnumerator BuildInteractableGridSystem(string[] stringMatrix)
     {
+        LevelData newlevelData = new LevelData();
         Vector3 onScreenPosition;
         Interactable newInteractable;
         List<Interactable> toAnimate = new List<Interactable>();
@@ -255,6 +257,11 @@ public class InteractableGridSystem : GridSystem<Interactable>
 
         // Set sorting order for visual stacking
         ReorderAllInteractablesSortingOrder();
+        if (initialized)
+        {
+            WriteGrid(levelDataHandler, levelUI);
+        }
+
         yield return null;
     }
 
@@ -426,7 +433,7 @@ public class InteractableGridSystem : GridSystem<Interactable>
                     StartCoroutine(selectedInteractablesList[i].GetComponent<Interactable>().CartoonishScaleToTarget(blasAnimationSpeed,
                                                                                                     blastAnimationMaxScale,
                                                                                                     blasAnimationMinScale));
-                    if (i == selectedInteractablesList.Count - 1 )
+                    if (i == selectedInteractablesList.Count - 1)
                     {
                         yield return StartCoroutine(selectedInteractablesList[i].GetComponent<Interactable>().CartoonishScaleToTarget(blasAnimationSpeed,
                                                                                                     blastAnimationMaxScale,
@@ -436,7 +443,7 @@ public class InteractableGridSystem : GridSystem<Interactable>
                     RemoveInteractables(selectedInteractablesList[i]);
                 }
 
-                
+
             }
         }
 
@@ -779,7 +786,7 @@ public class InteractableGridSystem : GridSystem<Interactable>
     }
 
 
-//Gridd fall down mechanism after removing interactables
+    //Gridd fall down mechanism after removing interactables
     private void GridFallDown()
     {
         for (int x = 0; x < Dimensions.x; x++)

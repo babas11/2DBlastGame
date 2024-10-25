@@ -6,6 +6,18 @@ using UnityEngine;
 [RequireComponent(typeof(SpriteRenderer))]
 public abstract class Interactable : Mover
 {
+    public readonly Dictionary<InteractableType, string> interactableStrings = new Dictionary<InteractableType, string>
+    {
+        {InteractableType.red, "r"},
+        {InteractableType.green, "g"},
+        {InteractableType.blue, "b"},
+        {InteractableType.yellow, "y"},
+        {InteractableType.box, "bo"},
+        {InteractableType.tnt, "t"},
+        {InteractableType.stone, "s"},
+        {InteractableType.vase, "v"},
+        {InteractableType.random, default}
+    };
     void Awake()
     {
         uiController = GameObject.FindObjectOfType<UI>();
@@ -36,6 +48,11 @@ public abstract class Interactable : Mover
     protected virtual void OnMouseDown()
     {
         uiController.DecreaseMoves();
+    }
+
+    public override string ToString()
+    {
+        return this.interactableStrings[type];
     }
 
 }
