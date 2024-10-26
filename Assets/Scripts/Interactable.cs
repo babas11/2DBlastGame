@@ -52,7 +52,7 @@ public abstract class Interactable : Mover
 
     public override string ToString()
     {
-        return this.interactableStrings[type];
+        return interactableStrings[type];
     }
 
 }

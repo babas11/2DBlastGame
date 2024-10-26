@@ -1,44 +1,42 @@
-using System.Collections;
-using System.Collections.Generic;
 using System.IO;
-using UnityEditor.EditorTools;
 using UnityEngine;
 
 public class LevelDataHandler : MonoBehaviour
 {
+
     public LevelData levelData { get; private set; }
 
     [SerializeField]
     [Tooltip("Name of the file to read")]
     private int levelToLoad;
-    public string levelToLoadString
+    public string LevelToLoadString(int level)
     {
-        get
+
+        if (level < 10)
         {
-            if (levelToLoad < 10)
-            {
-                return $"level_0{levelToLoad}.json";
-            }
-            else
-            {
-                return $"level_{levelToLoad}.json";
-            }
+            return $"level_0{level}.json";
         }
+        else
+        {
+            return $"level_{level}.json";
+        }
+
     }
 
+
     string SavePath => Path.Combine(Application.streamingAssetsPath, "Save.json");
-    string DefaultPath => Path.Combine(Application.streamingAssetsPath, levelToLoadString);
+    string DefaultPath => Path.Combine(Application.streamingAssetsPath, LevelToLoadString(1));
 
 
     void Start()
     {
         DontDestroyOnLoad(this.gameObject);
-        ReadGrid();
+        ReadLevel();
     }
 
 
 
-    void ReadGrid()
+    void ReadLevel()
     {
 
         if (File.Exists(SavePath))
@@ -54,13 +52,28 @@ public class LevelDataHandler : MonoBehaviour
 
         }
 
-
     }
+
+    
+
+    public void ReadLevel(int levelNumber)
+{
+    string levelPath = Path.Combine(Application.streamingAssetsPath, LevelToLoadString(levelNumber));
+    if (File.Exists(levelPath))
+    {
+        var fileContents = File.ReadAllText(levelPath);
+        levelData = JsonUtility.FromJson<LevelData>(fileContents);
+    }
+    else
+    {
+        Debug.LogError($"Level file for level {levelNumber} not found.");
+    }
+}
 
     public void SaveLevel(LevelData newlevelData)
     {
         string json = JsonUtility.ToJson(newlevelData, true);
-        File.WriteAllText(DefaultPath, json);
+        File.WriteAllText(SavePath, json);
     }
 
 

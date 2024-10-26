@@ -38,29 +38,7 @@ public abstract class GridSystem<T> : MonoBehaviour
         matrix = new T[dimensions.x, dimensions.y];
     }
 
-    public string[] ReadGrid(LevelDataHandler levelDataHandler)
-    {
-        return levelDataHandler.levelData.grid.ToArray();
-    }
-
-    public void WriteGrid(LevelDataHandler levelDataHandler,UI ui)
-    {
-        LevelData newLevelData = new LevelData();   
-        newLevelData.grid = new List<string>();
-        for (int i = 0; i < dimensions.y; i++)
-        {
-            for (int j = 0; j < dimensions.x; j++)
-            {
-                newLevelData.grid.Add(GetItemAt(i, j).ToString());
-            }
-        }
-        newLevelData.grid_width = dimensions.x;
-        newLevelData.grid_height = dimensions.y;
-        newLevelData.move_count = ui.Moves;
-        newLevelData.level_number = levelDataHandler.levelData.level_number;
-
-        levelDataHandler.SaveLevel(newLevelData);
-    }
+  
 
     public void PutItemAt(int x, int y, T item)
     {

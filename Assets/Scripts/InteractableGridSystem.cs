@@ -191,6 +191,30 @@ public class InteractableGridSystem : GridSystem<Interactable>
         transform.position = bottomLeft + new Vector3(gridXPosition, gridYPosition, 1f);
     }
 
+      public string[] ReadGrid(LevelDataHandler levelDataHandler)
+    {
+        return levelDataHandler.levelData.grid.ToArray();
+    }
+
+    public void WriteGrid(LevelDataHandler levelDataHandler,UI ui)
+    {
+        LevelData newLevelData = new LevelData();   
+        newLevelData.grid = new List<string>();
+        for (int i = 0; i < Dimensions.y; i++)
+        {
+            for (int j = 0; j < Dimensions.x; j++)
+            {
+                newLevelData.grid.Add(GetItemAt(j, i) .ToString());
+            }
+        }
+        newLevelData.grid_width = Dimensions.x;
+        newLevelData.grid_height = Dimensions.y;
+        newLevelData.move_count = ui.Moves;
+        newLevelData.level_number = levelDataHandler.levelData.level_number;
+
+        levelDataHandler.SaveLevel(newLevelData);
+    }
+
     public IEnumerator BuildInteractableGridSystem(string[] stringMatrix)
     {
         LevelData newlevelData = new LevelData();
@@ -258,7 +282,7 @@ public class InteractableGridSystem : GridSystem<Interactable>
         // Set sorting order for visual stacking
         ReorderAllInteractablesSortingOrder();
         
-        if (!initialized)
+        if (initialized)
         {
             WriteGrid(levelDataHandler, levelUI);
         }
