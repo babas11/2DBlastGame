@@ -5,11 +5,6 @@ using UnityEngine;
 
 public class Box : Interactable, IObstacle
 {
-    private UI ui;
-    private void Start()
-    {
-        ui = FindObjectOfType<UI>();
-    }
     public int Health { get; private set; } = 1;
     public override bool CanFall => false;
 
@@ -30,16 +25,6 @@ public class Box : Interactable, IObstacle
 
     public void UpdateObjectives()
     {
-        ui.UpdateObjectives(this);
+        uiController.UpdateObjectives(this);
     }
-}
-
-
-public interface IObstacle
-{
-    int Health { get; }
-    void TakeDamage(int damage, bool isTNTBlast);
-
-    void UpdateObjectives();
-
 }

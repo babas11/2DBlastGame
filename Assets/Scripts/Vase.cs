@@ -4,11 +4,6 @@ using UnityEngine;
 
 public class Vase : Interactable, IObstacle
 {
-    private UI ui;
-    private void Start()
-    {
-        ui = FindObjectOfType<UI>();
-    }
     [SerializeField]
     private
     Sprite[] sprites;
@@ -49,7 +44,7 @@ public class Vase : Interactable, IObstacle
 
     public void UpdateObjectives()
     {
-         ui.UpdateObjectives(this);
+         uiController.UpdateObjectives(this);
     }
 
 }

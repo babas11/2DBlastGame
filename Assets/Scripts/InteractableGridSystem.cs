@@ -98,12 +98,14 @@ public class InteractableGridSystem : GridSystem<Interactable>
         interactablePool = GameObject.FindObjectOfType<InteractablePool>();
         blastParticlePool = GameObject.FindObjectOfType<ParticlePool>();
         levelUI = FindObjectOfType<UI>();
+        levelDataHandler = FindObjectOfType<LevelDataHandler>();
 
     }
     private void Start()
     {
 
-        levelDataHandler = FindObjectOfType<LevelDataHandler>();
+
+
         InitializeGrid(levelDataHandler);
         BuildMatrix();
         SetupGrid();
@@ -191,20 +193,20 @@ public class InteractableGridSystem : GridSystem<Interactable>
         transform.position = bottomLeft + new Vector3(gridXPosition, gridYPosition, 1f);
     }
 
-      public string[] ReadGrid(LevelDataHandler levelDataHandler)
+    public string[] ReadGrid(LevelDataHandler levelDataHandler)
     {
         return levelDataHandler.levelData.grid.ToArray();
     }
 
-    public void WriteGrid(LevelDataHandler levelDataHandler,UI ui)
+    public void WriteGrid(LevelDataHandler levelDataHandler, UI ui)
     {
-        LevelData newLevelData = new LevelData();   
+        LevelData newLevelData = new LevelData();
         newLevelData.grid = new List<string>();
         for (int i = 0; i < Dimensions.y; i++)
         {
             for (int j = 0; j < Dimensions.x; j++)
             {
-                newLevelData.grid.Add(GetItemAt(j, i) .ToString());
+                newLevelData.grid.Add(GetItemAt(j, i).ToString());
             }
         }
         newLevelData.grid_width = Dimensions.x;
@@ -230,11 +232,6 @@ public class InteractableGridSystem : GridSystem<Interactable>
             {
                 if (IsEmpty(x, y))
                 {
-
-                    // Print debug information
-                    //print($"{x}, {y}, {GridPositionToWorldPosition(x, y)}");
-
-                    // Get a new interactable from the pool
                     if (initialized)
                     {
                         newInteractable = interactablePool.GetPooledObject(random[0]);
@@ -253,7 +250,7 @@ public class InteractableGridSystem : GridSystem<Interactable>
                     PutItemAt(x, y, newInteractable);
 
                     // Tell interactable where it is
-                    newInteractable.matrixPosition = new Vector2Int(x, y);
+                    newInteractable.MatrixPosition = new Vector2Int(x, y);
 
 
 
@@ -281,7 +278,7 @@ public class InteractableGridSystem : GridSystem<Interactable>
 
         // Set sorting order for visual stacking
         ReorderAllInteractablesSortingOrder();
-        
+
         if (initialized)
         {
             WriteGrid(levelDataHandler, levelUI);
@@ -318,8 +315,8 @@ public class InteractableGridSystem : GridSystem<Interactable>
             matchingInteractables.All(x => x.transform.parent = interactablePool.transform);
 
             //Copy the matrix position of the pressed interactable to the tnt before removing 
-            Vector2Int touchedInteractableMatrixPositin = new Vector2Int(pressedInteractableComponent.matrixPosition.x,
-                                                                         pressedInteractableComponent.matrixPosition.y);
+            Vector2Int touchedInteractableMatrixPositin = new Vector2Int(pressedInteractableComponent.MatrixPosition.x,
+                                                                         pressedInteractableComponent.MatrixPosition.y);
 
             //Damaging the obsticles near the blasted area
             yield return StartCoroutine(HandleObsticlesNearBlastedArea(matchingInteractables));
@@ -330,7 +327,7 @@ public class InteractableGridSystem : GridSystem<Interactable>
 
             //Placing TNT
             PutItemAt(touchedInteractableMatrixPositin.x, touchedInteractableMatrixPositin.y, tnt);
-            tnt.matrixPosition = touchedInteractableMatrixPositin;
+            tnt.MatrixPosition = touchedInteractableMatrixPositin;
             tnt.transform.position = pressedInteractableTransform.position;
 
             /* //Placing TNTS visual halo
@@ -480,20 +477,20 @@ public class InteractableGridSystem : GridSystem<Interactable>
     {
 
         HashSet<Interactable> interactablesToExplode = new HashSet<Interactable>();
-        interactablesToExplode = GetInteractablesWithinRange(pressedInteractable.matrixPosition, range).ToHashSet();
+        interactablesToExplode = GetInteractablesWithinRange(pressedInteractable.MatrixPosition, range).ToHashSet();
         interactablesToExplode.Remove(pressedInteractable);
         var interactablesToExplodeList = interactablesToExplode.ToList();
 
         //Placing TNTS Explosion particles
-    /*     var tntExplosionParticle = ArrangeBlastParticles(pressedInteractable, 1);
-        var tntHaloParticle = ArrangeBlastParticles(pressedInteractable, 0); */
+        /*     var tntExplosionParticle = ArrangeBlastParticles(pressedInteractable, 1);
+            var tntHaloParticle = ArrangeBlastParticles(pressedInteractable, 0); */
 
         //Scaling low in order to stay behind the tnt
-       /*  tntHaloParticle.transform.localScale = new Vector3(0.3f, 0.3f, 0);
-        tntExplosionParticle.transform.localScale = new Vector3(0.3f, 0.3f, 0); */
+        /*  tntHaloParticle.transform.localScale = new Vector3(0.3f, 0.3f, 0);
+         tntExplosionParticle.transform.localScale = new Vector3(0.3f, 0.3f, 0); */
 
         //Setting the sorting order tof tnt on top of other interactables
-        interactablesToExplodeList.ForEach(x => x.GetComponent<SpriteRenderer>().sortingOrder = x.matrixPosition.y + 1);
+        interactablesToExplodeList.ForEach(x => x.GetComponent<SpriteRenderer>().sortingOrder = x.MatrixPosition.y + 1);
         pressedInteractable.GetComponent<SpriteRenderer>().sortingOrder = onAnimationSortingOrder + 2;
 
         //Playing the TNT explotion  animation
@@ -506,9 +503,9 @@ public class InteractableGridSystem : GridSystem<Interactable>
         /* yield return StartCoroutine(tntExplosionParticle.CartoonishScaleToTarget(4f, 3f, 0f));
         yield return StartCoroutine(tntHaloParticle.CartoonishScaleToTarget(4f, 8f, 0f));
  */
-       /*  blastParticlePool.ReturnObjectToPool(tntExplosionParticle);
-        blastParticlePool.ReturnObjectToPool(tntHaloParticle);
- */
+        /*  blastParticlePool.ReturnObjectToPool(tntExplosionParticle);
+         blastParticlePool.ReturnObjectToPool(tntHaloParticle);
+  */
 
         for (int i = 0; i < interactablesToExplodeList.Count; i++) //(var interactableToExplode in interactablesToExplode)
         {
@@ -541,12 +538,12 @@ public class InteractableGridSystem : GridSystem<Interactable>
             }
 
 
-            if (interactablesToExplodeList[i] is Vase vase && interactablesToExplodeList[i].matrixPosition != pressedInteractable.matrixPosition)
+            if (interactablesToExplodeList[i] is Vase vase && interactablesToExplodeList[i].MatrixPosition != pressedInteractable.MatrixPosition)
             {
                 vase.TakeDamage(1, true);
 
             }
-            if (interactablesToExplodeList[i] is Tnt nextTnt && interactablesToExplodeList[i].matrixPosition != pressedInteractable.matrixPosition && range < 3)
+            if (interactablesToExplodeList[i] is Tnt nextTnt && interactablesToExplodeList[i].MatrixPosition != pressedInteractable.MatrixPosition && range < 3)
             {
                 interactablesToExplode.Remove(nextTnt);
                 yield return StartCoroutine(HandleObsticlesNearBlastedArea(interactablesToExplode.ToList(), isTNTBlast: true));
@@ -644,23 +641,23 @@ public class InteractableGridSystem : GridSystem<Interactable>
     } */
 
     //Arrange the spesific blast particle for the interactable and return it/* 
-   /*  BlastParticle ArrangeBlastParticles(Interactable interactableToPlay, int indexOfparticleInPrefabList)
-    {
+    /*  BlastParticle ArrangeBlastParticles(Interactable interactableToPlay, int indexOfparticleInPrefabList)
+     {
 
-        var particle = blastParticlePool.GetParticlePrefabByTypeAndIndex(interactableToPlay.Type, indexOfparticleInPrefabList);
-        if (particle != null)
-        {
-            particle.transform.position = interactableToPlay.transform.position;
-            particle.transform.localScale = new Vector3(1, 1, 1);
-        }
-        else
-        {
-            Debug.LogError("Failed to get a pooled particle.");
-        }
+         var particle = blastParticlePool.GetParticlePrefabByTypeAndIndex(interactableToPlay.Type, indexOfparticleInPrefabList);
+         if (particle != null)
+         {
+             particle.transform.position = interactableToPlay.transform.position;
+             particle.transform.localScale = new Vector3(1, 1, 1);
+         }
+         else
+         {
+             Debug.LogError("Failed to get a pooled particle.");
+         }
 
-        return particle;
-    } 
- */
+         return particle;
+     } 
+  */
 
 
 
@@ -728,7 +725,7 @@ public class InteractableGridSystem : GridSystem<Interactable>
         matches.Add(startInteractable);
 
         //for left direction
-        Vector2Int newPos = startInteractable.matrixPosition + Vector2Int.left;
+        Vector2Int newPos = startInteractable.MatrixPosition + Vector2Int.left;
 
         if (CheckBounds(newPos) && !IsEmpty(newPos.x, newPos.y) &&
                                     GetItemAt(newPos.x, newPos.y).Type == startInteractable.Type &&
@@ -738,7 +735,7 @@ public class InteractableGridSystem : GridSystem<Interactable>
         }
 
         //for right direction
-        newPos = startInteractable.matrixPosition + Vector2Int.right;
+        newPos = startInteractable.MatrixPosition + Vector2Int.right;
         if (CheckBounds(newPos) && !IsEmpty(newPos.x, newPos.y) &&
                                     GetItemAt(newPos.x, newPos.y).Type == startInteractable.Type &&
                                     !matches.Contains(GetItemAt(newPos.x, newPos.y)))
@@ -747,7 +744,7 @@ public class InteractableGridSystem : GridSystem<Interactable>
         }
 
         //for up direction
-        newPos = startInteractable.matrixPosition + Vector2Int.up;
+        newPos = startInteractable.MatrixPosition + Vector2Int.up;
         if (CheckBounds(newPos) && !IsEmpty(newPos.x, newPos.y) &&
                                     GetItemAt(newPos.x, newPos.y).Type == startInteractable.Type &&
                                     !matches.Contains(GetItemAt(newPos.x, newPos.y)))
@@ -756,7 +753,7 @@ public class InteractableGridSystem : GridSystem<Interactable>
         }
 
         //for down direction
-        newPos = startInteractable.matrixPosition + Vector2Int.down;
+        newPos = startInteractable.MatrixPosition + Vector2Int.down;
 
         if (CheckBounds(newPos) && !IsEmpty(newPos.x, newPos.y) && GetItemAt(newPos.x, newPos.y).Type == startInteractable.Type && !matches.Contains(GetItemAt(newPos.x, newPos.y)))
         {
@@ -774,26 +771,26 @@ public class InteractableGridSystem : GridSystem<Interactable>
         obsticles = new HashSet<TLookFor>();
 
         //for left direction
-        Vector2Int pos = startInteractable.matrixPosition + Vector2Int.left;
+        Vector2Int pos = startInteractable.MatrixPosition + Vector2Int.left;
         if (CheckBounds(pos) && GetItemAt(pos.x, pos.y) is TLookFor obsticle)
         {
             obsticles.Add(GetItemAt(pos.x, pos.y) as TLookFor);
         }
 
         //for right direction
-        pos = startInteractable.matrixPosition + Vector2Int.right;
+        pos = startInteractable.MatrixPosition + Vector2Int.right;
         if (CheckBounds(pos) && GetItemAt(pos.x, pos.y) as TLookFor)
         {
             obsticles.Add(GetItemAt(pos.x, pos.y) as TLookFor);
         }
         //for up direction
-        pos = startInteractable.matrixPosition + Vector2Int.up;
+        pos = startInteractable.MatrixPosition + Vector2Int.up;
         if (CheckBounds(pos) && GetItemAt(pos.x, pos.y) as TLookFor)
         {
             obsticles.Add(GetItemAt(pos.x, pos.y) as TLookFor);
         }
         //for down direction
-        pos = startInteractable.matrixPosition + Vector2Int.down;
+        pos = startInteractable.MatrixPosition + Vector2Int.down;
         if (CheckBounds(pos) && GetItemAt(pos.x, pos.y) as TLookFor)
         {
             obsticles.Add(GetItemAt(pos.x, pos.y) as TLookFor);
@@ -850,12 +847,12 @@ public class InteractableGridSystem : GridSystem<Interactable>
     {
 
         // Remove its old position
-        RemoveItemAt(interactable.matrixPosition.x, interactable.matrixPosition.y);
+        RemoveItemAt(interactable.MatrixPosition.x, interactable.MatrixPosition.y);
         //Place the interactable in the new position
         PutItemAt(x, y, interactable);
 
         // update interactables internal grid position
-        interactable.matrixPosition = new Vector2Int(x, y);
+        interactable.MatrixPosition = new Vector2Int(x, y);
 
         // Set the sorting order according to grid position on y axis
         interactable.GetComponent<SpriteRenderer>().sortingOrder = yNotEmpty;
@@ -870,7 +867,7 @@ public class InteractableGridSystem : GridSystem<Interactable>
     private void RemoveInteractables(List<Interactable> matchingInteractables)
     {
         // Remove the matching interactables from the grid
-        matchingInteractables.ForEach(x => RemoveItemAt(x.matrixPosition.x, x.matrixPosition.y));
+        matchingInteractables.ForEach(x => RemoveItemAt(x.MatrixPosition.x, x.MatrixPosition.y));
 
         //Rescale  before goi,g back to the pool
         matchingInteractables.ForEach(x => x.transform.localScale = new Vector3(1, 1, 1));
@@ -882,7 +879,7 @@ public class InteractableGridSystem : GridSystem<Interactable>
     public void RemoveInteractables(Interactable matchingInteractables)
     {
         // Remove the matching interactables from the grid
-        RemoveItemAt(matchingInteractables.matrixPosition.x, matchingInteractables.matrixPosition.y);
+        RemoveItemAt(matchingInteractables.MatrixPosition.x, matchingInteractables.MatrixPosition.y);
 
 
         //Rescale  before goi,g back to the pool

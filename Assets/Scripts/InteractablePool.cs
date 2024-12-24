@@ -7,7 +7,7 @@ using UnityEngine;
 /// It creates an initial batch of each type from the prefabs list, then reuses them.
 /// </summary>
 
-public class InteractablePool : MonoBehaviour, IObjectPooler<Interactable, string>
+public class InteractablePool : MonoBehaviour, IObjectPool<Interactable, string>
 {
     [Tooltip("List of Interactable prefabs for each InteractableType.")]
     [SerializeField] 

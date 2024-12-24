@@ -4,10 +4,8 @@ using UnityEngine;
 
 public class Stone : Interactable, IObstacle
 {
-    private UI ui;
     private void Start()
     {
-        ui = FindObjectOfType<UI>();
     }
     public int Health { get; private set; } = 1;
     public override bool CanFall => false;
@@ -29,7 +27,7 @@ public class Stone : Interactable, IObstacle
 
     public void UpdateObjectives()
     {
-         ui.UpdateObjectives(this);
+         uiController.UpdateObjectives(this);
     }
 }
 
