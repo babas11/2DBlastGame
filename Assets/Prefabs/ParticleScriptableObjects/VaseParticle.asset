@@ -12,6 +12,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 8ac113eb330ae4cf59f6b195b5d39c81, type: 3}
   m_Name: VaseParticle
   m_EditorClassIdentifier: 
-  particleTypeOF: 0
+  particleTypeOF: 7
   LightParticles: []
-  ExplosionParticle: []
+  ExplosionParticle:
+  - {fileID: 2539526740786037160, guid: 10b144c0484255740b22a873e15f47c1, type: 3}
+  - {fileID: 2539526740786037160, guid: b28f0fa3ba4dca747a8d4a8aacfbecfa, type: 3}
+  - {fileID: 2539526740786037160, guid: 22aba47d31414b944803307eabc3a077, type: 3}

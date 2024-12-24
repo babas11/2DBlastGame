@@ -12,6 +12,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 8ac113eb330ae4cf59f6b195b5d39c81, type: 3}
   m_Name: TntParticle
   m_EditorClassIdentifier: 
-  particleTypeOF: 0
-  LightParticles: []
+  particleTypeOF: 5
+  LightParticles:
+  - {fileID: 2539526740786037160, guid: 695781bb173a9514db1c3cc0c045d2c4, type: 3}
+  - {fileID: 2539526740786037160, guid: 821ebed35b097904cbb5f80292d9dec7, type: 3}
   ExplosionParticle: []

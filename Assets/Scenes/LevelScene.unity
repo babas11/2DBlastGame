@@ -290,7 +290,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 1}
   m_AnchorMax: {x: 1, y: 1}
-  m_AnchoredPosition: {x: 0, y: 0.47998095}
+  m_AnchoredPosition: {x: 0, y: 0.47998047}
   m_SizeDelta: {x: 0, y: 4.8500004}
   m_Pivot: {x: 0.5, y: 1}
 --- !u!114 &207320331
@@ -1197,38 +1197,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 686bd2fe807996a4fb8195d69ae12e31, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  particlePrefabEntries:
-  - type: 0
-    particlePrefabs:
-    - {fileID: 2539526740786037160, guid: 2246d20d4bb276c47a1093221deaefcf, type: 3}
-  - type: 1
-    particlePrefabs:
-    - {fileID: 2539526740786037160, guid: 9d9af8eb3c24fe44d915822112cdea76, type: 3}
-  - type: 2
-    particlePrefabs:
-    - {fileID: 2539526740786037160, guid: ae163f8859df13549acc72f5af271a37, type: 3}
-  - type: 3
-    particlePrefabs:
-    - {fileID: 2539526740786037160, guid: 6498d0fd771febd45b14304faf7f7882, type: 3}
-  - type: 4
-    particlePrefabs:
-    - {fileID: 2539526740786037160, guid: 533a7b5d264da164bae6a0b732c81703, type: 3}
-    - {fileID: 2539526740786037160, guid: 6a005649a967ed54692a5a786a64dcd8, type: 3}
-    - {fileID: 2539526740786037160, guid: 0173c6761ab5d704a8b2ebd821dea1be, type: 3}
-  - type: 5
-    particlePrefabs:
-    - {fileID: 2539526740786037160, guid: 821ebed35b097904cbb5f80292d9dec7, type: 3}
-    - {fileID: 2539526740786037160, guid: 695781bb173a9514db1c3cc0c045d2c4, type: 3}
-  - type: 6
-    particlePrefabs:
-    - {fileID: 2539526740786037160, guid: e919f06f743a9c941a39e6900fd55d93, type: 3}
-    - {fileID: 2539526740786037160, guid: 6af5953c9f3b77349a97d7c18496383f, type: 3}
-    - {fileID: 2539526740786037160, guid: dcea2828d22fb6d47971fa37a62b97d3, type: 3}
-  - type: 7
-    particlePrefabs:
-    - {fileID: 2539526740786037160, guid: 10b144c0484255740b22a873e15f47c1, type: 3}
-    - {fileID: 2539526740786037160, guid: b28f0fa3ba4dca747a8d4a8aacfbecfa, type: 3}
-    - {fileID: 2539526740786037160, guid: 22aba47d31414b944803307eabc3a077, type: 3}
 --- !u!114 &1225645523
 MonoBehaviour:
   m_ObjectHideFlags: 0

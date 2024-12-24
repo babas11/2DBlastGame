@@ -1,9 +1,7 @@
 using UnityEngine;
 
-public class BlastParticle: Mover
+public class Particle: Mover
 {
-    [SerializeField]
-    ParticleType effectType;
 
     public void ResetParticle()
     {
@@ -11,11 +9,6 @@ public class BlastParticle: Mover
         gameObject.SetActive(false);
     }
 
-
 }
 
-public enum ParticleType{
-    LighEffect,
-    ExplosionEffect
-}
 

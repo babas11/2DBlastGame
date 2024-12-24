@@ -12,6 +12,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 8ac113eb330ae4cf59f6b195b5d39c81, type: 3}
   m_Name: BoxParticle
   m_EditorClassIdentifier: 
-  particleTypeOF: 0
+  particleTypeOF: 4
   LightParticles: []
-  ExplosionParticle: []
+  ExplosionParticle:
+  - {fileID: 2539526740786037160, guid: 533a7b5d264da164bae6a0b732c81703, type: 3}
+  - {fileID: 2539526740786037160, guid: 6a005649a967ed54692a5a786a64dcd8, type: 3}
+  - {fileID: 2539526740786037160, guid: 0173c6761ab5d704a8b2ebd821dea1be, type: 3}

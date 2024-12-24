@@ -79,7 +79,7 @@ public class InteractableGridSystem : GridSystem<Interactable>
     int minimumCubeAmountToMakeTNT = 5;
 
     InteractablePool interactablePool;
-    BlastParticlePool blastParticlePool;
+    ParticlePool blastParticlePool;
     Mover mover;
     LevelDataHandler levelDataHandler;
     UI levelUI;
@@ -96,7 +96,7 @@ public class InteractableGridSystem : GridSystem<Interactable>
     private void Awake()
     {
         interactablePool = GameObject.FindObjectOfType<InteractablePool>();
-        blastParticlePool = GameObject.FindObjectOfType<BlastParticlePool>();
+        blastParticlePool = GameObject.FindObjectOfType<ParticlePool>();
         levelUI = FindObjectOfType<UI>();
 
     }

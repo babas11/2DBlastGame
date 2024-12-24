@@ -12,6 +12,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 8ac113eb330ae4cf59f6b195b5d39c81, type: 3}
   m_Name: BlueCubeParticle
   m_EditorClassIdentifier: 
-  particleTypeOF: 0
+  particleTypeOF: 2
   LightParticles: []
-  ExplosionParticle: []
+  ExplosionParticle:
+  - {fileID: 2539526740786037160, guid: ae163f8859df13549acc72f5af271a37, type: 3}

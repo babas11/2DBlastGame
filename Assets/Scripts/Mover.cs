@@ -103,7 +103,7 @@ public class Mover : MonoBehaviour
         idle = true;
     }
 
-    public IEnumerator ParticleDissolution(float fragmentMoveDistance, float explosionDuration, Vector3 startPosition, BlastParticle particle = null)
+    public IEnumerator ParticleDissolution(float fragmentMoveDistance, float explosionDuration, Vector3 startPosition, Particle particle = null)
     {
         // Choose an initial upward direction with randomness to spread the particles
         Vector3 initialDirection = (Vector3.up + new Vector3(Random.Range(-1f, 1f), Random.Range(1f, -1f), 0)).normalized;
@@ -232,9 +232,9 @@ public class Mover : MonoBehaviour
 
     // Ensure scale is exactly the target scale at the end
     transform.localScale = toTargetScale;
-    if(TryGetComponent(out BlastParticle particle))
+    if(TryGetComponent(out Particle particle))
     {
-        transform.parent = GameObject.FindAnyObjectByType<BlastParticlePool>().transform;
+        transform.parent = GameObject.FindAnyObjectByType<ParticlePool>().transform;
     }
     idle = true;
 }
