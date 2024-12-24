@@ -234,7 +234,7 @@ public class Mover : MonoBehaviour
     transform.localScale = toTargetScale;
     if(TryGetComponent(out BlastParticle particle))
     {
-        transform.parent = GameObject.FindAnyObjectByType<BlastParticlePooler>().transform;
+        transform.parent = GameObject.FindAnyObjectByType<BlastParticlePool>().transform;
     }
     idle = true;
 }

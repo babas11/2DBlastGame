@@ -3,21 +3,11 @@ using System.Collections.Generic;
 using Unity.VisualScripting;
 using UnityEngine;
 
+
+
 [RequireComponent(typeof(SpriteRenderer))]
 public abstract class Interactable : Mover
 {
-    public readonly Dictionary<InteractableType, string> interactableStrings = new Dictionary<InteractableType, string>
-    {
-        {InteractableType.red, "r"},
-        {InteractableType.green, "g"},
-        {InteractableType.blue, "b"},
-        {InteractableType.yellow, "y"},
-        {InteractableType.box, "bo"},
-        {InteractableType.tnt, "t"},
-        {InteractableType.stone, "s"},
-        {InteractableType.vase, "v"},
-        {InteractableType.random, default}
-    };
     void Awake()
     {
         uiController = GameObject.FindObjectOfType<UI>();
@@ -52,7 +42,12 @@ public abstract class Interactable : Mover
 
     public override string ToString()
     {
-        return interactableStrings[type];
+        return this.Type.RawValue();
+    }
+
+    public void ResetInteractable(){
+        
+        //TODO: Organize to reset all settings of the Interactable
     }
 
 }

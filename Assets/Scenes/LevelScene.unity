@@ -290,7 +290,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 1}
   m_AnchorMax: {x: 1, y: 1}
-  m_AnchoredPosition: {x: 0, y: 0.4799838}
+  m_AnchoredPosition: {x: 0, y: 0.47998095}
   m_SizeDelta: {x: 0, y: 4.8500004}
   m_Pivot: {x: 0.5, y: 1}
 --- !u!114 &207320331
@@ -1250,6 +1250,7 @@ MonoBehaviour:
   - {fileID: 5470597563362776149, guid: 96c16a83414146b41a46e160da75d6db, type: 3}
   - {fileID: 7580860253951080310, guid: e151ecc1860e5504d867a68a62eae04a, type: 3}
   - {fileID: 32819802142558215, guid: a3c4924bfe788de40829b1f9b0988896, type: 3}
+  initialPoolSize: 5
 --- !u!4 &1225645524
 Transform:
   m_ObjectHideFlags: 0
@@ -1536,6 +1537,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 1532180639}
+  - component: {fileID: 1532180640}
   m_Layer: 0
   m_Name: GameObject
   m_TagString: Untagged
@@ -1558,6 +1560,19 @@ Transform:
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &1532180640
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1532180638}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ecc4ef2e40cb5ac4783e9297cac43c4e, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  levelToLoad: 0
 --- !u!1 &1807174605
 GameObject:
   m_ObjectHideFlags: 0
