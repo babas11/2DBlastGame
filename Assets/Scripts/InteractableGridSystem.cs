@@ -21,7 +21,6 @@ public class InteractableGridSystem : GridSystem<Interactable>
     [SerializeField]
     float gridUnit = .5f;
 
-    //JsonRepository jsonRepo;
 
     // Grid unit size is 0.5f, but prefabs is 0.57f. in order to look show debth  
     [SerializeField]
@@ -84,13 +83,12 @@ public class InteractableGridSystem : GridSystem<Interactable>
     LevelDataHandler levelDataHandler;
     UI levelUI;
 
+    InteractableType random = InteractableType.random;
+
 
 
     // To control grid population by the initialization state
-    bool initialized = false;
-
-
-    private static readonly string[] random = { "rand" };
+    bool moveMade = false;
 
 
     private void Awake()
@@ -103,9 +101,6 @@ public class InteractableGridSystem : GridSystem<Interactable>
     }
     private void Start()
     {
-
-
-
         InitializeGrid(levelDataHandler);
         BuildMatrix();
         SetupGrid();
@@ -118,7 +113,7 @@ public class InteractableGridSystem : GridSystem<Interactable>
         PositioningGridOnTheScreen();
         ResizeAndPlaceBackground();
         StartCoroutine(BuildInteractableGridSystem(ReadGrid(levelDataHandler)));
-        initialized = true;
+        moveMade = true;
     }
 
 
@@ -219,7 +214,6 @@ public class InteractableGridSystem : GridSystem<Interactable>
 
     public IEnumerator BuildInteractableGridSystem(string[] stringMatrix)
     {
-        LevelData newlevelData = new LevelData();
         Vector3 onScreenPosition;
         Interactable newInteractable;
         List<Interactable> toAnimate = new List<Interactable>();
@@ -232,9 +226,9 @@ public class InteractableGridSystem : GridSystem<Interactable>
             {
                 if (IsEmpty(x, y))
                 {
-                    if (initialized)
+                    if (moveMade)
                     {
-                        newInteractable = interactablePool.GetPooledObject(random[0]);
+                        newInteractable = interactablePool.GetPooledObject(this.random.RawValue());
                     }
                     else
                     {
@@ -252,8 +246,6 @@ public class InteractableGridSystem : GridSystem<Interactable>
                     // Tell interactable where it is
                     newInteractable.MatrixPosition = new Vector2Int(x, y);
 
-
-
                     // Add to animation list
                     toAnimate.Add(newInteractable);
                     // Animate the interactables in the current row to their positions
@@ -270,16 +262,14 @@ public class InteractableGridSystem : GridSystem<Interactable>
 
             // Clear the list for the next row
             toAnimate.Clear();
-
-            //Define Cubes State as TNT or Default to show visually           
-            AdjustMatchingInterablesState();
-
         }
+        //Define Cubes State as TNT or Default to show visually           
+        AdjustMatchingInterablesState();
 
         // Set sorting order for visual stacking
         ReorderAllInteractablesSortingOrder();
 
-        if (initialized)
+        if (moveMade)
         {
             WriteGrid(levelDataHandler, levelUI);
         }
@@ -294,25 +284,25 @@ public class InteractableGridSystem : GridSystem<Interactable>
         Interactable pressedInteractableComponent = pressedInteractable.GetComponent<Interactable>();
 
         // Set the pressed interactable as the parent of all matching interactables in order to scale them together
-        foreach (var matchingInteractable in matchingInteractables)
-        {
-            matchingInteractable.transform.parent = pressedInteractable.transform;
-        }
+        Utilities.MakeChildrenOf(matchingInteractables, pressedInteractable);
 
         //increease the sorting order of the matching interactables to make them visible on top of the others
-        matchingInteractables.ForEach(x => x.GetComponent<SpriteRenderer>().sortingOrder = onAnimationSortingOrder);
-
+        if(Utilities.TryGetComponents(matchingInteractables, out List<SpriteRenderer> spriteRenderers))
+        {
+            Utilities.SetSortingOrders(spriteRenderers, onAnimationSortingOrder);
+        }
+        
 
         if (matchingInteractables.Count >= minimumCubeAmountToMakeTNT)
         {
             //Scale up and down for visual eye cathing responsive effect of cubes coming togethter to create TNT
             yield return StartCoroutine(pressedInteractable.GetComponent<Interactable>().CartoonishScaleToTarget(1f, 1.5f, .01f));
-
+                        
             //Pooling tnt
-            Interactable tnt = interactablePool.GetPooledObject("t");
+            Interactable tntCreated = interactablePool.GetPooledObject(InteractableType.tnt);
 
-            // Set the parent of the matching interactables to the interactable pool
-            matchingInteractables.All(x => x.transform.parent = interactablePool.transform);
+            // Set the parent of the matching interactables back to the interactable pool
+            Utilities.MakeChildrenOf(matchingInteractables, interactablePool.transform);
 
             //Copy the matrix position of the pressed interactable to the tnt before removing 
             Vector2Int touchedInteractableMatrixPositin = new Vector2Int(pressedInteractableComponent.MatrixPosition.x,
@@ -326,9 +316,9 @@ public class InteractableGridSystem : GridSystem<Interactable>
             RemoveInteractables(matchingInteractables);
 
             //Placing TNT
-            PutItemAt(touchedInteractableMatrixPositin.x, touchedInteractableMatrixPositin.y, tnt);
-            tnt.MatrixPosition = touchedInteractableMatrixPositin;
-            tnt.transform.position = pressedInteractableTransform.position;
+            PutItemAt(touchedInteractableMatrixPositin.x, touchedInteractableMatrixPositin.y, tntCreated);
+            tntCreated.MatrixPosition = touchedInteractableMatrixPositin;
+            tntCreated.transform.position = pressedInteractableTransform.position;
 
             /* //Placing TNTS visual halo
             var tntParticle = ArrangeBlastParticles(tnt, 0);
@@ -338,7 +328,7 @@ public class InteractableGridSystem : GridSystem<Interactable>
             //Playing the TNT creation and halo animation
 
             StartCoroutine(tntParticle.CartoonishScaleToTarget(2.5f, 1f, 0f)); */
-            StartCoroutine(tnt.GetComponent<Interactable>().CartoonishScaleToTarget(1f, 1.2f, 1f, true));
+            StartCoroutine(tntCreated.GetComponent<Interactable>().CartoonishScaleToTarget(1f, 1.2f, 1f, true));
 
 
         }

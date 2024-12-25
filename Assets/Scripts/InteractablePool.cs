@@ -112,6 +112,10 @@ public class InteractablePool : MonoBehaviour, IObjectPool<Interactable, string>
         return null;
     }
 
+    public Interactable GetPooledObject(InteractableType type){
+        return GetPooledObject(type.RawValue());
+    }
+
 
      /// <summary>
     /// Returns a single Interactable to the pool (sets it inactive).

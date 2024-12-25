@@ -28,7 +28,7 @@ public class LevelDataHandler : MonoBehaviour
     string DefaultPath => Path.Combine(Application.streamingAssetsPath, LevelToLoadString(1));
 
 
-    void Start()
+    void Awake()
     {
         DontDestroyOnLoad(this.gameObject);
         ReadLevel();

@@ -1,6 +1,7 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using DG.Tweening;
 using UnityEngine;
 using Random = UnityEngine.Random;
 
@@ -18,28 +19,115 @@ public class Mover : MonoBehaviour
     public bool idle { get; set; }
 
 
+    /// <summary>
+    /// 
+    /// </summary>
 
+     private bool _idle = true;
 
-    public IEnumerator MoveToPosition(Vector3 targetPosition, float speed)
+    /// <summary>
+    /// Indicates whether the object is currently idle (not animating).
+    /// </summary>
+    public bool IsIdle
     {
+        get => _idle;
+        protected set => _idle = value;
+    }
 
-        if (speed <= 0) { Debug.LogWarning("Speed must be a positive number"); }
-        from = transform.position;
-        to = targetPosition;
-        howFar = 0;
-        idle = false;
-        do
+    /// <summary>
+    /// Event invoked when an animation starts.
+    /// </summary>
+    public event Action OnAnimationStart;
+
+    /// <summary>
+    /// Event invoked when an animation completes.
+    /// </summary>
+    public event Action OnAnimationComplete;
+
+    /// <summary>
+    /// Scales the object to the target scale over the specified duration with the given easing.
+    /// </summary>
+    /// 
+    public virtual void ScaleTo(Vector3 targetScale, float duration, Ease ease = Ease.Linear)
+    {
+        ExecuteTween(transform.DOScale(targetScale, duration).SetEase(ease));
+    }
+
+    /// <summary>
+    /// Rotates the object to the target rotation over the specified duration with the given easing.
+    /// </summary>
+    public virtual void RotateTo(Vector3 targetRotation, float duration, Ease ease = Ease.Linear)
+    {
+        ExecuteTween(transform.DORotate(targetRotation, duration).SetEase(ease));
+    }
+
+    /// <summary>
+    /// Moves the object to the target position over the specified duration with the given easing.
+    /// </summary>
+    public virtual void MoveTo(Vector3 targetPosition, float duration, Ease ease = Ease.Linear)
+    {
+        ExecuteTween(transform.DOMove(targetPosition, duration).SetEase(ease));
+    }
+
+    public IEnumerator ScaleUpAndDownAsync(float targetMaxScale,float targetLowestScale, float duration, Ease ease = Ease.Linear, bool givenIdle = false)
+    {
+        Tween tween1 = transform.DOScale(targetMaxScale, duration).SetEase(ease);
+        Tween tween2 = transform.DOScale(targetLowestScale, duration).SetEase(ease);
+        Sequence sequence = DOTween.Sequence();
+        sequence.Append(tween1);
+        sequence.Append(tween2);
+        ExecuteSequence(sequence);
+        yield return sequence.AsyncWaitForCompletion();
+
+
+    }
+
+    /// <summary>
+    /// Executes the tween with standardized callbacks.
+    /// </summary>
+    protected void ExecuteTween(Tween tween)
+    {
+        if (tween == null) return;
+
+        IsIdle = false;
+        OnAnimationStart?.Invoke();
+
+        tween.OnComplete(() =>
         {
-            howFar += Time.deltaTime * speed;
-            if (howFar > 1)
-            {
-                howFar = 1;
-            }
-            transform.position = Vector3.Lerp(from, to, EasingElastic(howFar));
-            yield return null;
-        } while (howFar != 1);
+            IsIdle = true;
+            OnAnimationComplete?.Invoke();
+        });
+    }
 
-        idle = true;
+    protected void ExecuteSequence(Sequence sequence)
+    {
+        if (sequence == null) return;
+
+        IsIdle = false;
+        OnAnimationStart?.Invoke();
+
+        sequence.OnComplete(() =>
+        {
+            IsIdle = true;
+            OnAnimationComplete?.Invoke();
+
+        });
+    }
+
+    /// <summary>
+    /// Kills all active tweens on this GameObject when destroyed to prevent memory leaks.
+    /// </summary>
+    protected virtual void OnDestroy()
+    {
+        DOTween.Kill(transform);
+    }
+
+    /// <summary>
+    /// Kills all active tweens on this GameObject when disabled to prevent memory leaks.
+    /// </summary>
+    protected virtual void  OnDisable() {
+        DOTween.Kill(transform);
+
     }
 
 
@@ -69,7 +157,7 @@ public class Mover : MonoBehaviour
         }
     }
 
-     public IEnumerator MoveToPositionWithJump(Vector3 targetPosition, float speed, float jumpHeight)
+    public IEnumerator MoveToPositionWithJump(Vector3 targetPosition, float speed, float jumpHeight)
     {
         if (speed <= 0) { Debug.LogWarning("Speed must be a positive number"); }
         Vector3 from = transform.position;
@@ -166,82 +254,82 @@ public class Mover : MonoBehaviour
             particle.gameObject.SetActive(false);
         }
     }
-    
 
-    
+
+
     private float Easing(float howFar)
     {
         return howFar * howFar;
     }
-    
-    
+
+
     public IEnumerator CartoonishScaleToTarget(float speed, float overshootScale, float targetScale, bool givenIdle = false)
-{
-    if (speed <= 0)
     {
-        Debug.LogWarning("Speed must be a positive number");
-        yield break;
-    }
-
-    if (targetScale < 0)
-    {
-        Debug.LogWarning("Target scale must be non-negative");
-        yield break;
-    }
-    idle = givenIdle;
-    Vector3 fromScale = transform.localScale;
-    Vector3 toOvershootScale = fromScale * overshootScale; // Overshoot scale for the "pop" effect
-    Vector3 toTargetScale = new Vector3(targetScale, targetScale, targetScale); // Target scale specified by user
-
-    float howFar = 0f;
-
-    // Phase 1: Quickly grow to an overshoot scale
-    float growDuration = 0.2f / speed; // Adjust duration based on speed input
-    while (howFar < 1f)
-    {
-        howFar += Time.deltaTime / growDuration;
-        if (howFar > 1f)
+        if (speed <= 0)
         {
-            howFar = 1f;
+            Debug.LogWarning("Speed must be a positive number");
+            yield break;
         }
 
-        float easedValue = EasingOutQuad(howFar); // Using Quadratic easing for a quick but smooth effect
-        transform.localScale = Vector3.LerpUnclamped(fromScale, toOvershootScale, easedValue);
-
-        yield return null;
-    }
-
-    // Reset howFar for next phase
-    howFar = 0f;
-
-    // Phase 2: Smoothly shrink to target scale
-    float shrinkDuration = 0.3f / speed; // Adjust duration based on speed input
-    while (howFar < 1f)
-    {
-        howFar += Time.deltaTime / shrinkDuration;
-        if (howFar > 1f)
+        if (targetScale < 0)
         {
-            howFar = 1f;
+            Debug.LogWarning("Target scale must be non-negative");
+            yield break;
+        }
+        idle = givenIdle;
+        Vector3 fromScale = transform.localScale;
+        Vector3 toOvershootScale = fromScale * overshootScale; // Overshoot scale for the "pop" effect
+        Vector3 toTargetScale = new Vector3(targetScale, targetScale, targetScale); // Target scale specified by user
+
+        float howFar = 0f;
+
+        // Phase 1: Quickly grow to an overshoot scale
+        float growDuration = 0.2f / speed; // Adjust duration based on speed input
+        while (howFar < 1f)
+        {
+            howFar += Time.deltaTime / growDuration;
+            if (howFar > 1f)
+            {
+                howFar = 1f;
+            }
+
+            float easedValue = EasingOutQuad(howFar); // Using Quadratic easing for a quick but smooth effect
+            transform.localScale = Vector3.LerpUnclamped(fromScale, toOvershootScale, easedValue);
+
+            yield return null;
         }
 
-        float easedValue = EasingOutQuad(howFar); // Using a simple easing for a smooth shrink down to target scale
-        transform.localScale = Vector3.LerpUnclamped(toOvershootScale, toTargetScale, easedValue);
+        // Reset howFar for next phase
+        howFar = 0f;
 
-        yield return null;
+        // Phase 2: Smoothly shrink to target scale
+        float shrinkDuration = 0.3f / speed; // Adjust duration based on speed input
+        while (howFar < 1f)
+        {
+            howFar += Time.deltaTime / shrinkDuration;
+            if (howFar > 1f)
+            {
+                howFar = 1f;
+            }
+
+            float easedValue = EasingOutQuad(howFar); // Using a simple easing for a smooth shrink down to target scale
+            transform.localScale = Vector3.LerpUnclamped(toOvershootScale, toTargetScale, easedValue);
+
+            yield return null;
+        }
+
+        // Ensure scale is exactly the target scale at the end
+        transform.localScale = toTargetScale;
+        if (TryGetComponent(out Particle particle))
+        {
+            transform.parent = GameObject.FindAnyObjectByType<ParticlePool>().transform;
+        }
+        idle = true;
     }
 
-    // Ensure scale is exactly the target scale at the end
-    transform.localScale = toTargetScale;
-    if(TryGetComponent(out Particle particle))
+    private float EasingOutQuad(float t)
     {
-        transform.parent = GameObject.FindAnyObjectByType<ParticlePool>().transform;
+        return 1 - (1 - t) * (1 - t); // A quick, smooth easing function
     }
-    idle = true;
-}
-
-private float EasingOutQuad(float t)
-{
-    return 1 - (1 - t) * (1 - t); // A quick, smooth easing function
-}
 
 }
