@@ -34,42 +34,30 @@ public class Mover : MonoBehaviour
         protected set => _idle = value;
     }
 
-    /// <summary>
-    /// Event invoked when an animation starts.
-    /// </summary>
-    public event Action OnAnimationStart;
 
-    /// <summary>
-    /// Event invoked when an animation completes.
-    /// </summary>
-    public event Action OnAnimationComplete;
-
-    /// <summary>
-    /// Scales the object to the target scale over the specified duration with the given easing.
-    /// </summary>
-    /// 
-    public virtual void ScaleTo(Vector3 targetScale, float duration, Ease ease = Ease.Linear)
+    public virtual void ScaleTo(Vector3 targetScale, float duration, Ease ease = Ease.Linear, Action onComplete = null)
     {
-        ExecuteTween(transform.DOScale(targetScale, duration).SetEase(ease));
+        ExecuteTween(transform.DOScale(targetScale, duration).SetEase(ease), onComplete);
     }
+
 
     /// <summary>
     /// Rotates the object to the target rotation over the specified duration with the given easing.
     /// </summary>
-    public virtual void RotateTo(Vector3 targetRotation, float duration, Ease ease = Ease.Linear)
+    public virtual void RotateTo(Vector3 targetRotation, float duration, Ease ease = Ease.Linear, Action onComplete = null)
     {
-        ExecuteTween(transform.DORotate(targetRotation, duration).SetEase(ease));
+        ExecuteTween(transform.DORotate(targetRotation, duration).SetEase(ease), onComplete);
     }
 
     /// <summary>
     /// Moves the object to the target position over the specified duration with the given easing.
     /// </summary>
-    public virtual void MoveTo(Vector3 targetPosition, float duration, Ease ease = Ease.Linear)
+    public virtual void MoveTo(Vector3 targetPosition, float duration, Ease ease = Ease.Linear, Action onComplete = null)
     {
-        ExecuteTween(transform.DOMove(targetPosition, duration).SetEase(ease));
+        ExecuteTween(transform.DOMove(targetPosition, duration).SetEase(ease),onComplete);
     }
 
-    public IEnumerator ScaleUpAndDownAsync(float targetMaxScale,float targetLowestScale, float duration, Ease ease = Ease.Linear, bool givenIdle = false)
+    public IEnumerator ScaleUpAndDownAsync(float targetMaxScale,float targetLowestScale, float duration, Ease ease = Ease.Linear, bool givenIdle = false, Action onComplete = null)
     {
         Tween tween1 = transform.DOScale(targetMaxScale, duration).SetEase(ease);
         Tween tween2 = transform.DOScale(targetLowestScale, duration).SetEase(ease);
@@ -77,39 +65,37 @@ public class Mover : MonoBehaviour
         sequence.Append(tween1);
         sequence.Append(tween2);
         ExecuteSequence(sequence);
-        yield return sequence.AsyncWaitForCompletion();
-
-
+        yield return sequence.WaitForCompletion();
+        onComplete?.Invoke();
     }
 
     /// <summary>
     /// Executes the tween with standardized callbacks.
     /// </summary>
-    protected void ExecuteTween(Tween tween)
+    protected void ExecuteTween(Tween tween, Action onComplete = null)
     {
         if (tween == null) return;
 
-        IsIdle = false;
-        OnAnimationStart?.Invoke();
+        IsIdle = false; 
 
         tween.OnComplete(() =>
         {
             IsIdle = true;
-            OnAnimationComplete?.Invoke();
+            onComplete?.Invoke();
         });
     }
 
-    protected void ExecuteSequence(Sequence sequence)
+    protected void ExecuteSequence(Sequence sequence, Action onComplete = null)
     {
         if (sequence == null) return;
 
         IsIdle = false;
-        OnAnimationStart?.Invoke();
+
 
         sequence.OnComplete(() =>
         {
             IsIdle = true;
-            OnAnimationComplete?.Invoke();
+            onComplete?.Invoke();
 
         });
     }
