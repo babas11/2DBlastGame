@@ -1,25 +1,32 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
+using Unity.VisualScripting;
 using UnityEngine;
+using UnityEngine.Serialization;
+
 public class InteractableGridSystem : GridSystem<Interactable>
 {
+    # region Variables
 
     [Tooltip("Background object to cover the grid")]
     [SerializeField]
     GameObject backGround;
 
+    [FormerlySerializedAs("verticalOfscreenGridOffset")]
     [Tooltip("How much space the grid will fall down at the start")]
     [SerializeField]
-    Vector3 verticalOfscreenGridOffset = new Vector3(0, 6);
+    Vector3 verticalOffscreenGridOffset = new Vector3(0, 6);
 
     [Tooltip("How much space the grid will fall down at the start")]
-
+    
 
     [SerializeField]
     float gridUnit = .5f;
 
-
+    public bool isGridSystemIdle = true;
+    
     // Grid unit size is 0.5f, but prefabs is 0.57f. in order to look show debth  
     [SerializeField]
     float gridUnitHeightRemaining = .5704f;
@@ -72,8 +79,8 @@ public class InteractableGridSystem : GridSystem<Interactable>
     [SerializeField]
     float particleAnimationDuration = 2f;
 
-    [SerializeField]
-    int minimumCubeAmountToMakeTNT = 5;
+    [FormerlySerializedAs("minimumCubeAmountToMakeTNT")] [SerializeField]
+    int minimumCubeAmountToMakeTnt = 5;
 
     InteractablePool interactablePool;
     ParticlePool blastParticlePool;
@@ -83,11 +90,12 @@ public class InteractableGridSystem : GridSystem<Interactable>
 
     InteractableType random = InteractableType.random;
 
-
+    public Action TntPressed;
 
     // To control grid population by the initialization state
     bool moveMade = false;
 
+     # endregion
 
     private void Awake()
     {
@@ -100,7 +108,6 @@ public class InteractableGridSystem : GridSystem<Interactable>
     private void Start()
     {
         InitializeGrid(levelDataHandler);
-        BuildMatrix();
         SetupGrid();
         levelUI.SetupUI(levelDataHandler.levelData);
 
@@ -110,11 +117,20 @@ public class InteractableGridSystem : GridSystem<Interactable>
     {
         PositioningGridOnTheScreen();
         ResizeAndPlaceBackground();
-        StartCoroutine(BuildInteractableGridSystem(ReadGrid(levelDataHandler)));
+        BuildInteractableGridSystem(ReadGrid(levelDataHandler));
         moveMade = true;
     }
 
+    private void OnEnable()
+    {
+        Tnt.OnTntPressed += HandleTntPressed;
+    }
 
+    private void OnDisable()
+    {
+        Tnt.OnTntPressed -= HandleTntPressed;
+    }
+    
 
     void ReorderAllInteractablesSortingOrder()
     {
@@ -166,9 +182,9 @@ public class InteractableGridSystem : GridSystem<Interactable>
         Vector3 offset = new Vector3(bounds.extents.x, bounds.extents.y, 0);
 
         // Set the position to match the target position, considering the offset
-        backGround.transform.position = transform.position + offset + verticalOfscreenGridOffset - new Vector3(differenceInWidth, differenceInHeight) / 2f;
+        backGround.transform.position = transform.position + offset + verticalOffscreenGridOffset - new Vector3(differenceInWidth, differenceInHeight) / 2f;
 
-        StartCoroutine(backGround.GetComponent<Mover>().MoveToPositionWithJump(backGround.transform.position - verticalOfscreenGridOffset, backGroundFallAnimationSpeed, .1f));
+        StartCoroutine(backGround.GetComponent<Mover>().MoveToPositionWithJump(backGround.transform.position - verticalOffscreenGridOffset, backGroundFallAnimationSpeed, .1f));
     }
 
     private void PositioningGridOnTheScreen()
@@ -199,7 +215,11 @@ public class InteractableGridSystem : GridSystem<Interactable>
         {
             for (int j = 0; j < Dimensions.x; j++)
             {
+                if (IsEmpty(j, i)){print($"item at{j}, {i} is empty");}
+                
+                
                 newLevelData.grid.Add(GetItemAt(j, i).ToString());
+                //print($"item at{j}, {i} is {GetItemAt(j, i).MatrixPosition},and its type is {GetItemAt(j, i).Type}");
             }
         }
         newLevelData.grid_width = Dimensions.x;
@@ -210,8 +230,9 @@ public class InteractableGridSystem : GridSystem<Interactable>
         levelDataHandler.SaveLevel(newLevelData);
     }
 
-    public IEnumerator BuildInteractableGridSystem(string[] stringMatrix)
+    public void BuildInteractableGridSystem(string[] stringMatrix)
     {
+        //Debug.Log("Building interactable grid system");
         Vector3 onScreenPosition;
         Interactable newInteractable;
         List<Interactable> toAnimate = new List<Interactable>();
@@ -222,8 +243,10 @@ public class InteractableGridSystem : GridSystem<Interactable>
         {
             for (int x = 0; x < Dimensions.x; x++)
             {
+
                 if (IsEmpty(x, y))
                 {
+                    //Debug.Log("x: " + x + " y: " + y + " is empty");
                     if (moveMade)
                     {
                         newInteractable = interactablePool.GetPooledObject(this.random.RawValue());
@@ -234,16 +257,26 @@ public class InteractableGridSystem : GridSystem<Interactable>
                         arrayIndex++;
                     }
 
+                    if (newInteractable.transform.localScale.x < 1)
+                    {
+                        print($"item at{y}, {x} has {newInteractable.transform.localScale}  scale");
+                        newInteractable.transform.localScale = Vector3.one;
+
+                    }
+                    
+                    
                     // Set the interactable's position
                     onScreenPosition = GridPositionToWorldPosition(x, y);
-                    newInteractable.transform.position = onScreenPosition + verticalOfscreenGridOffset;
+                    newInteractable.transform.position = onScreenPosition + verticalOffscreenGridOffset;
 
                     // Place item at grid
                     PutItemAt(x, y, newInteractable);
 
                     // Tell interactable where it is
-                    newInteractable.MatrixPosition = new Vector2Int(x, y);
-
+                    newInteractable.SetMatrixPosition(new Vector2Int(x, y));
+                    
+                    newInteractable.gameObject.SetActive(true);
+                    
                     // Add to animation list
                     toAnimate.Add(newInteractable);
                     // Animate the interactables in the current row to their positions
@@ -254,7 +287,7 @@ public class InteractableGridSystem : GridSystem<Interactable>
             for (int i = 0; i < toAnimate.Count; i++)
             {
                 var interactable = toAnimate[i];
-                StartCoroutine(interactable.MoveToPositionWithJump(interactable.transform.position - verticalOfscreenGridOffset,
+                StartCoroutine(interactable.MoveToPositionWithJump(interactable.transform.position - verticalOffscreenGridOffset,
                                                                    interactablesFallSpeed, afterFallBounce));
             }
 
@@ -272,99 +305,47 @@ public class InteractableGridSystem : GridSystem<Interactable>
             WriteGrid(levelDataHandler, levelUI);
         }
 
-        yield return null;
+        //yield return null;
     }
 
 
-    public IEnumerator Blast(List<Interactable> matchingInteractables, Transform pressedInteractable)
+    public void Blast(List<Interactable> matchingInteractables, Transform pressedInteractableTransform)
     {
-        Transform pressedInteractableTransform = pressedInteractable.transform;
-        Interactable pressedInteractableComponent = pressedInteractable.GetComponent<Interactable>();
-
-        // Set the pressed interactable as the parent of all matching interactables in order to scale them together
-        Utilities.MakeChildrenOf(matchingInteractables, pressedInteractable);
-
-        //increease the sorting order of the matching interactables to make them visible on top of the others
-        if(Utilities.TryGetComponents(matchingInteractables, out List<SpriteRenderer> spriteRenderers))
-        {
-            Utilities.SetSortingOrders(spriteRenderers, onAnimationSortingOrder);
-        }
+        //increase the sorting order of the matching interactable to make them visible on top of the others
+        SetInteractablesSortingOrders(matchingInteractables);
         
-
-        if (matchingInteractables.Count >= minimumCubeAmountToMakeTNT)
+        // Remove the matching interactables from the internal matrix
+        matchingInteractables.ForEach(x => RemoveItemAt(x.MatrixPosition.x, x.MatrixPosition.y));
+        //Damage Obstacles near area
+        var obstacles = DamageNearObstacles(matchingInteractables,BlastType.Regular);
+        if (matchingInteractables.Count >= minimumCubeAmountToMakeTnt)
         {
-            //Scale up and down for visual eye cathing responsive effect of cubes coming togethter to create TNT
-            yield return StartCoroutine(pressedInteractable.GetComponent<Interactable>().CartoonishScaleToTarget(1f, 1.5f, .01f));
-                        
-            //Pooling tnt
-            Interactable tntCreated = interactablePool.GetPooledObject(InteractableType.tnt);
-
-            // Set the parent of the matching interactables back to the interactable pool
-            Utilities.MakeChildrenOf(matchingInteractables, interactablePool.transform);
-
-            //Copy the matrix position of the pressed interactable to the tnt before removing 
-            Vector2Int touchedInteractableMatrixPositin = new Vector2Int(pressedInteractableComponent.MatrixPosition.x,
-                                                                         pressedInteractableComponent.MatrixPosition.y);
-
-            //Damaging the obsticles near the blasted area
-            yield return StartCoroutine(HandleObsticlesNearBlastedArea(matchingInteractables));
-
-
-            // Remove the matching interactables from the grid and return them to the pool
-            RemoveInteractables(matchingInteractables);
-
-            //Placing TNT
-            PutItemAt(touchedInteractableMatrixPositin.x, touchedInteractableMatrixPositin.y, tntCreated);
-            tntCreated.MatrixPosition = touchedInteractableMatrixPositin;
-            tntCreated.transform.position = pressedInteractableTransform.position;
-
-            /* //Placing TNTS visual halo
-            var tntParticle = ArrangeBlastParticles(tnt, 0);
-            //put TNTS visual halo child of the tnt in order to move together on falling
-            tntParticle.transform.parent = tnt.transform;
-
-            //Playing the TNT creation and halo animation
-
-            StartCoroutine(tntParticle.CartoonishScaleToTarget(2.5f, 1f, 0f)); */
-            StartCoroutine(tntCreated.GetComponent<Interactable>().CartoonishScaleToTarget(1f, 1.2f, 1f, true));
-
-
+             DissolveInteractables( matchingInteractables, pressedInteractableTransform,true);
+             
+             Transform tntTransform = CreateInteractable(pressedInteractableTransform, InteractableType.tnt).transform;
+             
+             ParticleController.OnCreation(tntTransform, InteractableType.tnt);
         }
         else
         {
-            //Scale up and down for visual eye cathing responsive effect
-            StartCoroutine(pressedInteractable.GetComponent<Interactable>().CartoonishScaleToTarget(blasAnimationSpeed,
-                                                                                                    blastAnimationMaxScale,
-                                                                                                    blasAnimationMinScale));
-
-            // Wait until all interactables are idle
-            yield return new WaitUntil(() => matchingInteractables.All(x => x.idle));
-
-
-            //Handle the obsticles near the blasted area
-            yield return StartCoroutine(HandleObsticlesNearBlastedArea(matchingInteractables, false));
-
-            /* List<BlastParticle> particles;
-            // For each matching interactable, create its blast particlea and animate it
-            foreach (var matchingInteractable in matchingInteractables)
-            {
-                particles = ArrangeBlastParticles(matchingInteractables,
-                                                                      particleAmountAfterCubeBlast,
-                                                                      particleMinScaleAfterCubeBlast,
-                                                                      particleMaxScaleAfterCubeBlast);
-
-                foreach (var particle in particles)
-                {
-                    StartCoroutine(particle.ParticleDissolution(1f, 2f, matchingInteractable.transform.position, particle));
-                }
-                RemoveInteractables(matchingInteractables);
-            }
-
-            // Reset the parent of the matching interactables
-            matchingInteractables.All(x => x.transform.parent = interactablePool.transform); */
-
-
+             DissolveInteractables(matchingInteractables, pressedInteractableTransform,false);
         }
+        
+        
+        ParticleController.BlastParticles(matchingInteractables);
+
+        if (obstacles != null)
+        {
+            foreach (var obstacle in obstacles)
+            {
+            
+                ParticleController.BlastParticle(obstacle.ObstacleWorldPos, obstacle.ObstacleType);
+            }
+        }
+        
+                
+        
+       
         // Fill the  empty spaces within the grid up to down direction
         GridFallDown();
 
@@ -372,192 +353,230 @@ public class InteractableGridSystem : GridSystem<Interactable>
         ReorderAllInteractablesSortingOrder();
 
         //Fill the remaining empty spaces by repopulating
-        StartCoroutine(BuildInteractableGridSystem(ReadGrid(levelDataHandler)));
+        BuildInteractableGridSystem(ReadGrid(levelDataHandler));
 
+        SendInteractablesToThePool(matchingInteractables);
     }
+    
 
-
-
-
-    // For each Obsticle that is adjacent to a matching interactable, call their blast particles and animate them
-    public IEnumerator HandleObsticlesNearBlastedArea(List<Interactable> matchingInteractables, bool isTNTBlast = false)
+    // This method is called whenever a Tnt is pressed (OnMouseDown).
+    private void HandleTntPressed(Tnt pressedTnt, int explosionRange)
     {
-        List<Interactable> selectedInteractables = new List<Interactable>();
+        List<Tnt> nearTnts = GetAllChainTnts(pressedTnt, explosionRange);
+        
+        StartCoroutine(ChainExplodeTntsSequence(nearTnts,explosionRange));
+        
+    }
+    
+    public IEnumerator ChainExplodeTntsSequence(List<Tnt> chainTnts, int range)
+    {
+        SetInteractablesSortingOrders(chainTnts);
 
-        // Looking for the obstacles near the blasted area
-        if (!isTNTBlast)
+        // 1) For each TNT in the chain
+        foreach (var tnt in chainTnts)
         {
-            // Collect all unique interactables adjacent to the matching interactables
-            foreach (var matchingInteractable in matchingInteractables)
-            {
-                if (LookForMatchingsOnAxis(out HashSet<Interactable> foundObstacles, matchingInteractable))
-                {
-                    foreach (var obstacle in foundObstacles)
-                    {
-                        if (obstacle is IObstacle)
-                        {
-                            selectedInteractables.Add(obstacle);
-                        }
+            // 2) Animate the “lighting” or fuse
+            // ToDo yield return StartCoroutine(PlayFuseAnimation(tnt));
+            
+            // 4) Apply actual explosion logic: remove cubes, obstacles, etc.
+            yield return StartCoroutine(BlastTnt(tnt, range));
+        }
 
-                    }
+        // 5) Once all TNTs have exploded, do the final grid updates
+        chainTnts.ForEach(x => RemoveItemAt(x.MatrixPosition.x, x.MatrixPosition.y) );
+        SendInteractablesToThePool(chainTnts);
+        GridFallDown();
+        ReorderAllInteractablesSortingOrder();
+        BuildInteractableGridSystem(ReadGrid(levelDataHandler));
+    }
+    
+    public List<Tnt> GetAllChainTnts(Tnt initialTnt, int range)
+    {
+        Queue<Tnt> queue = new Queue<Tnt>();
+        HashSet<Tnt> visited = new HashSet<Tnt>();
+
+        queue.Enqueue(initialTnt);
+        visited.Add(initialTnt);
+
+        while (queue.Count > 0)
+        {
+            Tnt current = queue.Dequeue();
+            // find other Tnt in the explosion range
+            var nearTnts = GetInteractablesWithinRange<Tnt>(current.MatrixPosition, range);
+            foreach (var tnt in nearTnts)
+            {
+                if (!visited.Contains(tnt))
+                {
+                    visited.Add(tnt);
+                    queue.Enqueue(tnt);
                 }
             }
-            //On TNT explosion the interactables are looked and given from
+        }
+
+        // Return all TNTs that will blow in this chain
+        return visited.ToList();
+    }
+
+     private IEnumerator BlastTnt(Tnt tnt,int range)
+     {
+         
+        List<Cube> nearCubes = 
+            GetInteractablesWithinRange<Cube>(tnt.MatrixPosition, range);
+        
+        List<Interactable> nearInteractables =
+            GetInteractablesWithinRange<Interactable>(tnt.MatrixPosition, range);
+        
+        yield return StartCoroutine(AnimationHandler.ScaleUpAndRotate(tnt,1.5f,0.3f,new Vector3(0f,0f,360f), (
+            () =>
+            {
+                tnt.GetComponent<Renderer>().enabled = false;   
+                ParticleController.OnCreation(tnt.transform, InteractableType.tnt);
+            } )));
+
+        var nearObstacles = DamageNearObstacles(nearInteractables,BlastType.Tnt);
+        
+        if (nearCubes.Count > 0)
+        {
+            yield return StartCoroutine(AnimationHandler.ScaleUpAndDownAsync(nearCubes, 1.1f, 1f, 0.1f));
+        }
+
+        if (nearObstacles != null)
+        {
+            foreach (IObstacle obstacle in nearObstacles)
+            {
+                ParticleController.BlastParticle(obstacle.ObstacleWorldPos,obstacle.ObstacleType);
+            }
+        }
+        
+        foreach (var nearCube in nearCubes)
+        {
+            ParticleController.BlastParticle(nearCube.transform.position,nearCube.Type);
+        }
+        
+        nearCubes.ForEach(x => RemoveItemAt(x.MatrixPosition.x, x.MatrixPosition.y));
+        nearObstacles.ForEach(x => RemoveItemAt(x.ObstacleMatrixPos.x, x.ObstacleMatrixPos.y));
+        
+        SendInteractablesToThePool(nearCubes);
+        SendInteractablesToThePool(nearObstacles.ConvertObstaclesToInteractable());
+    }
+     
+
+    void DamageObstacles(List<Interactable> matchingInteractables,BlastType blastType )
+    {
+        List<Interactable> nearObstaclesAsInteractable = new List<Interactable>();
+        HashSet<IObstacle> nearObstacles = new HashSet<IObstacle>();
+        
+        foreach (Interactable matchingInteractable in matchingInteractables)
+        {
+            if (LookForInteractablesOnAxis(out HashSet<IObstacle> foundObstacles, matchingInteractable))
+            {
+                nearObstacles.AddRange(foundObstacles);
+                foreach (IObstacle obstacle in nearObstacles)
+                {
+                    nearObstaclesAsInteractable.Add(obstacle.InteractableObstacle);
+                }
+                
+            }
+        }
+        
+        foreach (IObstacle obstacle in nearObstacles)
+        {
+            obstacle.TakeDamage(1,blastType);
+            if (obstacle.Health == 0)
+            {
+                RemoveItemAt(obstacle.ObstacleMatrixPos.x, obstacle.ObstacleMatrixPos.y);
+                SendInteractableToThePool(obstacle.InteractableObstacle);
+            }
+        }
+    }
+
+    private List<IObstacle> DamageNearObstacles(List<Interactable> matchingInteractables, BlastType blastType)
+    {
+        List<IObstacle> nearObstacles = new List<IObstacle>();
+        List<IObstacle> damagedObstacles = new List<IObstacle>();
+
+        // Collect all unique obstacles adjacent to the matching interactables
+        foreach (Interactable matchingInteractable in matchingInteractables)
+        {
+            if (LookForInteractablesOnAxis(out HashSet<IObstacle> foundObstacles, matchingInteractable))
+            {
+                nearObstacles.AddRange(foundObstacles);
+            }
+        }
+
+        // Remove duplicates if any
+        nearObstacles = nearObstacles.Distinct().ToList();
+
+        // Iterate over the collected obstacles
+        foreach (IObstacle obstacle in nearObstacles)
+        {
+            bool damageApplied = obstacle.TakeDamage(1, blastType);
+        
+            if (damageApplied)
+            {
+                damagedObstacles.Add(obstacle);
+            }
+        }
+
+        return damagedObstacles;
+    }
+
+    private void SetInteractablesSortingOrders<T>(List<T> matchingInteractables)
+    where T : Interactable
+    {
+        if (Utilities.TryGetComponents(matchingInteractables, out List<SpriteRenderer> spriteRenderers))
+        {
+            Utilities.SetSortingOrders(spriteRenderers, onAnimationSortingOrder);
         }
         else
         {
-            selectedInteractables = matchingInteractables;
+            Debug.LogError("Failed to get sprite renderers from matching interactables.");
         }
-
-
-
-        // Process each unique obstacle
-        List<Interactable> selectedInteractablesList = selectedInteractables.ToList();
-        for (int i = 0; i < selectedInteractablesList.Count; i++)
-        {
-            /* // Arrange blast particles for this obstacle
-            List<BlastParticle> particles = ArrangeBlastParticles(
-                selectedInteractablesList[i],
-                particleAmountAfterObsticleBlast,
-                particleMinScaleAfterObsticleBlast,
-                particleMaxScaleAfterObsticleBlast);
-
-            // Start particle dissolution for this obstacle
-            foreach (var particle in particles)
-            {
-                StartCoroutine(particle.ParticleDissolution(1f, particleAnimationDuration, selectedInteractablesList[i].transform.position, particle));
-            } */
-
-            if (selectedInteractablesList[i] is IObstacle obstacleComponent)
-            {
-                // Apply damage
-                obstacleComponent.TakeDamage(1, isTNTBlast);
-                StartCoroutine(selectedInteractablesList[i].GetComponent<Mover>().CartoonishScaleToTarget(blasAnimationSpeed,
-                                                                                                    blastAnimationMaxScale,
-                                                                                                    blasAnimationMinScale));
-
-                // Check if the obstacle should be removed
-                if (obstacleComponent.Health <= 0)
-                {
-
-                    StartCoroutine(selectedInteractablesList[i].GetComponent<Interactable>().CartoonishScaleToTarget(blasAnimationSpeed,
-                                                                                                    blastAnimationMaxScale,
-                                                                                                    blasAnimationMinScale));
-                    if (i == selectedInteractablesList.Count - 1)
-                    {
-                        yield return StartCoroutine(selectedInteractablesList[i].GetComponent<Interactable>().CartoonishScaleToTarget(blasAnimationSpeed,
-                                                                                                    blastAnimationMaxScale,
-                                                                                                    blasAnimationMinScale));
-
-                    }
-                    RemoveInteractables(selectedInteractablesList[i]);
-                }
-
-
-            }
-        }
-
     }
 
-
-
-    public IEnumerator TNTBlast(Interactable pressedInteractable, int range)
+    void DissolveInteractables<T>(List<T> matchingInteractables,Transform pressedInteractableTransform = null, bool isTnt = false) where T : Interactable
     {
-
-        HashSet<Interactable> interactablesToExplode = new HashSet<Interactable>();
-        interactablesToExplode = GetInteractablesWithinRange(pressedInteractable.MatrixPosition, range).ToHashSet();
-        interactablesToExplode.Remove(pressedInteractable);
-        var interactablesToExplodeList = interactablesToExplode.ToList();
-
-        //Placing TNTS Explosion particles
-        /*     var tntExplosionParticle = ArrangeBlastParticles(pressedInteractable, 1);
-            var tntHaloParticle = ArrangeBlastParticles(pressedInteractable, 0); */
-
-        //Scaling low in order to stay behind the tnt
-        /*  tntHaloParticle.transform.localScale = new Vector3(0.3f, 0.3f, 0);
-         tntExplosionParticle.transform.localScale = new Vector3(0.3f, 0.3f, 0); */
-
-        //Setting the sorting order tof tnt on top of other interactables
-        interactablesToExplodeList.ForEach(x => x.GetComponent<SpriteRenderer>().sortingOrder = x.MatrixPosition.y + 1);
-        pressedInteractable.GetComponent<SpriteRenderer>().sortingOrder = onAnimationSortingOrder + 2;
-
-        //Playing the TNT explotion  animation
-        StartCoroutine(pressedInteractable.CartoonishScaleToTarget(1f, 2f, 0f, true));
-        (pressedInteractable as Tnt).Exploded = true;
-        // Wait until the tnt becomes smaller
-        //yield return new WaitUntil(() => pressedInteractable.transform.localScale.x < .5);
-
-        //Playing the TNT explotion particles 
-        /* yield return StartCoroutine(tntExplosionParticle.CartoonishScaleToTarget(4f, 3f, 0f));
-        yield return StartCoroutine(tntHaloParticle.CartoonishScaleToTarget(4f, 8f, 0f));
- */
-        /*  blastParticlePool.ReturnObjectToPool(tntExplosionParticle);
-         blastParticlePool.ReturnObjectToPool(tntHaloParticle);
-  */
-
-        for (int i = 0; i < interactablesToExplodeList.Count; i++) //(var interactableToExplode in interactablesToExplode)
+        
+        // Scale up and down for visual eye catching responsive effect
+        if (isTnt)
         {
-            if (interactablesToExplodeList[i] is Interactable interactable)
-            {
+            Interactable pressedInteractable = pressedInteractableTransform?.GetComponent<Interactable>();
 
-
-                /* List<BlastParticle> particles = ArrangeBlastParticles(interactablesToExplodeList[i],
-                                                                      particleAmountAfterCubeBlast,
-                                                                      particleMinScaleAfterCubeBlast,
-                                                                      particleMaxScaleAfterCubeBlast);
-                foreach (var particle in particles)
-                {
-                    StartCoroutine(particle.ParticleDissolution(1f, 2f, interactablesToExplodeList[i].transform.position));
-                }
- */
-                if (i == interactablesToExplodeList.Count - 1)
-                {
-                    yield return StartCoroutine(interactable.CartoonishScaleToTarget(1.3f,
-                                                            1.3f,
-                                                            1));
-                }
-                else
-                {
-                    StartCoroutine(interactable.CartoonishScaleToTarget(1.3f,
-                                                            1.3f,
-                                                            1));
-                }
-
-            }
-
-
-            if (interactablesToExplodeList[i] is Vase vase && interactablesToExplodeList[i].MatrixPosition != pressedInteractable.MatrixPosition)
-            {
-                vase.TakeDamage(1, true);
-
-            }
-            if (interactablesToExplodeList[i] is Tnt nextTnt && interactablesToExplodeList[i].MatrixPosition != pressedInteractable.MatrixPosition && range < 3)
-            {
-                interactablesToExplode.Remove(nextTnt);
-                yield return StartCoroutine(HandleObsticlesNearBlastedArea(interactablesToExplode.ToList(), isTNTBlast: true));
-
-                RemoveInteractables(interactablesToExplode.ToList());
-                RemoveInteractables(pressedInteractable);
-                StartCoroutine(nextTnt.Explode(true));
-            }
+            // Set the pressed interactable as the parent of all matching interactables in order to scale them together
+            Utilities.MakeChildrenOf(matchingInteractables, pressedInteractableTransform);
+            // Scale up and down for visual eye catching responsive effect
+             pressedInteractable?.ScaleUpAndDown(1.1f, 1f, 0.2f,false);
+        }
+        else
+        {
+            // Scale up and down for visual eye catching responsive effect
+            AnimationHandler.ScaleUpAndDown(matchingInteractables, 1.1f, 1f, 0.1f);
 
         }
-
-
-        yield return StartCoroutine(HandleObsticlesNearBlastedArea(interactablesToExplode.ToList(), isTNTBlast: true));
-        RemoveInteractables(interactablesToExplode.ToList());
-        RemoveInteractables(pressedInteractable);
-
-        GridFallDown();
-        StartCoroutine(BuildInteractableGridSystem(ReadGrid(levelDataHandler)));
-        yield return null;
+        
     }
 
+    Interactable  CreateInteractable(Transform pressedInteractableTransform, InteractableType type)
+    {
+        Interactable pressedInteractable = pressedInteractableTransform.GetComponent<Interactable>();
+        Interactable interactableCreated = interactablePool.GetPooledObject(type);
 
+        PutItemAt(pressedInteractable.MatrixPosition.x, pressedInteractable.MatrixPosition.y, interactableCreated);
+        
+        interactableCreated.SetMatrixPosition(pressedInteractable.MatrixPosition);
+        interactableCreated.transform.position = pressedInteractableTransform.position;
+        
+        interactableCreated.GetComponent<Interactable>().ScaleUpAndDown(1.2f, 1f, 0.1f,true );
+        
+        return interactableCreated;
+
+    }
+
+    
     // Get all interactables in tnt blast position in blast range
-    public List<Interactable> GetInteractablesWithinRange(Vector2Int blastPosition, int range)
+    public List<TInteractable> GetInteractablesWithinRange<TInteractable>(Vector2Int blastPosition, int range) where TInteractable : Interactable
     {
-        List<Interactable> interactablesInRange = new List<Interactable>();
+        List<TInteractable> interactablesInRange = new List<TInteractable>();
 
         for (int x = blastPosition.x - range; x <= blastPosition.x + range; x++)
         {
@@ -566,10 +585,11 @@ public class InteractableGridSystem : GridSystem<Interactable>
                 Vector2Int position = new Vector2Int(x, y);
                 if (CheckBounds(position) && !IsEmpty(position.x, position.y))
                 {
-                    var interactable = GetItemAt(position.x, position.y);
-                    if (!interactablesInRange.Contains(interactable))
+                    Interactable interactable = GetItemAt(position.x, position.y);
+                    
+                    if (interactable != null && interactable is TInteractable tInteractable)
                     {
-                        interactablesInRange.Add(interactable);
+                        interactablesInRange.Add(tInteractable);
                     }
                 }
             }
@@ -579,74 +599,7 @@ public class InteractableGridSystem : GridSystem<Interactable>
     }
 
 
-    /* List<BlastParticle> ArrangeBlastParticles(List<Interactable> interactables, int countOfParticleAmount, float minmimumScale, float maximumScale)
-    {
-        if (countOfParticleAmount < 1)
-        {
-            return null;
-        }
-        if (minmimumScale < 0 || maximumScale < 0)
-        {
-            return null;
-        }
-        List<BlastParticle> particles = new List<BlastParticle>();
-        foreach (var interactable in interactables)
-        {
-            for (int i = 0; i < countOfParticleAmount; i++)
-            {
-                var particle = blastParticlePool.GetPooledObject(interactable.Type);
-                particle.transform.position = interactable.transform.position;
-                float randScale = Random.Range(minmimumScale, maximumScale);
-                particle.transform.localScale = new Vector3(randScale, randScale, 1);
-                particles.Add(particle);
-            }
-        }
-        return particles;
-    } */
-
-    /* List<BlastParticle> ArrangeBlastParticles(Interactable interactable, int countOfParticleAmount, float minmimumScale, float maximumScale)
-    {
-        if (countOfParticleAmount < 1)
-        {
-            return null;
-        }
-        if (minmimumScale < 0 || maximumScale < 0)
-        {
-            return null;
-        }
-        List<BlastParticle> particles = new List<BlastParticle>();
-
-        for (int i = 0; i < countOfParticleAmount; i++)
-        {
-            var particle = blastParticlePool.GetPooledObject(interactable.Type);
-            //particle.transform.position = interactable.transform.position;
-            float randScale = Random.Range(minmimumScale, maximumScale);
-            //particle.transform.localScale = new Vector3(randScale, randScale, 1);
-            //particles.Add(particle);
-        }
-
-        return particles;
-    } */
-
-    //Arrange the spesific blast particle for the interactable and return it/* 
-    /*  BlastParticle ArrangeBlastParticles(Interactable interactableToPlay, int indexOfparticleInPrefabList)
-     {
-
-         var particle = blastParticlePool.GetParticlePrefabByTypeAndIndex(interactableToPlay.Type, indexOfparticleInPrefabList);
-         if (particle != null)
-         {
-             particle.transform.position = interactableToPlay.transform.position;
-             particle.transform.localScale = new Vector3(1, 1, 1);
-         }
-         else
-         {
-             Debug.LogError("Failed to get a pooled particle.");
-         }
-
-         return particle;
-     } 
-  */
-
+    
 
 
     //Look whole grid to find matching groups and adjust their sprites to show they are in tnt state or default state
@@ -669,14 +622,8 @@ public class InteractableGridSystem : GridSystem<Interactable>
                     {
                         if (match is Cube cube)
                         {
-                            if (currentMatches.Count >= minimumCubeAmountToMakeTNT)
-                            {
-                                cube.TNTState = Cube.CubeState.TNT;
-                            }
-                            else
-                            {
-                                cube.TNTState = Cube.CubeState.Default;
-                            }
+                            cube.TNTState = currentMatches.Count >= minimumCubeAmountToMakeTnt ? Cube.CubeState.TNT : 
+                                                                                                 Cube.CubeState.Default;
                         }
 
                     }
@@ -754,37 +701,39 @@ public class InteractableGridSystem : GridSystem<Interactable>
 
 
     // Check if there are any object derived from Interactable in the axis of a interactable in one unit on the matrix
-    public bool LookForMatchingsOnAxis<TLookFor>(out HashSet<TLookFor> obsticles, TLookFor startInteractable) where TLookFor : Interactable
+    public bool LookForInteractablesOnAxis<TItem>(out HashSet<IObstacle> nearInteractables, TItem startInteractable) 
+        where TItem : Interactable
+
     {
-        obsticles = new HashSet<TLookFor>();
+        nearInteractables = new HashSet<IObstacle>();
 
         //for left direction
         Vector2Int pos = startInteractable.MatrixPosition + Vector2Int.left;
-        if (CheckBounds(pos) && GetItemAt(pos.x, pos.y) is TLookFor obsticle)
+        if (CheckBounds(pos) && !IsEmpty(pos.x, pos.y)  && GetItemAt(pos.x, pos.y) is IObstacle itemAtLeft )
         {
-            obsticles.Add(GetItemAt(pos.x, pos.y) as TLookFor);
+            nearInteractables.Add(itemAtLeft);
         }
 
         //for right direction
         pos = startInteractable.MatrixPosition + Vector2Int.right;
-        if (CheckBounds(pos) && GetItemAt(pos.x, pos.y) as TLookFor)
+        if (CheckBounds(pos) && !IsEmpty(pos.x, pos.y) && GetItemAt(pos.x, pos.y) is IObstacle itemAtRight)
         {
-            obsticles.Add(GetItemAt(pos.x, pos.y) as TLookFor);
+            nearInteractables.Add(itemAtRight);
         }
         //for up direction
         pos = startInteractable.MatrixPosition + Vector2Int.up;
-        if (CheckBounds(pos) && GetItemAt(pos.x, pos.y) as TLookFor)
+        if (CheckBounds(pos) && !IsEmpty(pos.x, pos.y) && GetItemAt(pos.x, pos.y) is IObstacle itemOnUp)
         {
-            obsticles.Add(GetItemAt(pos.x, pos.y) as TLookFor);
+            nearInteractables.Add(itemOnUp);
         }
         //for down direction
         pos = startInteractable.MatrixPosition + Vector2Int.down;
-        if (CheckBounds(pos) && GetItemAt(pos.x, pos.y) as TLookFor)
+        if (CheckBounds(pos) && !IsEmpty(pos.x, pos.y) && GetItemAt(pos.x, pos.y) is IObstacle itemOnBelow)
         {
-            obsticles.Add(GetItemAt(pos.x, pos.y) as TLookFor);
+            nearInteractables.Add(itemOnBelow);
         }
 
-        if (obsticles.Count > 0)
+        if (nearInteractables.Count > 0)
         {
             return true;
         }
@@ -794,6 +743,23 @@ public class InteractableGridSystem : GridSystem<Interactable>
         }
 
     }
+
+    public bool LookForObstacle<TItem>(out List<IObstacle> obstacles, List<TItem> interactables) where TItem : Interactable
+    {
+        obstacles = new List<IObstacle>();
+        bool obstacleFound = false;
+        foreach (TItem interactable in interactables)
+        {
+            if (interactable is IObstacle obstacle)
+            {
+                obstacleFound = true;
+                obstacles.Add(obstacle);
+            }
+        }
+        return obstacleFound;
+    }
+    
+   
 
 
     //Gridd fall down mechanism after removing interactables
@@ -813,9 +779,9 @@ public class InteractableGridSystem : GridSystem<Interactable>
 
                             bool canFall = true;
 
-                            if (interactable is IObstacle obstacle)
+                            if (interactable  is Interactable obstacle)
                             {
-                                //canFall = obstacle.CanFall;
+                                canFall = obstacle.CanFall;
                             }
 
                             if (canFall)
@@ -828,6 +794,7 @@ public class InteractableGridSystem : GridSystem<Interactable>
                 }
             }
         }
+        
     }
 
 
@@ -840,41 +807,44 @@ public class InteractableGridSystem : GridSystem<Interactable>
         PutItemAt(x, y, interactable);
 
         // update interactables internal grid position
-        interactable.MatrixPosition = new Vector2Int(x, y);
+        interactable.SetMatrixPosition(new Vector2Int(x, y));
 
         // Set the sorting order according to grid position on y axis
         interactable.GetComponent<SpriteRenderer>().sortingOrder = yNotEmpty;
 
         //Start animation 
-        StartCoroutine(interactable.MoveToPositionWithJump(GridPositionToWorldPosition(x, y), 3.5f, 0.1f));
-
+        //StartCoroutine(interactable.MoveToPositionWithJump(GridPositionToWorldPosition(x, y), 4.5f, 0.1f));
+        interactable.MoveTo(GridPositionToWorldPosition(x, y),0.1f);
     }
 
 
 
-    private void RemoveInteractables(List<Interactable> matchingInteractables)
+    private void RemoveInteractables<T>(List<T> matchingInteractables) where T : Interactable
     {
         // Remove the matching interactables from the grid
-        matchingInteractables.ForEach(x => RemoveItemAt(x.MatrixPosition.x, x.MatrixPosition.y));
-
-        //Rescale  before goi,g back to the pool
-        matchingInteractables.ForEach(x => x.transform.localScale = new Vector3(1, 1, 1));
-
-        // Return the matching interactables to the pool
-        matchingInteractables.ForEach(x => interactablePool.ReturnObjectToPool(x));
+        matchingInteractables.ForEach(x => RemoveInteractable(x));
     }
 
-    public void RemoveInteractables(Interactable matchingInteractables)
+    public void RemoveInteractable<T>(T matchingInteractable) where T : Interactable
     {
         // Remove the matching interactables from the grid
-        RemoveItemAt(matchingInteractables.MatrixPosition.x, matchingInteractables.MatrixPosition.y);
-
-
-        //Rescale  before goi,g back to the pool
-        matchingInteractables.transform.localScale = new Vector3(1, 1, 1);
+        RemoveItemAt(matchingInteractable.MatrixPosition.x, matchingInteractable.MatrixPosition.y);
 
         // Return the matching interactables to the pool
-        interactablePool.ReturnObjectToPool(matchingInteractables);
+        interactablePool.ReturnObjectToPool(matchingInteractable);
+    }
+
+    void SendInteractableToThePool(Interactable interactable)
+    {
+        interactablePool.ReturnObjectToPool(interactable);
+    }
+
+    void SendInteractablesToThePool(IEnumerable<Interactable> interactables)
+    {
+        foreach (var item in interactables)
+        {
+            interactablePool.ReturnObjectToPool(item);
+        }
     }
 
 }

@@ -16,13 +16,15 @@ public class Mover : MonoBehaviour
 
     private float howFar;
 
-    public bool idle { get; set; }
+    
+    public bool idle { get; set; } = true;
 
 
     /// <summary>
     /// 
     /// </summary>
-
+    
+    
      private bool _idle = true;
 
     /// <summary>
@@ -32,12 +34,14 @@ public class Mover : MonoBehaviour
     {
         get => _idle;
         protected set => _idle = value;
-    }
-
+    } 
+   
 
     public virtual void ScaleTo(Vector3 targetScale, float duration, Ease ease = Ease.Linear, Action onComplete = null)
     {
-        ExecuteTween(transform.DOScale(targetScale, duration).SetEase(ease), onComplete);
+        Tween tween = transform.DOScale(targetScale, duration).SetEase(ease);
+        tween.SetId("Non-Moving Animation");
+        ExecuteTween(tween, onComplete);
     }
 
 
@@ -46,7 +50,9 @@ public class Mover : MonoBehaviour
     /// </summary>
     public virtual void RotateTo(Vector3 targetRotation, float duration, Ease ease = Ease.Linear, Action onComplete = null)
     {
-        ExecuteTween(transform.DORotate(targetRotation, duration).SetEase(ease), onComplete);
+        Tween tween = transform.DORotate(targetRotation, duration).SetEase(ease);
+        tween.SetId("Non-Moving Animation");
+        ExecuteTween(tween, onComplete);
     }
 
     /// <summary>
@@ -54,20 +60,81 @@ public class Mover : MonoBehaviour
     /// </summary>
     public virtual void MoveTo(Vector3 targetPosition, float duration, Ease ease = Ease.Linear, Action onComplete = null)
     {
+        Tween tween = transform.DOMove(targetPosition, duration).SetEase(ease);
+        tween.SetId("Moving Animation");
         ExecuteTween(transform.DOMove(targetPosition, duration).SetEase(ease),onComplete);
     }
 
-    public IEnumerator ScaleUpAndDownAsync(float targetMaxScale,float targetLowestScale, float duration, Ease ease = Ease.Linear, bool givenIdle = false, Action onComplete = null)
+    public IEnumerator ScaleUpAndDownAsync(float targetMaxScale,float targetLowestScale, float duration,bool idleOnStart, Ease ease = Ease.Linear, Action onComplete = null)
     {
         Tween tween1 = transform.DOScale(targetMaxScale, duration).SetEase(ease);
+        tween1.SetId("Non-Moving Animation");
         Tween tween2 = transform.DOScale(targetLowestScale, duration).SetEase(ease);
+        tween2.SetId("Non-Moving Animation");
         Sequence sequence = DOTween.Sequence();
         sequence.Append(tween1);
         sequence.Append(tween2);
-        ExecuteSequence(sequence);
+        ExecuteSequence(sequence,idleOnStart,onComplete);
+        
         yield return sequence.WaitForCompletion();
-        onComplete?.Invoke();
+       ;
     }
+
+   
+     public void ScaleUpAndDown(float targetMaxScale,float targetLowestScale, float duration,bool idleOnStart, Action onComplete = null)
+    {
+        Tween tween1 = transform.DOScale(targetMaxScale, duration);
+        tween1.SetId("Non-Moving Animation");
+        Tween tween2 = transform.DOScale(targetLowestScale, duration);
+        tween2.SetId("Non-Moving Animation");
+        Sequence sequence = DOTween.Sequence();
+        sequence.Append(tween1);
+        sequence.Append(tween2);
+        ExecuteSequence(sequence,idleOnStart,onComplete);
+    }
+
+     public IEnumerator ScaleUpAndDownAsync<T>(IEnumerable<T> itemsToAnimate,float targetMaxScale,float targetLowestScale, float duration,bool idleOnStart, Action onComplete = null) where T: Mover
+    {
+        Sequence sequence = DOTween.Sequence();
+        foreach (var item in itemsToAnimate)
+        {
+            Tween tween1 = item.transform.DOScale(targetMaxScale, duration);
+            tween1.SetId("Non-Moving Animation");
+            
+        }
+
+        foreach (var item in itemsToAnimate)
+        {
+            Tween tween2 = item.transform.DOScale(targetLowestScale, duration);
+            sequence.Join(tween2);
+        }
+
+        ExecuteSequence(sequence,idleOnStart,onComplete);
+
+        yield return sequence.WaitForCompletion();
+        
+    }
+    protected void ExecuteSequence(Sequence sequence,bool idleOnStart, Action onComplete = null)
+    {
+        if (sequence == null) return;
+
+        sequence.OnStart(() =>
+        {
+            IsIdle = idleOnStart;
+            idle = idleOnStart;
+
+        });
+
+
+        sequence.OnComplete(() =>
+        {
+            IsIdle = true;
+            idle = true;
+            onComplete?.Invoke();
+
+        });
+    }
+
 
     /// <summary>
     /// Executes the tween with standardized callbacks.
@@ -85,20 +152,7 @@ public class Mover : MonoBehaviour
         });
     }
 
-    protected void ExecuteSequence(Sequence sequence, Action onComplete = null)
-    {
-        if (sequence == null) return;
-
-        IsIdle = false;
-
-
-        sequence.OnComplete(() =>
-        {
-            IsIdle = true;
-            onComplete?.Invoke();
-
-        });
-    }
+    
 
     /// <summary>
     /// Kills all active tweens on this GameObject when destroyed to prevent memory leaks.
@@ -242,14 +296,14 @@ public class Mover : MonoBehaviour
     }
 
 
-
+    
     private float Easing(float howFar)
     {
         return howFar * howFar;
     }
 
 
-    public IEnumerator CartoonishScaleToTarget(float speed, float overshootScale, float targetScale, bool givenIdle = false)
+    public IEnumerator CartoonishScaleToTarget(float speed, float overshootScale, float targetScale)
     {
         if (speed <= 0)
         {
@@ -262,7 +316,6 @@ public class Mover : MonoBehaviour
             Debug.LogWarning("Target scale must be non-negative");
             yield break;
         }
-        idle = givenIdle;
         Vector3 fromScale = transform.localScale;
         Vector3 toOvershootScale = fromScale * overshootScale; // Overshoot scale for the "pop" effect
         Vector3 toTargetScale = new Vector3(targetScale, targetScale, targetScale); // Target scale specified by user
@@ -310,7 +363,6 @@ public class Mover : MonoBehaviour
         {
             transform.parent = GameObject.FindAnyObjectByType<ParticlePool>().transform;
         }
-        idle = true;
     }
 
     private float EasingOutQuad(float t)

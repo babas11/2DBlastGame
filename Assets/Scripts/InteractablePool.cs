@@ -54,6 +54,7 @@ public class InteractablePool : MonoBehaviour, IObjectPool<Interactable, string>
             for (int i = 0; i < amount; i++)
             {
                 Interactable newObject = Instantiate(prefab, transform);
+                newObject.transform.localScale = Vector3.one;
                 newObject.gameObject.SetActive(false);
                 pooledObjects[prefab.Type].Add(newObject);
             }
@@ -104,6 +105,7 @@ public class InteractablePool : MonoBehaviour, IObjectPool<Interactable, string>
         if (prefab != null)
         {
             Interactable newObject = Instantiate(prefab, transform);
+            newObject.gameObject.SetActive(true);
             pooledObjects[type].Add(newObject);
             return newObject;
         }
@@ -118,7 +120,7 @@ public class InteractablePool : MonoBehaviour, IObjectPool<Interactable, string>
 
 
      /// <summary>
-    /// Returns a single Interactable to the pool (sets it inactive).
+    /// Returns a single Interactable to the pool (sets it inactive and set its scale to one).
     /// </summary>
     /// <param name="toBeReturned">The Interactable to return.</param>
     public void ReturnObjectToPool(Interactable toBeReturned)
@@ -129,16 +131,25 @@ public class InteractablePool : MonoBehaviour, IObjectPool<Interactable, string>
             return;
         }
         // Optionally reset the object's state here.
-        //ToDo:toBeReturned.ResetInteractable();
-
-        toBeReturned.gameObject.SetActive(false);
+        toBeReturned.ResetInteractable(transform);
+    }
+     
+    public void ReturnInteractableToPool<T>(Interactable toBeReturned) where T : Interactable
+    {
+        if (toBeReturned == null)
+        {
+            Debug.LogError("Cannot return a null object to the pool.");
+            return;
+        }
+        // Optionally reset the object's state here.
+        toBeReturned.ResetInteractable(transform);
     }
 
       /// <summary>
     /// Returns a list of Interactables to the pool (sets them all inactive).
     /// </summary>
     /// <param name="toBeReturned">List of Interactables to return.</param>
-     public void ReturnObjectToPool(List<Interactable> toBeReturned)
+     public void ReturnObjectsToPool<T>(List<T> toBeReturned) where T : Interactable
     {
         foreach (var interactable in toBeReturned)
         {
@@ -151,7 +162,7 @@ public class InteractablePool : MonoBehaviour, IObjectPool<Interactable, string>
 
         foreach (var interactable in toBeReturned)
         {
-            ReturnObjectToPool(interactable);
+            ReturnInteractableToPool<T>(interactable);
         }
     }
 

@@ -52,6 +52,7 @@ public class Utilities : MonoBehaviour
             return;
         }
 
+
         foreach (T component in components)
         {
             if (component != null)
@@ -112,6 +113,39 @@ public class Utilities : MonoBehaviour
         }
 
         return allSuccessful;
+    }
+
+    public static void SetScales<T>(IEnumerable<T> objects, float scale)
+    where T : Component
+    {
+        foreach (var obj in objects)
+        {
+            obj.transform.localScale = new Vector3(scale, scale, scale);
+        }
+    }
+    
+    public static void SetScale<T>(T obj, float scale)
+        where T : Component
+    {
+            obj.transform.localScale = new Vector3(scale, scale, scale);
+    }
+    
+    public static void SetPositions<T>(IEnumerable<T> objects, Vector3 pos)
+        where T : Component
+    {
+        foreach (var obj in objects)
+        {
+            obj.transform.position = pos;
+        }
+    }
+    
+    public static void SetParent<T>(IEnumerable<T> objects, Transform parent)
+        where T : Component
+    {
+        foreach (var obj in objects)
+        {
+            obj.transform.parent = parent;
+        }
     }
 
 }

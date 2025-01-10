@@ -14,7 +14,7 @@ public class LevelDataHandler : MonoBehaviour
 
         if (level < 10)
         {
-            return $"level_0{level}.json";
+            return $"level_0{4}.json";
         }
         else
         {

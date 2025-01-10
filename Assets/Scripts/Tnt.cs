@@ -1,40 +1,37 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
+using Unity.VisualScripting;
 using UnityEngine;
+using UnityEngine.Serialization;
 
-public class Tnt : Interactable
+public class Tnt : Interactable,IExplosive
 {
-
-    [SerializeField]
+    Renderer rend;
+    void Start()
+    {
+        rend = GetComponent<SpriteRenderer>();
+    }
+    public static event Action<Tnt,int> OnTntPressed;
     public override bool CanFall => true;
-    public bool Exploded = false;
+    public bool exploded = false;
+    public int ExplosionArea { get; } = 2;
 
+    public void Explode()
+    {
+        throw new System.NotImplementedException();
+    }
+
+    public void HideTnt()
+    {
+        rend.enabled = false;
+    }
 
 
     protected override void OnMouseDown()
     {
-        base.OnMouseDown();
-        StartCoroutine(Explode());
+        //base.OnMouseDown();
+        OnTntPressed?.Invoke(this,ExplosionArea);
     }
-
-    public IEnumerator Explode(bool chainExplosion = false)
-    {
-        HashSet<Tnt> tntsInCombo = new HashSet<Tnt> { this };
-        
-        // Check for adjacent TNTs to form a combo
-        
-        if(!chainExplosion){
-            interactableGridSystem.LookForMatchingsOnAxis<Tnt>(out tntsInCombo,this);
-            tntsInCombo.Add(this);
-        }
-        //Enhancing the range of explotion whether it is a combo or not
-        int blastRange = tntsInCombo.Count > 1 ? 3 : 2;
-
-        StartCoroutine(interactableGridSystem.TNTBlast(this,blastRange));
-
-        yield return null;
-
-    }
-
 }
 

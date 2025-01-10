@@ -54,9 +54,9 @@ public class UI : Mover
 
     public void SetupUI(LevelData levelData)
     {
-        moves = levelData.move_count;
+        /* moves = levelData.move_count;
         movesText.text = moves.ToString();
-        FindObjectivesOfTheLevel(levelData);
+        FindObjectivesOfTheLevel(levelData); */
 
     }
 
@@ -96,14 +96,14 @@ public class UI : Mover
 
     public void DecreaseMoves()
     {
-        moves--;
+       /*  moves--;
         if (moves < 0)
         {
             moves = 0;
             StartCoroutine(EndScene(false));
-
+ß
         }
-        movesText.text = moves.ToString();
+        movesText.text = moves.ToString(); */
     }
     void FindObjectivesOfTheLevel(LevelData levelData)
     {

@@ -1,6 +1,4 @@
 using System.Collections.Generic;
-using Unity.VisualScripting;
-using UnityEditor.Experimental.GraphView;
 using UnityEngine;
 
 public class Cube : Interactable
@@ -43,7 +41,7 @@ public class Cube : Interactable
         if (this.idle && interactableGridSystem.LookInteractableForMatchingAdjacent(out List<Interactable> matchList, this))
         {
             base.OnMouseDown();
-            StartCoroutine(interactableGridSystem.Blast(matchList, this.transform));
+            interactableGridSystem.Blast(matchList, this.transform);
         }
         else
         {
@@ -51,6 +49,7 @@ public class Cube : Interactable
             StartCoroutine(CartoonishScaleToTarget(2.5f, 1.3f, 1f));
         }
     }
+
 
 }
 

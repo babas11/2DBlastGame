@@ -1,3 +1,4 @@
+using System;
 using UnityEngine;
 
 /// <summary>
@@ -36,8 +37,18 @@ public abstract class Interactable : Mover
     /// <summary>
     /// The position of this interactable object within the grid system.
     /// </summary>
+    
+    public Vector2Int MatrixPosition
+    {
+        get { return matrixPosition; }
+    }
     [SerializeField]
-    public Vector2Int MatrixPosition;
+    private Vector2Int matrixPosition;
+
+    public void  SetMatrixPosition(Vector2Int matrixPosition)
+    {
+        this.matrixPosition = matrixPosition;
+    }
 
     /// <summary>
     /// Gets the <see cref="InteractableType"/> of this interactable object.
@@ -48,10 +59,10 @@ public abstract class Interactable : Mover
     /// Reference to the grid system managing the placement and state of interactable objects.
     /// </summary>
     protected InteractableGridSystem interactableGridSystem { get; private set; }
+    protected InteractablePool interactablePool { get; private set; }
 
-    void Start()
+    private void Awake()
     {
-        uiController = GameObject.FindObjectOfType<UI>();
         // Get the SpriteRenderer component attached to this GameObject.
         spriteRenderer = GetComponent<SpriteRenderer>();
 
@@ -59,7 +70,12 @@ public abstract class Interactable : Mover
         {
             Debug.LogError("SpriteRenderer component is missing.");
         }
+    }
 
+    void Start()
+    {
+        uiController = GameObject.FindObjectOfType<UI>();
+        interactablePool = FindObjectOfType<InteractablePool>();
         // Attempt to find and assign the InteractableGridSystem in the scene.
         interactableGridSystem = FindObjectOfType<InteractableGridSystem>();
 
@@ -76,7 +92,7 @@ public abstract class Interactable : Mover
     /// </summary>
     protected virtual void OnMouseDown()
     {
-        uiController.DecreaseMoves();
+        //uiController.DecreaseMoves();
     }
 
     /// <summary>
@@ -93,10 +109,15 @@ public abstract class Interactable : Mover
     /// Resets the interactable object's state to its default settings.
     /// This method should be implemented to clear or reset any transient states or properties.
     /// </summary>
-    public void ResetInteractable()
+    public void ResetInteractable(Transform parent)
     {
-
-        //TODO: Organize to reset all settings of the Interactable
+        this.transform.localScale = new Vector3(1, 1, 1);
+        transform.rotation = Quaternion.Euler(0,0,0);
+        //Debug.Log(transform.localScale);
+        spriteRenderer.enabled = true;
+        transform.SetParent(parent);
+        gameObject.SetActive(false);
+        
     }
 
 }

@@ -16,7 +16,7 @@ using UnityEngine;
 /// batch1 -> [ redParticle1, redParticle2, ... ]
 /// </code>
 /// </summary>
-public partial class ParticlePool : MonoBehaviour
+public  class ParticlePool : MonoBehaviour
 {
     /// <summary>
     /// A struct pairing an <see cref="InteractableType"/> with its list of <see cref="Particle"/> prefabs.
@@ -38,7 +38,7 @@ public partial class ParticlePool : MonoBehaviour
         [Tooltip("Particle prefabs to spawn together as a batch.")]
         public List<Particle> ParticlePrefabs;
     }
-
+    
     /// <summary>
     /// The definitions mapping each <see cref="InteractableType"/> to a set ("batch") of particle prefabs.
     /// </summary>
@@ -51,7 +51,9 @@ public partial class ParticlePool : MonoBehaviour
     /// </summary>
     [Tooltip("Amount of batches to create when populating the pool.")]
     [SerializeField]
-    public int batchCount = 15; 
+    public int batchCount = 15;
+
+    private int autoExpansion = 5;
 
     /// <summary>
     /// If true, the pool automatically expands (creates new batches) when no inactive batch is found.
@@ -108,6 +110,7 @@ public partial class ParticlePool : MonoBehaviour
                 foreach (var prefab in definition.ParticlePrefabs)
                 {
                     Particle particleInstance = Instantiate(prefab, transform);
+                    particleInstance.transform.localScale = Particle.TypesParticleScale[definition.InteractableType];
                     particleInstance.gameObject.SetActive(false);
                     newBatch.Add(particleInstance);
                 }
@@ -133,7 +136,7 @@ public partial class ParticlePool : MonoBehaviour
     /// <returns>
     /// An array of <see cref="Particle"/> forming one complete batch, or null if none can be found or created.
     /// </returns>
-    public Particle[] GetParticleBatch(InteractableType type, bool autoActivate = true, int expansionBatchCount = 5)
+    public Particle[] GetParticleBatch(InteractableType type, bool autoActivate = true, float startScale = -1)
     {
         // Check if the dictionary has any entries for this type.
         if (!particlePool.ContainsKey(type))
@@ -151,13 +154,25 @@ public partial class ParticlePool : MonoBehaviour
             {
                 SetBatchActive(inactiveBatch, true);
             }
+
+            if (startScale != -1)
+            {
+                Utilities.SetScales(inactiveBatch, startScale);
+            }
+            else
+            {
+                Particle.ArrangeParticlesScale(inactiveBatch, type);
+            }
+
+            
+            
             return inactiveBatch;
         }
 
         // If no inactive batch is found, but expansion is allowed, populate new batches.
         if (allowPoolExpansion)
         {
-            PopulatePool(expansionBatchCount);
+            PopulatePool(autoExpansion);
             
             // Try again after expansion.
             inactiveBatch = FindInactiveBatch(type);
@@ -166,6 +181,15 @@ public partial class ParticlePool : MonoBehaviour
                 if (autoActivate)
                 {
                     SetBatchActive(inactiveBatch, true);
+                }
+                
+                if (startScale != -1)
+                {
+                    Utilities.SetScales(inactiveBatch, startScale);
+                }
+                else
+                {
+                    Particle.ArrangeParticlesScale(inactiveBatch, type);
                 }
                 return inactiveBatch;
             }
@@ -185,8 +209,10 @@ public partial class ParticlePool : MonoBehaviour
         for (int i = 0; i < particlePrefabs.Length; i++)
         {
             Particle newParticle = Instantiate(particlePrefabs[i], transform);
+            newParticle.transform.localScale = startScale != -1 ? new Vector3(startScale,startScale,1) : Particle.TypesParticleScale[type];
             directInstantiation[i] = newParticle;
         }
+        
 
         // Add this new direct-instantiated batch to the pool for future reuse.
         particlePool[type].Add(directInstantiation.ToList());
@@ -268,14 +294,14 @@ public partial class ParticlePool : MonoBehaviour
         }
 
         // Reset the particle so that it's ready for reuse.
-        particleToReturn.ResetParticle();
+        particleToReturn.ResetParticle(transform);
     }
 
     /// <summary>
     /// Returns a list of <see cref="Particle"/> objects to the pool by resetting each one.
     /// </summary>
     /// <param name="particlesToReturn">The list of particle instances to reset and return.</param>
-    public void ReturnParticles(List<Particle> particlesToReturn)
+    public void ReturnParticles(IEnumerable<Particle> particlesToReturn)
     {
         // Check for any null references in the provided list.
         foreach (var particle in particlesToReturn)
@@ -314,4 +340,9 @@ public partial class ParticlePool : MonoBehaviour
         Debug.LogError($"No particle prefab definition found for InteractableType '{type}'.");
         return null;
     }
+    
+    
+    
+    
+    
 }

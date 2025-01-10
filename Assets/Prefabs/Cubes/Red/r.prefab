@@ -25,6 +25,10 @@ PrefabInstance:
       value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 1308636310742388714, guid: c146bc244a32a4f8dbf87b48c49a5f10, type: 3}
+      propertyPath: m_MaskInteraction
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 1308636310742388714, guid: c146bc244a32a4f8dbf87b48c49a5f10, type: 3}
       propertyPath: m_WasSpriteAssigned
       value: 1
       objectReference: {fileID: 0}
@@ -112,6 +116,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   type: 0
   matrixPosition: {x: 0, y: 0}
+  tntState: 0
   cubeSprites:
   - {fileID: 21300000, guid: 24ea5975acf39594d80a087d0c53eb87, type: 3}
   - {fileID: 21300000, guid: 9cac6b1e249e98147b871305c668ad31, type: 3}

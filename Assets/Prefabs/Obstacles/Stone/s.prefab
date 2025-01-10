@@ -25,6 +25,10 @@ PrefabInstance:
       value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 1308636310742388714, guid: c146bc244a32a4f8dbf87b48c49a5f10, type: 3}
+      propertyPath: m_MaskInteraction
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 1308636310742388714, guid: c146bc244a32a4f8dbf87b48c49a5f10, type: 3}
       propertyPath: m_WasSpriteAssigned
       value: 1
       objectReference: {fileID: 0}
@@ -82,15 +86,15 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 7048563434237669301, guid: c146bc244a32a4f8dbf87b48c49a5f10, type: 3}
       propertyPath: m_SpriteTilingProperty.oldSize.x
-      value: 1.42
+      value: 0.49824563
       objectReference: {fileID: 0}
     - target: {fileID: 7048563434237669301, guid: c146bc244a32a4f8dbf87b48c49a5f10, type: 3}
       propertyPath: m_SpriteTilingProperty.oldSize.y
-      value: 1.62
+      value: 0.56842107
       objectReference: {fileID: 0}
     - target: {fileID: 7581675275785504965, guid: c146bc244a32a4f8dbf87b48c49a5f10, type: 3}
       propertyPath: m_Name
-      value: Stone
+      value: s
       objectReference: {fileID: 0}
     m_RemovedComponents:
     - {fileID: 7022935656069499754, guid: c146bc244a32a4f8dbf87b48c49a5f10, type: 3}
@@ -119,8 +123,4 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   type: 6
-  particles:
-  - {fileID: 2005943023583013728, guid: 11217b4e7217e3548a231c50997785ad, type: 3}
-  - {fileID: 2005943023583013728, guid: a56059d704ab41e4593c9aa85f398c8e, type: 3}
-  - {fileID: 2005943023583013728, guid: 190852a85dc5126449df08f16662d683, type: 3}
   matrixPosition: {x: 0, y: 0}

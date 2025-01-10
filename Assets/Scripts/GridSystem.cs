@@ -85,7 +85,7 @@ public abstract class GridSystem<T> : MonoBehaviour where T : MonoBehaviour
             return default;
         }
         return matrix[x, y];
-    }
+    }    
 
      /// <summary>
     /// Removes the item at the specified grid coordinates by setting it to the default value of T.
@@ -122,7 +122,15 @@ public abstract class GridSystem<T> : MonoBehaviour where T : MonoBehaviour
         }
         if (!CheckBounds(x, y)) Debug.LogError($"{x}, {y} are not on the grid");
 
-        matrix[x, y] = default(T);
+        matrix[x, y] = default;
+    }
+
+    public void RemoveItemsAt(List<Vector2Int> positions)
+    {
+        foreach (var position in positions)
+        {
+            RemoveItemAt(position.x, position.y);
+        }
     }
 
     /// <summary>
@@ -138,7 +146,7 @@ public abstract class GridSystem<T> : MonoBehaviour where T : MonoBehaviour
 
 
         //return data[x, y] == null;
-        return EqualityComparer<T>.Default.Equals(matrix[x, y], default(T));
+        return EqualityComparer<T>.Default.Equals(matrix[x, y], default);
     }
 
      /// <summary>
@@ -150,17 +158,19 @@ public abstract class GridSystem<T> : MonoBehaviour where T : MonoBehaviour
     public Vector3 GridPositionToWorldPosition(int x, int y)
     {
         if (!CheckBounds(x, y)) 
-    {
-        Debug.LogError($"{x}, {y} are not on the grid");
+        {
+            Debug.LogError($"{x}, {y} are not on the grid");
     
-    }
+        }
     
-    float xPosition = x * 0.5f + transform.position.x + .25f;
+        float xPosition = x * 0.5f + transform.position.x + .25f;
 
-    float yPosition = y * 0.5f + transform.position.y + 0.285f;
+        float yPosition = y * 0.5f + transform.position.y + 0.285f;
 
-    return new Vector3(xPosition, yPosition, 0);
+        return new Vector3(xPosition, yPosition, 0);
     }
+
+    
     
 
 }
