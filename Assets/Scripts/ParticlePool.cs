@@ -319,6 +319,7 @@ public  class ParticlePool : MonoBehaviour
             ReturnParticle(particle);
         }
     }
+    
 
     /// <summary>
     /// Retrieves an array of <see cref="Particle"/> prefabs for the specified <see cref="InteractableType"/>
