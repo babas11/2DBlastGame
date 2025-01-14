@@ -303,7 +303,7 @@ public class InteractableGridSystem : GridSystem<Interactable>
         // Remove the matching interactables from the internal matrix
         matchingInteractables.ForEach(x => RemoveItemAt(x.MatrixPosition.x, x.MatrixPosition.y));
         //Damage Obstacles near area
-        var obstacles = DamageNearObstacles(matchingInteractables, BlastType.Regular);
+        var obstacles = DamageObstacles(matchingInteractables, BlastType.Regular);
         obstacles.ForEach(x => RemoveItemAt(x.InteractableObstacle.MatrixPosition.x, x.InteractableObstacle.MatrixPosition.y));
         //
         if (matchingInteractables.Count >= minimumCubeAmountToMakeTnt)
@@ -341,66 +341,165 @@ public class InteractableGridSystem : GridSystem<Interactable>
         //Fill the remaining empty spaces by repopulating
         BuildInteractableGridSystem(ReadGrid(levelDataHandler));
 
-        SendInteractablesToThePool(matchingInteractables);
-        SendObstacleToThePool(obstacles);
+        //SendInteractablesToThePool(matchingInteractables);
+        interactablePool.ReturnObjectsToPool(matchingInteractables);
+        
+        interactablePool.ReturnObstaclesToPool(obstacles);
+
     }
 
 
-    // This method is called whenever a Tnt is pressed (OnMouseDown).
+
+    
     private void HandleTntPressed(Tnt pressedTnt, int explosionRange)
     {
-        //List<Tnt> adjacentTnt = GetAllChainTnts(pressedTnt, 1);
-        List<Tnt> nearTnts = GetAllChainTnts(pressedTnt, explosionRange);
+        bool isDouble = IsDoubleTnt(out List<Tnt> aroundTnts, pressedTnt);
+        List<Tnt> chainTnts = GetAllChainTnts(pressedTnt, isDouble);
 
-        //bool megaTnt = adjacentTnt.Count() > 1;
-
-        StartCoroutine(ChainExplodeTntsSequence(nearTnts, explosionRange));
+        // Start the chain explosion
+        StartCoroutine(ChainExplodeTntsSequence(chainTnts, pressedTnt, explosionRange, isDouble, aroundTnts));
     }
-
-    public IEnumerator ChainExplodeTntsSequence(List<Tnt> chainTnts, int range, bool isMegaTnt = false)
+    
+    public IEnumerator ChainExplodeTntsSequence(
+        List<Tnt> chainTnts,
+        Tnt pressedTnt,
+        int range,
+        bool isMegaTnt = false,
+        List<Tnt> megaTnts = null)
     {
         SetInteractablesSortingOrders(chainTnts);
-        
-        //TODO Adjust Mega Blast
-        /*for (int i = 0; i < chainTnts.Count; i++)
-        {
-            if (isMegaTnt && i = 0)
-            {
-                //ToDo yield return BlastMegaTnt()
-            }
-            StartCoroutine(BlastTnt(chainTnts[i], range));
-        }*/
 
-        // 1) For each TNT in the chain
-        foreach (var tnt in chainTnts)
+        // 1) If mega, handle that first
+        if (isMegaTnt && megaTnts != null)
         {
-            // 2) Animate the “lighting” or fuse
-            // ToDo yield return StartCoroutine(PlayFuseAnimation(tnt));
+            // Explode all Tnts in the “mega cluster”
+            yield return StartCoroutine(ExplodeMegaTnt(megaTnts, pressedTnt, range + 1));
 
-            // 4) Apply actual explosion logic: remove cubes, obstacles, etc.
-            yield return StartCoroutine(BlastTnt(tnt, range));
+            // Remove those Tnts from chain
+            chainTnts.RemoveAll(t => megaTnts.Contains(t));
+            interactablePool.ReturnObjectsToPool(megaTnts);
+            //SendInteractablesToThePool(megaTnts);
         }
 
-        // 5) Once all TNTs have exploded, do the final grid updates
+        // 2) Now do the rest in chain
+        foreach (var tnt in chainTnts)
+        {
+            yield return StartCoroutine(ExplodeRegularTnt(tnt, range));
+        }
+
+        // 3) Final grid updates
         chainTnts.ForEach(x => RemoveItemAt(x.MatrixPosition.x, x.MatrixPosition.y));
-        SendInteractablesToThePool(chainTnts);
+        interactablePool.ReturnObjectsToPool(chainTnts);
+        //SendInteractablesToThePool(chainTnts);
+
         GridFallDown();
         ReorderAllInteractablesSortingOrder();
         BuildInteractableGridSystem(ReadGrid(levelDataHandler));
     }
+    private IEnumerator HandleTntDamageArea(Tnt centerTnt, int range, BlastType blastType)
+    {
+        // 1) Gather near cubes / obstacles
+        List<Cube> nearCubes = GetInteractablesWithinRange<Cube>(centerTnt.MatrixPosition, range);
+        List<Interactable> nearInteractables = GetInteractablesWithinRange<Interactable>(centerTnt.MatrixPosition, range);
 
-    public List<Tnt> GetAllChainTnts(Tnt initialTnt, int range)
+        // 2) Possibly animate near cubes
+        if (nearCubes.Count > 0)
+        {
+            yield return StartCoroutine(AnimationHandler.ScaleUpAndDownAsync(nearInteractables, 1.1f, 1f, 0.1f));
+        }
+
+        // 3) Damage obstacles
+        var nearObstacles = DamageObstacles(nearInteractables, blastType);
+
+        // 4) Spawn particles for cubes/obstacles
+        foreach (var cube in nearCubes)
+        {
+            ParticleController.BlastParticle(cube.transform.position, cube.Type);
+        }
+
+        if (nearObstacles != null)
+        {
+            foreach (var obstacle in nearObstacles)
+            {
+                ParticleController.BlastParticle(obstacle.ObstacleWorldPos, obstacle.ObstacleType);
+            }
+        }
+
+        // 5) Remove them from grid, return to pool, etc.
+        nearCubes.ForEach(x => RemoveItemAt(x.MatrixPosition.x, x.MatrixPosition.y));
+        interactablePool.ReturnObjectsToPool(nearCubes);
+        //SendInteractablesToThePool(nearCubes);
+    
+        nearObstacles.ForEach(o => RemoveItemAt(o.ObstacleMatrixPos.x, o.ObstacleMatrixPos.y));
+        interactablePool.ReturnObstaclesToPool(nearObstacles);
+        //SendInteractablesToThePool(nearObstacles.ConvertObstaclesToInteractable());
+
+        yield break;
+    }
+    
+    private IEnumerator ExplodeMegaTnt(List<Tnt> megaTnts, Tnt mainTnt, int range)
+    {
+        // 1) Remove them from grid so they can’t be re-blasted
+        megaTnts.ForEach(x => RemoveItemAt(x.MatrixPosition.x, x.MatrixPosition.y));
+
+        // 2) Use your MegaTntMergeIntoOne animation
+        yield return AnimationHandler.MegaTntMergeIntoOne(megaTnts, mainTnt,
+            duration: 0.5f,
+            partialTimeScale: 0.85f,
+            onPartialTime: () =>
+            {
+                // e.g. spawn particles in the middle, etc.
+            },
+            onComplete: () =>
+            {
+                ParticleController.OnCreation(mainTnt.transform, InteractableType.tnt);
+            });
+
+        // 3) Hide the main Tnt if needed
+        mainTnt.DisableRenderer();
+
+        // 4) (Optional) Handle an enlarged blast radius for the mega TNT
+        yield return StartCoroutine(HandleTntDamageArea(mainTnt, range, BlastType.Tnt));
+        
+
+        // (Optional) return to pool, etc.
+    }
+    private IEnumerator ExplodeRegularTnt(Tnt tnt, int range)
+    {
+        // 1) Animate the TNT
+        yield return StartCoroutine(AnimationHandler.ScaleUpAndRotate(
+            tnt, 
+            targetMaxScale: 1.5f, 
+            duration: 0.3f, 
+            endPosition: new Vector3(0f, 0f, 360f),
+            onComplete: () =>
+            {
+                tnt.GetComponent<Renderer>().enabled = false;
+                ParticleController.OnCreation(tnt.transform, InteractableType.tnt);
+            }));
+
+        // 2) Damaging near cubes/obstacles, spawning particles, etc.
+        yield return StartCoroutine(HandleTntDamageArea(tnt, range, BlastType.Tnt));
+    }
+    
+    public List<Tnt> GetAllChainTnts(Tnt initialTnt,bool isMegaTnt = false)
     {
         Queue<Tnt> queue = new Queue<Tnt>();
         HashSet<Tnt> visited = new HashSet<Tnt>();
 
         queue.Enqueue(initialTnt);
         visited.Add(initialTnt);
+        
+        bool isMega = isMegaTnt;
 
         while (queue.Count > 0)
         {
             Tnt current = queue.Dequeue();
-            // find other Tnt in the explosion range
+            
+            int range = isMegaTnt? 7 : 5;
+            
+            isMega = false;
+            
             var nearTnts = GetInteractablesWithinRange<Tnt>(current.MatrixPosition, range);
             foreach (var tnt in nearTnts)
             {
@@ -416,95 +515,35 @@ public class InteractableGridSystem : GridSystem<Interactable>
         return visited.ToList();
     }
 
-    private IEnumerator BlastTnt(Tnt tnt, int range)
-    {
-        List<Cube> nearCubes =
-            GetInteractablesWithinRange<Cube>(tnt.MatrixPosition, range);
-
-        List<Interactable> nearInteractables =
-            GetInteractablesWithinRange<Interactable>(tnt.MatrixPosition, range);
-
-        yield return StartCoroutine(AnimationHandler.ScaleUpAndRotate(tnt, 1.5f, 0.3f, new Vector3(0f, 0f, 360f), (
-            () =>
-            {
-                tnt.GetComponent<Renderer>().enabled = false;
-                ParticleController.OnCreation(tnt.transform, InteractableType.tnt);
-            })));
-
-        var nearObstacles = DamageNearObstacles(nearInteractables, BlastType.Tnt);
-
-        if (nearCubes.Count > 0)
-        {
-            yield return StartCoroutine(AnimationHandler.ScaleUpAndDownAsync(nearCubes, 1.1f, 1f, 0.1f));
-        }
-
-        if (nearObstacles != null)
-        {
-            foreach (IObstacle obstacle in nearObstacles)
-            {
-                ParticleController.BlastParticle(obstacle.ObstacleWorldPos, obstacle.ObstacleType);
-            }
-        }
-
-        foreach (var nearCube in nearCubes)
-        {
-            ParticleController.BlastParticle(nearCube.transform.position, nearCube.Type);
-        }
-
-        nearCubes.ForEach(x => RemoveItemAt(x.MatrixPosition.x, x.MatrixPosition.y));
-        nearObstacles.ForEach(x => RemoveItemAt(x.ObstacleMatrixPos.x, x.ObstacleMatrixPos.y));
-
-        SendInteractablesToThePool(nearCubes);
-        SendInteractablesToThePool(nearObstacles.ConvertObstaclesToInteractable());
-    }
 
 
-    void DamageObstacles(List<Interactable> matchingInteractables, BlastType blastType)
-    {
-        List<Interactable> nearObstaclesAsInteractable = new List<Interactable>();
-        HashSet<IObstacle> nearObstacles = new HashSet<IObstacle>();
 
-        foreach (Interactable matchingInteractable in matchingInteractables)
-        {
-            if (LookForInteractablesOnAxis(out HashSet<IObstacle> foundObstacles, matchingInteractable))
-            {
-                nearObstacles.AddRange(foundObstacles);
-                foreach (IObstacle obstacle in nearObstacles)
-                {
-                    nearObstaclesAsInteractable.Add(obstacle.InteractableObstacle);
-                }
-            }
-        }
-
-        foreach (IObstacle obstacle in nearObstacles)
-        {
-            obstacle.TakeDamage(1, blastType);
-            if (obstacle.Health == 0)
-            {
-                RemoveItemAt(obstacle.ObstacleMatrixPos.x, obstacle.ObstacleMatrixPos.y);
-                SendInteractableToThePool(obstacle.InteractableObstacle);
-            }
-        }
-    }
-
-    private List<IObstacle> DamageNearObstacles(List<Interactable> matchingInteractables, BlastType blastType)
+    private List<IObstacle> DamageObstacles(List<Interactable> matchingInteractables, BlastType blastType)
     {
         List<IObstacle> nearObstacles = new List<IObstacle>();
         List<IObstacle> damagedObstacles = new List<IObstacle>();
 
-        // Collect all unique obstacles adjacent to the matching interactables
-        foreach (Interactable matchingInteractable in matchingInteractables)
+        if (blastType == BlastType.Regular)
         {
-            if (LookForInteractablesOnAxis(out HashSet<IObstacle> foundObstacles, matchingInteractable))
+            // 1) Find obstacles around matching interactables
+            foreach (Interactable matchingInteractable in matchingInteractables)
             {
-                nearObstacles.AddRange(foundObstacles);
+                if (LookForInteractablesOnAxis(out HashSet<IObstacle> foundObstacles, matchingInteractable))
+                {
+                    nearObstacles.AddRange(foundObstacles);
+                }
             }
+            // 2) Remove duplicates
+            nearObstacles = nearObstacles.Distinct().ToList();
+        }
+        else if (blastType == BlastType.Tnt)
+        {
+            nearObstacles = matchingInteractables
+                .OfType<IObstacle>()
+                .Distinct()
+                .ToList();
         }
 
-        // Remove duplicates if any
-        nearObstacles = nearObstacles.Distinct().ToList();
-
-        // Iterate over the collected obstacles
         foreach (IObstacle obstacle in nearObstacles)
         {
             bool damageApplied = obstacle.TakeDamage(1, blastType);
@@ -515,6 +554,7 @@ public class InteractableGridSystem : GridSystem<Interactable>
             }
         }
 
+        // Return the obstacles that actually took damage
         return damagedObstacles;
     }
 
@@ -731,21 +771,41 @@ public class InteractableGridSystem : GridSystem<Interactable>
         }
     }
 
-    public bool LookForObstacle<TItem>(out List<IObstacle> obstacles, List<TItem> interactables)
-        where TItem : Interactable
+    public bool IsDoubleTnt<TTnt>(out List<TTnt> nearTnts, TTnt pressedTnt)
+        where TTnt : Tnt
     {
-        obstacles = new List<IObstacle>();
-        bool obstacleFound = false;
-        foreach (TItem interactable in interactables)
+        nearTnts = new List<TTnt>();
+        bool tntFound = false;
+
+        Vector2Int[] axis = new[]
         {
-            if (interactable is IObstacle obstacle)
+            Vector2Int.left,
+            Vector2Int.right,
+            Vector2Int.up,
+            Vector2Int.down
+        };
+
+        foreach (Vector2Int ax in axis)
+        {
+            var pos = pressedTnt.MatrixPosition + ax;
+
+            // Check if within bounds and not empty
+            if (CheckBounds(pos.x, pos.y) && !IsEmpty(pos.x, pos.y))
             {
-                obstacleFound = true;
-                obstacles.Add(obstacle);
+                // Get the interactable at this grid position
+                Interactable interactable = GetItemAt(pos.x, pos.y);
+
+                // Check if it's of the expected TNT type
+                if (interactable is TTnt itemAt)
+                {
+                    nearTnts.Add(itemAt);
+                    nearTnts.Add(pressedTnt);
+                    tntFound = true;
+                }
             }
         }
 
-        return obstacleFound;
+        return tntFound;
     }
 
 
@@ -802,40 +862,5 @@ public class InteractableGridSystem : GridSystem<Interactable>
         interactable.MoveTo(GridPositionToWorldPosition(x, y), 0.1f);
     }
 
-
-    private void RemoveInteractables<T>(List<T> matchingInteractables) where T : Interactable
-    {
-        // Remove the matching interactables from the grid
-        matchingInteractables.ForEach(x => RemoveInteractable(x));
-    }
-
-    public void RemoveInteractable<T>(T matchingInteractable) where T : Interactable
-    {
-        // Remove the matching interactables from the grid
-        RemoveItemAt(matchingInteractable.MatrixPosition.x, matchingInteractable.MatrixPosition.y);
-
-        // Return the matching interactables to the pool
-        interactablePool.ReturnObjectToPool(matchingInteractable);
-    }
-
-    void SendInteractableToThePool(Interactable interactable)
-    {
-        interactablePool.ReturnObjectToPool(interactable);
-    }
-
-    void SendInteractablesToThePool(IEnumerable<Interactable> interactables)
-    {
-        foreach (var item in interactables)
-        {
-            interactablePool.ReturnObjectToPool(item);
-        }
-    }
     
-    void SendObstacleToThePool(IEnumerable<IObstacle> interactables)
-    {
-        foreach (var item in interactables)
-        {
-            interactablePool.ReturnObjectToPool(item.InteractableObstacle);
-        }
-    }
 }

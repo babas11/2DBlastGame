@@ -113,11 +113,19 @@ public abstract class Interactable : Mover
     {
         this.transform.localScale = new Vector3(1, 1, 1);
         transform.rotation = Quaternion.Euler(0,0,0);
-        //Debug.Log(transform.localScale);
         spriteRenderer.enabled = true;
         transform.SetParent(parent);
         gameObject.SetActive(false);
-        
+    }
+
+    public void DisableRenderer()
+    {
+        spriteRenderer.enabled = false;
+    }
+
+    public void EnableRenderer()
+    {
+        spriteRenderer.enabled = true;
     }
 
 }

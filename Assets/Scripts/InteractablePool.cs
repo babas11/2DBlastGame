@@ -134,6 +134,8 @@ public class InteractablePool : MonoBehaviour, IObjectPool<Interactable, string>
         toBeReturned.ResetInteractable(transform);
     }
      
+    
+     
     public void ReturnInteractableToPool<T>(Interactable toBeReturned) where T : Interactable
     {
         if (toBeReturned == null)
@@ -143,6 +145,14 @@ public class InteractablePool : MonoBehaviour, IObjectPool<Interactable, string>
         }
         // Optionally reset the object's state here.
         toBeReturned.ResetInteractable(transform);
+    }
+
+    public void ReturnObstaclesToPool(IEnumerable<IObstacle> toBeReturned)
+    {
+        foreach (var item in toBeReturned)
+        {
+            ReturnObjectToPool(item.InteractableObstacle);
+        }
     }
 
       /// <summary>

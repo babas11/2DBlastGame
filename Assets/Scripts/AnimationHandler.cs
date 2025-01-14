@@ -166,7 +166,128 @@ public static class AnimationHandler {
         });
         yield return sequence.WaitForCompletion();
     }
-    
-    
+
+    public static IEnumerator MegaTntMergeIntoOne(
+        List<Tnt> allTnts,
+        Tnt mainTnt,                    
+        float duration,
+        float partialTimeScale,
+        Action onComplete = null,
+        Action onPartialTime = null)
+    {
+        foreach (var tnt in allTnts)
+        {
+            tnt.idle = false;
+        }
+
+        // 2) Build sequence
+        Sequence sequence = DOTween.Sequence();
+
+        // 2a) Move all Tnts to the center in parallel
+        foreach (var tnt in allTnts)
+        {
+            sequence.Join(
+                tnt.transform.DOMove(mainTnt.transform.position, duration * 0.4f).SetEase(Ease.OutSine)
+            );
+        }
+
+        // 2b) Once they've converged, remove/disable all but one
+        sequence.AppendCallback(() =>
+        {
+            // Hide or remove all Tnts except 'mainTnt'
+            foreach (var tnt in allTnts)
+            {
+                if (tnt != mainTnt)
+                {
+                    // Option A: disable or hide
+                    tnt.DisableRenderer();
+                }
+            }
+        });
+
+        // 2c) Now continue animating just 'mainTnt'
+        // Example: scale it up or rotate, etc.
+        sequence.Append(
+            mainTnt.transform.DOScale(2.0f, duration * 0.7f).SetEase(Ease.OutElastic)
+        );
+        sequence.Join(
+            mainTnt.transform.DORotate(new Vector3(0, 0, 360), duration * 0.7f, RotateMode.FastBeyond360)
+                .SetEase(Ease.OutElastic)
+        );
+        
+        
+        float colorFlashDuration = 0.5f;
+
+            SpriteRenderer sr = mainTnt.GetComponent<SpriteRenderer>();
+            if (sr != null)
+            {
+                Color originalColor = sr.color;
+                Color flashColor = Color.red; // pick a color you like
+
+                // color up
+                sequence.Join(
+                    sr.DOColor(flashColor, duration * 0.35f)
+                        .SetEase(Ease.OutQuad).OnComplete((() =>
+                        {
+                            sr.DOColor(originalColor, duration * 0.35f)
+                                .SetEase(Ease.InQuad);
+                        }))
+                );
+             
+            }
+            
+            float OnPartialTime = duration * partialTimeScale;
+            sequence.InsertCallback(OnPartialTime,() =>
+            {
+                onPartialTime?.Invoke();
+            });
+
+        // 3) OnComplete => set the main Tnt idle = true, invoke callback if needed
+        sequence.OnComplete(() =>
+        {
+            mainTnt.idle = true;
+            onComplete?.Invoke();
+        });
+
+        // 4) Play and yield
+        sequence.Play();
+        yield return sequence.WaitForCompletion();
+    }
+
+    /*public static IEnumerator PlayTnt(TntType tntType, Action onComplete = null)
+    {
+        switch (tntType)
+        {
+            case TntType.Regular:
+                //yield return ScaleUpAndRotate();
+                break;
+            case TntType.Mega:
+                //yield return MegaTnt();
+                break;
+        }
+    }*/
+}
+
+public struct AnimationData
+{
+    public readonly Action OnComplete;
+    public readonly IEnumerable<Tnt> ItemsToAnimate;
+    public readonly Vector3 CenterTnt;
+    public readonly Vector3 EndPosition;
+    public readonly float SingleScaleUp;
+    public readonly float AllFinalScale;
+    public readonly float Duration;
+
+    public AnimationData(Action onComplete, IEnumerable<Tnt> itemsToAnimate, Vector3 centerTnt, Vector3 endPosition, float singleScaleUp, float allFinalScale, float duration)
+    {
+        OnComplete = onComplete;
+        this.ItemsToAnimate = itemsToAnimate;
+        this.CenterTnt = centerTnt;
+        this.EndPosition = endPosition;
+        this.SingleScaleUp = singleScaleUp;
+        this.AllFinalScale = allFinalScale;
+        this.Duration = duration;
+    }
+
 
 }
