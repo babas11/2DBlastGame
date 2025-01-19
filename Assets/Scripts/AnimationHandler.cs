@@ -168,8 +168,8 @@ public static class AnimationHandler {
     }
 
     public static IEnumerator MegaTntMergeIntoOne(
-        List<Tnt> allTnts,
-        Tnt mainTnt,                    
+        List<Interactable> allTnts,
+        Interactable mainTnt,                    
         float duration,
         float partialTimeScale,
         Action onComplete = null,

@@ -37,16 +37,15 @@ public class Vase : Interactable, IObstacle
 
     public bool TakeDamage(int damage, BlastType blastType)
     {
-        // Normal blast, Vase can take multiple damages
         Health -= damage;
-        Health = Mathf.Max(Health, 0);
-        StartCoroutine(CartoonishScaleToTarget(2.5f, 1.3f, 1f));
-        ChangeSprite();
-
-        if (Health == 0)
+        if (Health > 0)
         {
-            //UpdateObjectives();
+            Health = Mathf.Max(Health, 0);
+            StartCoroutine(CartoonishScaleToTarget(2.5f, 1.3f, 1f));
+            ChangeSprite();
+            return false;
         }
+       
         return true;
     }
 
@@ -54,15 +53,7 @@ public class Vase : Interactable, IObstacle
 
     void ChangeSprite()
     {
-        if (Health > 1)
-        {
-
-        }
-        else
-        {
-            GetComponent<SpriteRenderer>().sprite = sprites[1];
-        }
-
+        GetComponent<SpriteRenderer>().sprite = sprites[1];
     }
 
    

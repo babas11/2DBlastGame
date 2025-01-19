@@ -17,6 +17,7 @@ public class Tnt : Interactable,IExplosive
     public bool exploded = false;
     public int ExplosionArea { get; } = 2;
 
+
     public void Explode()
     {
         throw new System.NotImplementedException();
@@ -28,10 +29,10 @@ public class Tnt : Interactable,IExplosive
     }
 
 
-    protected override void OnMouseDown()
+    /*protected override void OnMouseDown()
     {
         //base.OnMouseDown();
         OnTntPressed?.Invoke(this,ExplosionArea);
-    }
+    }*/
 }
 

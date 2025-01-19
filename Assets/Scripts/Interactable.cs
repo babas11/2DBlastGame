@@ -58,7 +58,7 @@ public abstract class Interactable : Mover
     /// <summary>
     /// Reference to the grid system managing the placement and state of interactable objects.
     /// </summary>
-    protected InteractableGridSystem interactableGridSystem { get; private set; }
+    protected INteractableGridSystem interactableGridSystem { get; private set; }
     protected InteractablePool interactablePool { get; private set; }
 
     private void Awake()
@@ -77,7 +77,7 @@ public abstract class Interactable : Mover
         uiController = GameObject.FindObjectOfType<UI>();
         interactablePool = FindObjectOfType<InteractablePool>();
         // Attempt to find and assign the InteractableGridSystem in the scene.
-        interactableGridSystem = FindObjectOfType<InteractableGridSystem>();
+        interactableGridSystem = FindObjectOfType<INteractableGridSystem>();
 
         if (interactableGridSystem == null)
         {
@@ -109,7 +109,7 @@ public abstract class Interactable : Mover
     /// Resets the interactable object's state to its default settings.
     /// This method should be implemented to clear or reset any transient states or properties.
     /// </summary>
-    public void ResetInteractable(Transform parent)
+    public virtual void ResetInteractable(Transform parent)
     {
         this.transform.localScale = new Vector3(1, 1, 1);
         transform.rotation = Quaternion.Euler(0,0,0);
@@ -127,5 +127,5 @@ public abstract class Interactable : Mover
     {
         spriteRenderer.enabled = true;
     }
-
+    
 }

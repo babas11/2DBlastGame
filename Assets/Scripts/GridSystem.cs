@@ -20,8 +20,7 @@ public abstract class GridSystem<T> : MonoBehaviour where T : MonoBehaviour
     /// <summary>
     /// The internal matrix representing the grid data.
     /// </summary>
-    [SerializeField]
-    T[,] matrix;
+    protected T[,] Matrix { get; private set; }
 
  
     /// <summary>
@@ -49,7 +48,7 @@ public abstract class GridSystem<T> : MonoBehaviour where T : MonoBehaviour
         }
 
         // Initialize the matrix with the specified dimensions
-        matrix = new T[dimensions.x, dimensions.y];
+        Matrix = new T[dimensions.x, dimensions.y];
     }
 
     /// <summary>
@@ -65,7 +64,7 @@ public abstract class GridSystem<T> : MonoBehaviour where T : MonoBehaviour
             Debug.LogWarning("Invalid position");
             return;
         }
-        matrix[x, y] = item;
+        Matrix[x, y] = item;
     }
 
 
@@ -84,7 +83,7 @@ public abstract class GridSystem<T> : MonoBehaviour where T : MonoBehaviour
             Debug.LogWarning("Invalid position" + x.ToString() + " " + y.ToString());
             return default;
         }
-        return matrix[x, y];
+        return Matrix[x, y];
     }    
 
      /// <summary>
@@ -122,7 +121,7 @@ public abstract class GridSystem<T> : MonoBehaviour where T : MonoBehaviour
         }
         if (!CheckBounds(x, y)) Debug.LogError($"{x}, {y} are not on the grid");
 
-        matrix[x, y] = default;
+        Matrix[x, y] = default;
     }
 
     public void RemoveItemsAt(List<Vector2Int> positions)
@@ -132,7 +131,7 @@ public abstract class GridSystem<T> : MonoBehaviour where T : MonoBehaviour
             RemoveItemAt(position.x, position.y);
         }
     }
-
+    
     /// <summary>
     /// Determines whether the specified grid cell is empty.
     /// A cell is considered empty if it contains the default value of T.
@@ -146,7 +145,7 @@ public abstract class GridSystem<T> : MonoBehaviour where T : MonoBehaviour
 
 
         //return data[x, y] == null;
-        return EqualityComparer<T>.Default.Equals(matrix[x, y], default);
+        return EqualityComparer<T>.Default.Equals(Matrix[x, y], default);
     }
 
      /// <summary>

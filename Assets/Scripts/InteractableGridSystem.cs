@@ -1,4 +1,4 @@
-using System;
+/*using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
@@ -496,7 +496,7 @@ public class InteractableGridSystem : GridSystem<Interactable>
         {
             Tnt current = queue.Dequeue();
             
-            int range = isMegaTnt? 7 : 5;
+            int range = isMega? 7 : 5;
             
             isMega = false;
             
@@ -673,8 +673,7 @@ public class InteractableGridSystem : GridSystem<Interactable>
         {
             SearForMatches(startInteractable, matches);
         }
-
-
+        
         matchList = matches;
 
         return matches.Count > 1;
@@ -863,4 +862,4 @@ public class InteractableGridSystem : GridSystem<Interactable>
     }
 
     
-}
+}*/

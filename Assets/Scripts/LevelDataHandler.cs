@@ -14,7 +14,7 @@ public class LevelDataHandler : MonoBehaviour
 
         if (level < 10)
         {
-            return $"level_0{4}.json";
+            return $"level_0{6}.json";
         }
         else
         {
@@ -74,6 +74,11 @@ public class LevelDataHandler : MonoBehaviour
     {
         string json = JsonUtility.ToJson(newlevelData, true);
         File.WriteAllText(SavePath, json);
+    }
+
+    public string[] GetLevel()
+    {
+        return levelData.grid.ToArray();
     }
 
 
