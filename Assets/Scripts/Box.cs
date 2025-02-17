@@ -45,15 +45,13 @@ public class Box : Interactable, IObstacle
             //Destroy the object
             //UpdateObjectives();
             KillObstacle();
-
         }
-
         return true;
     }
 
     public void UpdateObjectives()
     {
-        //uiController.UpdateObjectives(this);
+        
     }
 
     public void KillObstacle()

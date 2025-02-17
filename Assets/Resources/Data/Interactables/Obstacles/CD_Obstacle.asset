@@ -1,0 +1,202 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 8d019b5a314449f390ab5a4a09759767, type: 3}
+  m_Name: CD_Obstacle
+  m_EditorClassIdentifier: 
+  serializationData:
+    SerializedFormat: 2
+    SerializedBytes: 
+    ReferencedUnityObjects:
+    - {fileID: 21300000, guid: 9b76118e30c632343a351f6c42a0e7db, type: 3}
+    - {fileID: 21300000, guid: bb0dd12e38ecbac44809ab225f067c2c, type: 3}
+    - {fileID: 21300000, guid: e3ee8378d88dd3747ae9dfc4e4ab3d50, type: 3}
+    - {fileID: 21300000, guid: 9086313e3c327b14c9b7f3c9eeb11a99, type: 3}
+    SerializedBytesString: 
+    Prefab: {fileID: 0}
+    PrefabModificationsReferencedUnityObjects: []
+    PrefabModifications: []
+    SerializationNodes:
+    - Name: Data
+      Entry: 7
+      Data: 0|System.Collections.Generic.Dictionary`2[[Script.Enums.ObstaccleType,
+        Assembly-CSharp],[Script.Data.ValueObjects.ObstaccleData, Assembly-CSharp]],
+        mscorlib
+    - Name: comparer
+      Entry: 7
+      Data: 1|System.Collections.Generic.EnumEqualityComparer`1[[Script.Enums.ObstaccleType,
+        Assembly-CSharp]], mscorlib
+    - Name: 
+      Entry: 12
+      Data: 0
+    - Name: 
+      Entry: 13
+      Data: 
+    - Name: 
+      Entry: 8
+      Data: 
+    - Name: 
+      Entry: 12
+      Data: 3
+    - Name: 
+      Entry: 7
+      Data: 
+    - Name: $k
+      Entry: 3
+      Data: 0
+    - Name: $v
+      Entry: 7
+      Data: Script.Data.ValueObjects.ObstaccleData, Assembly-CSharp
+    - Name: CanFall
+      Entry: 5
+      Data: false
+    - Name: DefaultSprite
+      Entry: 10
+      Data: 0
+    - Name: Health
+      Entry: 3
+      Data: 1
+    - Name: DamagedSprites
+      Entry: 6
+      Data: 
+    - Name: MatrixPosition
+      Entry: 7
+      Data: UnityEngine.Vector2Int, UnityEngine.CoreModule
+    - Name: 
+      Entry: 3
+      Data: 0
+    - Name: 
+      Entry: 3
+      Data: 0
+    - Name: 
+      Entry: 8
+      Data: 
+    - Name: ObstacleType
+      Entry: 3
+      Data: 0
+    - Name: OnlyPowerDamage
+      Entry: 5
+      Data: false
+    - Name: 
+      Entry: 8
+      Data: 
+    - Name: 
+      Entry: 8
+      Data: 
+    - Name: 
+      Entry: 7
+      Data: 
+    - Name: $k
+      Entry: 3
+      Data: 1
+    - Name: $v
+      Entry: 7
+      Data: Script.Data.ValueObjects.ObstaccleData, Assembly-CSharp
+    - Name: CanFall
+      Entry: 5
+      Data: true
+    - Name: DefaultSprite
+      Entry: 10
+      Data: 1
+    - Name: Health
+      Entry: 3
+      Data: 2
+    - Name: DamagedSprites
+      Entry: 7
+      Data: 2|System.Collections.Generic.List`1[[UnityEngine.Sprite, UnityEngine.CoreModule]],
+        mscorlib
+    - Name: 
+      Entry: 12
+      Data: 1
+    - Name: 
+      Entry: 10
+      Data: 2
+    - Name: 
+      Entry: 13
+      Data: 
+    - Name: 
+      Entry: 8
+      Data: 
+    - Name: MatrixPosition
+      Entry: 7
+      Data: UnityEngine.Vector2Int, UnityEngine.CoreModule
+    - Name: 
+      Entry: 3
+      Data: 0
+    - Name: 
+      Entry: 3
+      Data: 0
+    - Name: 
+      Entry: 8
+      Data: 
+    - Name: ObstacleType
+      Entry: 3
+      Data: 1
+    - Name: OnlyPowerDamage
+      Entry: 5
+      Data: false
+    - Name: 
+      Entry: 8
+      Data: 
+    - Name: 
+      Entry: 8
+      Data: 
+    - Name: 
+      Entry: 7
+      Data: 
+    - Name: $k
+      Entry: 3
+      Data: 2
+    - Name: $v
+      Entry: 7
+      Data: Script.Data.ValueObjects.ObstaccleData, Assembly-CSharp
+    - Name: CanFall
+      Entry: 5
+      Data: false
+    - Name: DefaultSprite
+      Entry: 10
+      Data: 3
+    - Name: Health
+      Entry: 3
+      Data: 1
+    - Name: DamagedSprites
+      Entry: 6
+      Data: 
+    - Name: MatrixPosition
+      Entry: 7
+      Data: UnityEngine.Vector2Int, UnityEngine.CoreModule
+    - Name: 
+      Entry: 3
+      Data: 0
+    - Name: 
+      Entry: 3
+      Data: 0
+    - Name: 
+      Entry: 8
+      Data: 
+    - Name: ObstacleType
+      Entry: 3
+      Data: 2
+    - Name: OnlyPowerDamage
+      Entry: 5
+      Data: true
+    - Name: 
+      Entry: 8
+      Data: 
+    - Name: 
+      Entry: 8
+      Data: 
+    - Name: 
+      Entry: 13
+      Data: 
+    - Name: 
+      Entry: 8
+      Data: 
