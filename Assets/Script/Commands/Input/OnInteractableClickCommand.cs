@@ -4,7 +4,7 @@ namespace Script.Commands.Input
 {
     public class OnInteractableClickCommand 
     {
-        private Interactable _interactable;
+        /*private Interactable _interactable;
 
         public OnInteractableClickCommand(Interactable interactable)
         {
@@ -16,6 +16,6 @@ namespace Script.Commands.Input
             // Trigger Some Actions
             //BlastManager.OnInteractableSelected?.Invoke(Interactable)
             Debug.Log($"OnInteractableClickCommand, {_interactable.Type}");
-        }
+        }*/
     }
 }

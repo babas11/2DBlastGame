@@ -24,7 +24,6 @@ namespace Script.Managers
 
         private void OnLevelSceneInitialize()
         {
-            print("LevelPanel");
             CoreUISignals.Instance.onOpenPanel?.Invoke(UIPanelTypes.Level,0);
         }
 

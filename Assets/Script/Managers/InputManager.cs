@@ -2,6 +2,8 @@ using System.Collections.Generic;
 using Script.Commands.Input;
 using Script.Data.UnityObjects;
 using Script.Data.ValueObjects;
+using Script.Interfaces;
+using Script.Managers;
 using Script.Signals;
 using UnityEngine;
 using UnityEngine.EventSystems;
@@ -28,7 +30,7 @@ public class InputManager : MonoBehaviour
 
     private InputData GetInputData()
     {
-        return Resources.Load<CD_Input>("Data/InputData").Data;
+        return Resources.Load<CD_Input>("Data/Input/InputData").Data;
     }
 
     private void OnEnable()
@@ -75,13 +77,6 @@ public class InputManager : MonoBehaviour
             
             InputSignals.Instance.onInputTaken?.Invoke();
             Debug.Log("Executed ---onInputTaken---");
-            
-            if (!_isFirstTimeTouchTaken)
-            {
-                _isFirstTimeTouchTaken = true;
-                InputSignals.Instance.onFirstTimeTouchTaken?.Invoke();
-                Debug.Log("Executed ---onFirstTimeTouchTaken---");
-            }
         }
         
         if (Input.GetMouseButtonUp(0) && !IsPointerOverUIElement())
@@ -97,15 +92,21 @@ public class InputManager : MonoBehaviour
                 return;
             }
             
-            Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
-            if (Physics.Raycast(ray, out RaycastHit hitInfo, 100f)) 
+            Vector2 mouseWorldPos = Camera.main.ScreenToWorldPoint(Input.mousePosition);
+            RaycastHit2D hitInfo = Physics2D.Raycast(mouseWorldPos, Vector2.zero);
+            if (hitInfo != null)
             {
-                var interactable = hitInfo.collider.GetComponent<Interactable>();
-                if (interactable != null)
+                IGridElement touchedElement;
+                if (hitInfo.collider.CompareTag("Cube"))
                 {
-                    // 1C. Create and execute a command
-                    var clickCommand = new OnInteractableClickCommand(interactable);
-                    clickCommand.Execute();
+                    touchedElement = hitInfo.transform.GetComponentInParent<CubeManager>();
+                    InputSignals.Instance.onGridTouch?.Invoke(touchedElement);
+                    
+                }
+                else if (hitInfo.collider.CompareTag("Obstacle"))
+                {
+                    touchedElement = hitInfo.transform.GetComponentInParent<ObstacleManager>();
+                    InputSignals.Instance.onGridTouch?.Invoke(touchedElement);
                 }
             }
         }

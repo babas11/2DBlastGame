@@ -86,11 +86,11 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 7048563434237669301, guid: c146bc244a32a4f8dbf87b48c49a5f10, type: 3}
       propertyPath: m_SpriteTilingProperty.oldSize.x
-      value: 0.49824563
+      value: 0.47333333
       objectReference: {fileID: 0}
     - target: {fileID: 7048563434237669301, guid: c146bc244a32a4f8dbf87b48c49a5f10, type: 3}
       propertyPath: m_SpriteTilingProperty.oldSize.y
-      value: 0.56842107
+      value: 0.54
       objectReference: {fileID: 0}
     - target: {fileID: 7581675275785504965, guid: c146bc244a32a4f8dbf87b48c49a5f10, type: 3}
       propertyPath: m_Name
@@ -100,27 +100,5 @@ PrefabInstance:
     - {fileID: 7022935656069499754, guid: c146bc244a32a4f8dbf87b48c49a5f10, type: 3}
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
-    m_AddedComponents:
-    - targetCorrespondingSourceObject: {fileID: 7581675275785504965, guid: c146bc244a32a4f8dbf87b48c49a5f10, type: 3}
-      insertIndex: -1
-      addedObject: {fileID: 5470597563362776149}
+    m_AddedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: c146bc244a32a4f8dbf87b48c49a5f10, type: 3}
---- !u!1 &3682432742778492067 stripped
-GameObject:
-  m_CorrespondingSourceObject: {fileID: 7581675275785504965, guid: c146bc244a32a4f8dbf87b48c49a5f10, type: 3}
-  m_PrefabInstance: {fileID: 6497889900167879782}
-  m_PrefabAsset: {fileID: 0}
---- !u!114 &5470597563362776149
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 3682432742778492067}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: c2b57d2ffa60e214ea79f8f8081c4056, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  type: 6
-  matrixPosition: {x: 0, y: 0}

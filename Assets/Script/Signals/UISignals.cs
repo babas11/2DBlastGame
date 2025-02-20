@@ -15,7 +15,7 @@ namespace Script.Signals
         
         
         public UnityAction<byte> onSetMainLevelData = delegate{};
-        public UnityAction<GridData> onSetGameLevelData = delegate{};
+        public UnityAction<JsonLevelData> onSetGameLevelData = delegate{};
         public UnityAction onLevelPlay = delegate{};
         
     }

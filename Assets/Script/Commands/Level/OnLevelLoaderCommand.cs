@@ -17,7 +17,7 @@ namespace Script.Commands.Level
 
         public void Execute()
         {
-            _levelIndex = _data.Grid.level_number;
+            _levelIndex = _data.jsonLevel.level_number;
             string levelIndexString  = _levelIndex > 9 ? _levelIndex.ToString() : $"0{_levelIndex}";
             
             _levelName = GetCurrentLevelName();

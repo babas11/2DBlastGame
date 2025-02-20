@@ -11,7 +11,7 @@ namespace Script.Data.ValueObjects
         public bool CanFall;
         public Sprite DefaultSprite;
         public byte Health;
-        public List<Sprite> DamagedSprites;
+        public Sprite[] Sprites;
         public Vector2Int MatrixPosition;
         public ObstaccleType ObstacleType;
         public bool OnlyPowerDamage;

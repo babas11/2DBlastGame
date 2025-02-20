@@ -27,17 +27,17 @@ namespace Script.Managers
 
         private void Awake()
         {
-            _levelData.Grid = GetLevelData();
+            _levelData.jsonLevel = GetLevelData();
             _currentLevel = GetActiveLevel();
             _levelName = SceneManager.GetActiveScene().name;
         }
 
         
-        private GridData GetLevelData()
+        private JsonLevelData GetLevelData()
         {
             string levelIndexString  = currentLevel > 9 ? currentLevel.ToString() : $"0{currentLevel}";
             var textAsset = Resources.Load<TextAsset>($"Data/Levels/level_{levelIndexString}"); 
-            return JsonUtility.FromJson<GridData>(textAsset.text);
+            return JsonUtility.FromJson<JsonLevelData>(textAsset.text);
             
         }
         
