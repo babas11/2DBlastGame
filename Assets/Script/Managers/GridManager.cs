@@ -80,6 +80,38 @@ namespace Script.Managers
         {
             SubscribeEvents();
         }
+
+        [Button]
+        private void DebugGrid()
+        {
+            // Just a header for clarity
+            Debug.Log("=== Grid Debug Start ===");
+
+            // We can loop from top row (y = _dimensions.y - 1) down to bottom (y = 0),
+            // or bottom to top – whichever you prefer. Here we go bottom to top.
+            for (int y = _dimensions.y - 1; y >= 0; y--)
+            {
+                // Build a single string representing row y
+                string rowInfo = $"Row {y}: ";
+
+                for (int x = 0; x < _dimensions.x; x++)
+                {
+                    IGridElement element = _grid[x, y];
+                    if (element != null)
+                    {
+                        rowInfo += $"{element.Type} ";
+                    }
+                    else
+                    {
+                        rowInfo += "[null] ";
+                    }
+                }
+
+                Debug.Log(rowInfo);
+            }
+
+            Debug.Log("=== Grid Debug End ===");
+        }
         
         private void SubscribeEvents()
         {
@@ -87,7 +119,7 @@ namespace Script.Managers
             GridSignals.Instance.onGridPlaced += OnGridPlaced;
             GridSignals.Instance.onElementsFall += _fallElementCommand.Execute;
             GridSignals.Instance.onSetCubeState += _gridCubeStateCommand.Execute;
-            GridSignals.Instance.onBlastCompleted += _gridFallCommand.Execute;
+            GridSignals.Instance.onBlastCompleted += OnBlastCompleted;
             InputSignals.Instance.onGridTouch += _onridTouchCommand.Execute;
         }
 
@@ -103,6 +135,12 @@ namespace Script.Managers
             InputSignals.Instance.onEnableInput?.Invoke();
         }
 
+        private void OnBlastCompleted()
+        {
+            _gridFallCommand.Execute();
+            _buidGridCommand.Execute(_gridElementsParent,false);
+        }
+
         private void OnDisable()
         {
             Unsubscribe();
@@ -114,7 +152,7 @@ namespace Script.Managers
             GridSignals.Instance.onGridPlaced -= OnGridPlaced;
             GridSignals.Instance.onElementsFall -= _fallElementCommand.Execute;
             GridSignals.Instance.onSetCubeState -= _gridCubeStateCommand.Execute;
-            GridSignals.Instance.onBlastCompleted -= _gridFallCommand.Execute;
+            GridSignals.Instance.onBlastCompleted -= OnBlastCompleted;
             InputSignals.Instance.onGridTouch -= _onridTouchCommand.Execute;
         }
     }

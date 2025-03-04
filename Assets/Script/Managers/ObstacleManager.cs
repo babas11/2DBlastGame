@@ -48,7 +48,6 @@ namespace Script.Managers
         public InteractableType Type => _interactableType;
         public bool CanFall => _canFall;
         
-        public bool IsIdle { get; set; } = true;
         
         #endregion
 
@@ -61,6 +60,7 @@ namespace Script.Managers
             _canFall = _obstacleData.Data[assignedType.InteractableTypeToObstacleType()].CanFall;
             _matrixPosition = matrixPosition;
             transform.position = worldPosition;
+            transform.localScale = new Vector3(1, 1, 1);
             _obstacleType = assignedType.InteractableTypeToObstacleType();
             _interactableType = assignedType;
             _obtacleHealth = _obstacleTypeData.Health; 

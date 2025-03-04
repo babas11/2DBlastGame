@@ -55,7 +55,7 @@ namespace Script.Utilities.Grid
         {
             if (!CheckBounds(x,y))
             {
-                Debug.LogWarning("Invalid position");
+                //Debug.LogWarning("Invalid position");
                 return;
             }
             _matrix[x, y] = default;

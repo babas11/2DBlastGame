@@ -22,7 +22,7 @@ namespace Script.Commands.Grid
         private CD_Grid _gridData;
         private Vector2Int _dimensions;
         private GridManipulationUtilities<IGridElement> gridManipulationUtilities;
-
+        
         public BuildGridCommand(GridManager manager, JsonLevelData data, ref IGridElement[,] grid, GridManipulationUtilities<IGridElement> gridManipulationUtilities, CD_Grid gridData)
         {
             _manager = manager;
@@ -34,7 +34,7 @@ namespace Script.Commands.Grid
             _gridData = gridData;
         }
 
-        public void Execute(Transform parentTransform)
+        public void Execute(Transform parentTransform, bool isInitialFil = true)
         {
             Vector3 onScreenPosition;
             Vector2Int matrixPosition;
@@ -52,14 +52,22 @@ namespace Script.Commands.Grid
                         matrixPosition = new Vector2Int(x, y);
                         onScreenPosition = gridManipulationUtilities.GridPositionToWorldPosition(x, y);
                         Vector3 offScreenPosition = new Vector3(onScreenPosition.x, onScreenPosition.y + (_dimensions.y + 1) * gridUnit , onScreenPosition.z);
-                        newGridElement = SetNewElement(_data,arrayIndex,matrixPosition,offScreenPosition,parentTransform);
+                        if (isInitialFil)
+                        {
+                            newGridElement = SetNewElementFromJson(_data,arrayIndex,matrixPosition,offScreenPosition,parentTransform);
+                        }
+                        else
+                        {
+                            newGridElement = FillRandomElement(arrayIndex,matrixPosition,offScreenPosition,parentTransform);
+                        }
+                        
                         gridManipulationUtilities.PutItemAt(x, y, newGridElement);
                         arrayIndex++;
                         toAnimate.Add(newGridElement);
                         // Animate the interactables in the current row to their positions
                     }
                 }
-                GridSignals.Instance.onElementsFall?.Invoke(new FallElementBach(toAnimate,(_dimensions.y + 1) * gridUnit));
+                GridSignals.Instance.onElementsFall?.Invoke(new FallingElementGroup(toAnimate,(_dimensions.y + 1) * gridUnit));
                 toAnimate.Clear();
             }
 
@@ -73,16 +81,19 @@ namespace Script.Commands.Grid
             }
             */
             GridSignals.Instance.onSetCubeState?.Invoke();
-            GridSignals.Instance.onGridPlaced?.Invoke();
+            if (isInitialFil)
+            {
+                GridSignals.Instance.onGridPlaced?.Invoke();
+            }
+            
             GridSignals.Instance.onSetSortOrder?.Invoke();
         }
 
-        private IGridElement SetNewElement(JsonLevelData data, int arrayIndex,Vector2Int matrixPosition,Vector3 worldPosition,Transform parentTransform)
+        private IGridElement SetNewElementFromJson(JsonLevelData data, int arrayIndex,Vector2Int matrixPosition,Vector3 worldPosition,Transform parentTransform)
         {
             IGridElement gridElement;
-            
-            string elementStringKey = data.grid[arrayIndex];
-            switch (elementStringKey.StringToPoolType())
+            string elementKey = data.grid[arrayIndex];
+            switch (elementKey.StringToPoolType())
             {
                 case InteractableBehaviorType.Cube:
                     gridElement = PoolSignals.Instance.onGetCubeFromPool.Invoke();
@@ -94,20 +105,32 @@ namespace Script.Commands.Grid
                     throw new ArgumentException("Unassigned behavior type");
                     break;
             }
+            
             gridElement.ElementTransfom.SetParent(parentTransform);
-
-            if (elementStringKey.StringToInteractableType() == InteractableType.random)
+            InteractableType itemType = elementKey.StringToInteractableType();
+            
+            if (elementKey.StringToInteractableType() == InteractableType.random)
             {
-                int enumIdex = UnityEngine.Random.Range(0,Enum.GetValues(typeof(CubeType)).Length);
-                CubeType cubeType = (CubeType)enumIdex;
-                gridElement.SetGridElement(cubeType.CubeTypeToInteractableType(),matrixPosition,worldPosition);
-            }
-            else
-            {
-                gridElement.SetGridElement(data.grid[arrayIndex].StringToInteractableType(),matrixPosition,worldPosition);
+                itemType = CreateRandomType();
             }
             
+            gridElement.SetGridElement(itemType,matrixPosition,worldPosition);
             return gridElement;
+        }
+        private IGridElement FillRandomElement(int arrayIndex,Vector2Int matrixPosition,Vector3 worldPosition,Transform parentTransform)
+        {
+            IGridElement gridElement = PoolSignals.Instance.onGetCubeFromPool.Invoke();
+            gridElement.ElementTransfom.SetParent(parentTransform);
+            InteractableType itemType = CreateRandomType();
+            gridElement.SetGridElement(itemType,matrixPosition,worldPosition);
+            return gridElement;
+        }
+
+        private InteractableType CreateRandomType()
+        {
+            int enumIdex = UnityEngine.Random.Range(0,Enum.GetValues(typeof(CubeType)).Length);
+            CubeType cubeType = (CubeType)enumIdex;
+            return cubeType.CubeTypeToInteractableType();
         }
     }
 }

@@ -28,7 +28,7 @@ namespace Script.Commands.Grid
                     {
                         for (int yAbove = y + 1; yAbove < _dimensions.y; yAbove++)
                         {
-                            if (!_gridManipulationUtilities.IsEmpty(x, yAbove) && _gridManipulationUtilities.GetItemAt(x, yAbove).IsIdle)
+                            if (!_gridManipulationUtilities.IsEmpty(x, yAbove))
                             {
                                 var interactable = _gridManipulationUtilities.GetItemAt(x, yAbove);
                                 bool canFall = interactable.CanFall;
@@ -48,15 +48,13 @@ namespace Script.Commands.Grid
             _gridManipulationUtilities.RemoveItemAt(interactable.MatrixPosition.x, interactable.MatrixPosition.y);
             _gridManipulationUtilities.PutItemAt(x, y, interactable);
             interactable.SetMetrixPosition(new Vector2Int(x, y));
-            MoveTo(interactable,_gridManipulationUtilities.GridPositionToWorldPosition(x, y), 0.1f);
+            MoveTo(interactable,_gridManipulationUtilities.GridPositionToWorldPosition(x, y), 0.3f);
         }
         private  void MoveTo(IGridElement element,Vector3 targetPosition, float duration, Ease ease = Ease.Linear, Action onComplete = null)
         {
-            element.IsIdle = false;
             Tween tween = element.ElementTransfom.DOMove(targetPosition, duration).SetEase(ease);
             tween.OnComplete(() =>
             {
-                element.IsIdle = true;
                 onComplete?.Invoke();
             });
         }

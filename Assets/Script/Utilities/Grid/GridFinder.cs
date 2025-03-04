@@ -193,7 +193,6 @@ namespace Script.Utilities.Grid
                     }
                 }
             }
-
             return nearInteractables.Count > 0;
         }
         

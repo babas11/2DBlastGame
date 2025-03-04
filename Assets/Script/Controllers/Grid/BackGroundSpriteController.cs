@@ -35,7 +35,7 @@ namespace Script.Controllers.Grid
         
         public void SetGridBackGroundSprite()
         {
-            _renderer.sortingOrder = -1;
+            _renderer.sortingOrder = 0;
             _renderer.sprite = _data.GridViewData.GridBackground;
             float overScale = _data.GridViewData.BackgroundOverScale;
             float gridUnit = _data.GridViewData.GridUnit;

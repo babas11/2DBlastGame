@@ -49,7 +49,7 @@ namespace Script.Controllers.Cube
 
         internal void SetSortingOrder(Vector2Int matrixPosition)
         {
-            spriteRenderer.sortingOrder = matrixPosition.y;
+            spriteRenderer.sortingOrder = matrixPosition.y + 1;
         }
 
 

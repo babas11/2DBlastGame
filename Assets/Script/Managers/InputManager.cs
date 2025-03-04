@@ -1,129 +1,130 @@
 using System.Collections.Generic;
-using Script.Commands.Input;
 using Script.Data.UnityObjects;
 using Script.Data.ValueObjects;
 using Script.Interfaces;
-using Script.Managers;
 using Script.Signals;
 using UnityEngine;
 using UnityEngine.EventSystems;
 
-public class InputManager : MonoBehaviour
+namespace Script.Managers
 {
-    #region Self Variables
-
-    #region Private Variables
-
-    private InputData _data;
-    private bool _isAvailableForTouch, _isFirstTimeTouchTaken, _isTouching;
-    private float _tapTime;
-
-    #endregion
-
-
-    #endregion
-
-    private void Awake()
+    public class InputManager : MonoBehaviour
     {
-        _data = GetInputData();
-    }
+        #region Self Variables
 
-    private InputData GetInputData()
-    {
-        return Resources.Load<CD_Input>("Data/Input/InputData").Data;
-    }
+        #region Private Variables
 
-    private void OnEnable()
-    {
-        SubscribeEvents();
-    }
+        private InputData _data;
+        private bool _isAvailableForTouch, _isFirstTimeTouchTaken, _isTouching;
+        private float _tapTime;
 
-    private void SubscribeEvents()
-    {
-        CoreGameSignals.Instance.onResetActiveLevel += OnReset;
-        InputSignals.Instance.onEnableInput += OnEnableInput;
-        InputSignals.Instance.onDisableInput += OnDisableInput;
-    }
+        #endregion
 
-    private void OnReset()
-    {
-        _isAvailableForTouch = false;
-        _isFirstTimeTouchTaken = false;
-        _isTouching = false;
-    }
-    private void OnEnableInput()
-    {
-        _isAvailableForTouch = true;
-    }
-    private void OnDisableInput()
-    {
-        _isAvailableForTouch = false;
-    }
-    private void UnSubscribeEvents()
-    {
-        CoreGameSignals.Instance.onResetActiveLevel -= OnReset;
-        InputSignals.Instance.onEnableInput -= OnEnableInput;
-        InputSignals.Instance.onDisableInput -= OnDisableInput;
-    }
+
+        #endregion
+
+        private void Awake()
+        {
+            _data = GetInputData();
+        }
+
+        private InputData GetInputData()
+        {
+            return Resources.Load<CD_Input>("Data/Input/InputData").Data;
+        }
+
+        private void OnEnable()
+        {
+            SubscribeEvents();
+        }
+
+        private void SubscribeEvents()
+        {
+            CoreGameSignals.Instance.onResetActiveLevel += OnReset;
+            InputSignals.Instance.onEnableInput += OnEnableInput;
+            InputSignals.Instance.onDisableInput += OnDisableInput;
+        }
+
+        private void OnReset()
+        {
+            _isAvailableForTouch = false;
+            _isFirstTimeTouchTaken = false;
+            _isTouching = false;
+        }
+        private void OnEnableInput()
+        {
+            _isAvailableForTouch = true;
+        }
+        private void OnDisableInput()
+        {
+            _isAvailableForTouch = false;
+        }
+        private void UnSubscribeEvents()
+        {
+            CoreGameSignals.Instance.onResetActiveLevel -= OnReset;
+            InputSignals.Instance.onEnableInput -= OnEnableInput;
+            InputSignals.Instance.onDisableInput -= OnDisableInput;
+        }
     
         private void Update()
-    {
-        if (!_isAvailableForTouch) return;
-        
-        if (Input.GetMouseButtonDown(0) && !IsPointerOverUIElement())
         {
-            _isTouching = true;
-            _tapTime = Time.time;
-            
-            InputSignals.Instance.onInputTaken?.Invoke();
-            Debug.Log("Executed ---onInputTaken---");
-        }
+            if (!_isAvailableForTouch) return;
         
-        if (Input.GetMouseButtonUp(0) && !IsPointerOverUIElement())
-        {
-            _isTouching = false;
-            InputSignals.Instance.onInputReleased?.Invoke();
-            Debug.Log("Executed ---onInputReleased---");
-            
-            float tapDuration = Time.time - _tapTime;
-            if (tapDuration > _data.maxValidInputTime)
+            if (Input.GetMouseButtonDown(0) && !IsPointerOverUIElement())
             {
-                Debug.Log("Tap too long! Ignoring interaction.");
-                return;
+                _isTouching = true;
+                _tapTime = Time.time;
+            
+                InputSignals.Instance.onInputTaken?.Invoke();
+                Debug.Log("Executed ---onInputTaken---");
             }
-            
-            Vector2 mouseWorldPos = Camera.main.ScreenToWorldPoint(Input.mousePosition);
-            RaycastHit2D hitInfo = Physics2D.Raycast(mouseWorldPos, Vector2.zero);
-            if (hitInfo.collider != null)
+        
+            if (Input.GetMouseButtonUp(0) && !IsPointerOverUIElement())
             {
-                IGridElement touchedElement;
-                if (hitInfo.collider.CompareTag("Cube"))
+                _isTouching = false;
+                InputSignals.Instance.onInputReleased?.Invoke();
+                Debug.Log("Executed ---onInputReleased---");
+            
+                float tapDuration = Time.time - _tapTime;
+                if (tapDuration > _data.maxValidInputTime)
                 {
-                    touchedElement = hitInfo.transform.GetComponentInParent<CubeManager>();
-                    InputSignals.Instance.onGridTouch?.Invoke(touchedElement);
+                    Debug.Log("Tap too long! Ignoring interaction.");
+                    return;
+                }
+            
+                Vector2 mouseWorldPos = Camera.main.ScreenToWorldPoint(Input.mousePosition);
+                RaycastHit2D hitInfo = Physics2D.Raycast(mouseWorldPos, Vector2.zero);
+                if (hitInfo.collider != null)
+                {
+                    IGridElement touchedElement;
+                    if (hitInfo.collider.CompareTag("Cube"))
+                    {
+                        touchedElement = hitInfo.transform.GetComponentInParent<CubeManager>();
+                        InputSignals.Instance.onGridTouch?.Invoke(touchedElement);
                     
-                }
-                else if (hitInfo.collider.CompareTag("Obstacle"))
-                {
-                    touchedElement = hitInfo.transform.GetComponentInParent<ObstacleManager>();
-                    InputSignals.Instance.onGridTouch?.Invoke(touchedElement);
+                    }
+                    else if (hitInfo.collider.CompareTag("Obstacle"))
+                    {
+                        touchedElement = hitInfo.transform.GetComponentInParent<ObstacleManager>();
+                        InputSignals.Instance.onGridTouch?.Invoke(touchedElement);
+                    }
                 }
             }
         }
-    }
-    void OnDisable()
-    {
-        UnSubscribeEvents();
-    }
-    private bool IsPointerOverUIElement()
-    {
-        PointerEventData eventData = new PointerEventData(EventSystem.current)
+        void OnDisable()
         {
-            position = Input.mousePosition
-        };
-        List<RaycastResult> results = new List<RaycastResult>();
-        EventSystem.current.RaycastAll(eventData, results);
-        return results.Count > 0;
-    }
+            UnSubscribeEvents();
+        }
+        private bool IsPointerOverUIElement()
+        {
+            PointerEventData eventData = new PointerEventData(EventSystem.current)
+            {
+                position = Input.mousePosition
+            };
+            List<RaycastResult> results = new List<RaycastResult>();
+            EventSystem.current.RaycastAll(eventData, results);
+            return results.Count > 0;
+        }
 
+    }
 }

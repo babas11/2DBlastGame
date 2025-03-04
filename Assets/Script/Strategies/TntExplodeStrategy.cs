@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using System.Linq;
 using DG.Tweening;
 using Script.Enums;
 using Script.Extensions;
@@ -13,6 +14,8 @@ namespace Script.Strategies
     {
         private GridManipulationUtilities<IGridElement> _gridUtils;
         private GridFinder _gridFinder;
+        private const int NormalRange = 2;
+        private const int SynergyRange = 3;
 
         public TntExplodeStrategy(GridManipulationUtilities<IGridElement> gridUtils, GridFinder gridFinder)
         {
@@ -22,11 +25,19 @@ namespace Script.Strategies
 
         public void Explode(IGridElement startTnt)
         {
+            bool isMegaTnt =_gridFinder.LookForInteractablesOnAxis(out HashSet<IGridElement> nearTnts, startTnt, 
+                x => x.Type == InteractableType.tnt);
             HashSet<IGridElement> visited = new HashSet<IGridElement>();
-        
-            List<IGridElement> firstWave = new List<IGridElement> { startTnt };
 
-            ExplodeWave(firstWave, visited);
+            if (isMegaTnt)
+            {
+                CombineThenExplodeFistMegaTnt(startTnt, nearTnts.ToList(), visited);
+            }
+            else
+            {
+                List<IGridElement> firstWave = new List<IGridElement> { startTnt };
+                ExplodeWave(firstWave, visited);
+            }
         }
 
         private void ExplodeWave(List<IGridElement> currentWave, HashSet<IGridElement> visited)
@@ -58,6 +69,7 @@ namespace Script.Strategies
                 
                 waveSequence.AppendCallback(() =>
                 {
+                    
                     List<IGridElement> newlyFoundTnt = HandleTntExplosion(tnt);
 
                     foreach (var newTnt in newlyFoundTnt)
@@ -78,14 +90,68 @@ namespace Script.Strategies
             waveSequence.Play();
         }
 
-        private List<IGridElement> HandleTntExplosion(IGridElement tnt)
+
+        private void CombineThenExplodeFistMegaTnt(IGridElement mainTnt,List<IGridElement> otherTnts, HashSet<IGridElement> visited)
         {
-            List<IGridElement> chainTnt = _gridFinder.GetChainElementsInRange(tnt, InteractableType.tnt, 2);
+            visited.Add(mainTnt);
+            
+            Sequence seq = DOTween.Sequence();
+            // 1) Move the other TNT to the mainTnt's position (combine)
+            foreach (var tnt in otherTnts)
+            {
+                seq.Join(
+                    tnt.ElementTransfom.DOMove(
+                        mainTnt.ElementTransfom.position, 0.2f
+                    )
+                        .OnComplete(() =>
+                        {
+                            RemoveTnt(tnt);
+                        })
+                );
+            }
+
+            seq.Append(
+                
+                mainTnt.ElementTransfom.DOScale(2.0f, 0.15f * 0.7f).SetEase(Ease.OutElastic)
+            );
+            seq.Join(
+                mainTnt.ElementTransfom.DORotate(new Vector3(0, 0, 360), 0.15f * 0.7f, RotateMode.FastBeyond360)
+                    .SetEase(Ease.OutElastic)
+            );
+            
+
+            // 4) Then do the "mega" explosion with synergy range
+            seq.AppendCallback(() =>
+            {
+                DamageSurroundingElements(mainTnt, SynergyRange);
+                
+            });
+            
+            // 5) After finishing this wave, gather the next wave
+            List<IGridElement> nextWave = new List<IGridElement>();
+            
+            seq.OnComplete(() =>
+            {
+                List<IGridElement> newlyFoundTnt = HandleTntExplosion(mainTnt,SynergyRange);
+
+                foreach (var newTnt in newlyFoundTnt)
+                {
+                    if (!visited.Contains(newTnt))
+                    {
+                        nextWave.Add(newTnt);
+                    }
+                }
+                ExplodeWave(nextWave, visited); 
+            });
+
+            seq.Play();
+        }
+        private List<IGridElement> HandleTntExplosion(IGridElement tnt, int range = NormalRange)
+        {
+            List<IGridElement> chainTnt = _gridFinder.GetChainElementsInRange(tnt, InteractableType.tnt, range);
             chainTnt.Remove(tnt);
-            
-            DamageSurroundingElements(tnt, 2);
-            RemoveTntItself(tnt);
-            
+            DamageSurroundingElements(tnt, range);
+            RemoveTnt(tnt);
             return chainTnt;
         }
 
@@ -108,7 +174,7 @@ namespace Script.Strategies
             }
         }
 
-        private void RemoveTntItself(IGridElement tnt)
+        private void RemoveTnt(IGridElement tnt)
         {
             Vector2Int pos = tnt.MatrixPosition;
             _gridUtils.RemoveItemAt(pos.x, pos.y);

@@ -83,12 +83,14 @@ namespace Script.Managers
         private void OnSendCubeToPool(CubeManager cube)
         {
             cube.gameObject.SetActive(false);
+            cube.transform.SetParent(transform);
             cubePool.Enqueue(cube);
         }
         
         private void OnSendObstacleToPool(ObstacleManager obstacle)
         {
             obstacle.gameObject.SetActive(false);
+            obstacle.transform.SetParent(transform);
             obstaclePool.Enqueue(obstacle);
         }
         private void UnSubscribeEvents()

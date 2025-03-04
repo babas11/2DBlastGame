@@ -14,12 +14,12 @@ namespace Script.Commands.Grid
             _gridViewData = gridViewData;
         }
 
-        internal void Execute(FallElementBach batch)
+        internal void Execute(FallingElementGroup group)
         {
            
-            foreach (IGridElement element in batch.elementsToFall)
+            foreach (IGridElement element in group.elementsToFall)
             {
-                Fall(element.ElementTransfom,batch.offScreenValue);
+                Fall(element.ElementTransfom,group.offScreenValue);
             }
         }
 

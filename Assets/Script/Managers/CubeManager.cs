@@ -39,7 +39,7 @@ namespace Script.Managers
         public InteractableType Type => _interactableType;
         public CubeState CubeState => _cubeState;
         public bool CanFall => true;
-        public bool IsIdle { get; set; } = true;
+
         
         #endregion
         
@@ -55,6 +55,7 @@ namespace Script.Managers
         {
             _matrixPosition = matrixPosition;
             transform.position = worldPosition;
+            transform.localScale = new Vector3(1, 1, 1);
             _cubeType = assignedType.InteractableTypeToCubeType();
             _interactableType = assignedType;
             _cubeState = CubeState.DefaultState;
@@ -69,7 +70,6 @@ namespace Script.Managers
                 case GridElementUpdate.UpdateToCubeTnt:
                     SetCubeToTntState();
                     return false;
-                    break;
                 case GridElementUpdate.UpdateToTnt:
                     SetCubeToTnt();
                     return false;
@@ -89,7 +89,6 @@ namespace Script.Managers
 
         public void ResetElement()
         {
-            _data = null ;
             _matrixPosition = default;
             _cubeType = default;
             _interactableType = default;

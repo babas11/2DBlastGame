@@ -3,12 +3,12 @@ using Script.Interfaces;
 
 namespace Script.Keys
 {
-    public struct FallElementBach
+    public struct FallingElementGroup
     {
         public List<IGridElement> elementsToFall;
         public float offScreenValue;
 
-        public FallElementBach(List<IGridElement> elementsToFall, float offScreenValue)
+        public FallingElementGroup(List<IGridElement> elementsToFall, float offScreenValue)
         {
             this.elementsToFall = elementsToFall;
             this.offScreenValue = offScreenValue;

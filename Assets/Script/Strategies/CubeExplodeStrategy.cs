@@ -46,7 +46,7 @@ namespace Script.Strategies
             DamageObstaclesAround(matchingElements, pressedElement);
             
             AnimateElementsToScaleZero(matchingElements,() => DeactivateElements(matchingElements));
-            GridSignals.Instance.onBlastCompleted.Invoke();
+             GridSignals.Instance.onBlastCompleted.Invoke();
             GridSignals.Instance.onSetSortOrder.Invoke();
         }
 
@@ -102,11 +102,13 @@ namespace Script.Strategies
             Sequence animateSequence = DOTween.Sequence();
             foreach (var element in elementsToAnimate)
             {
-                element.IsIdle = false;
-               Tween anim = element.ElementTransfom.DOScale(0, 0.3f).SetEase(Ease.InQuad);
+               Tween anim = element.ElementTransfom.DOScale(0, 0.1f).SetEase(Ease.InQuad);
                animateSequence.Join(anim);
             }
-            animateSequence.OnComplete(() => onComplete?.Invoke());
+            animateSequence.OnComplete(() =>
+            {
+                onComplete?.Invoke();
+            });
         }
     }
 }
