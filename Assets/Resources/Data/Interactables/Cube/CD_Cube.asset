@@ -58,30 +58,12 @@ MonoBehaviour:
     - Name: $v
       Entry: 7
       Data: Script.Data.ValueObjects.CubeData, Assembly-CSharp
-    - Name: cubeType
-      Entry: 3
-      Data: 0
-    - Name: cubeState
-      Entry: 3
-      Data: 0
     - Name: cubeSprite
       Entry: 10
       Data: 0
     - Name: cubeTntSprite
       Entry: 10
       Data: 1
-    - Name: matrixPosition
-      Entry: 7
-      Data: UnityEngine.Vector2Int, UnityEngine.CoreModule
-    - Name: 
-      Entry: 3
-      Data: 0
-    - Name: 
-      Entry: 3
-      Data: 0
-    - Name: 
-      Entry: 8
-      Data: 
     - Name: 
       Entry: 8
       Data: 
@@ -97,30 +79,12 @@ MonoBehaviour:
     - Name: $v
       Entry: 7
       Data: Script.Data.ValueObjects.CubeData, Assembly-CSharp
-    - Name: cubeType
-      Entry: 3
-      Data: 1
-    - Name: cubeState
-      Entry: 3
-      Data: 0
     - Name: cubeSprite
       Entry: 10
       Data: 2
     - Name: cubeTntSprite
       Entry: 10
       Data: 3
-    - Name: matrixPosition
-      Entry: 7
-      Data: UnityEngine.Vector2Int, UnityEngine.CoreModule
-    - Name: 
-      Entry: 3
-      Data: 0
-    - Name: 
-      Entry: 3
-      Data: 0
-    - Name: 
-      Entry: 8
-      Data: 
     - Name: 
       Entry: 8
       Data: 
@@ -136,30 +100,12 @@ MonoBehaviour:
     - Name: $v
       Entry: 7
       Data: Script.Data.ValueObjects.CubeData, Assembly-CSharp
-    - Name: cubeType
-      Entry: 3
-      Data: 2
-    - Name: cubeState
-      Entry: 3
-      Data: 0
     - Name: cubeSprite
       Entry: 10
       Data: 4
     - Name: cubeTntSprite
       Entry: 10
       Data: 5
-    - Name: matrixPosition
-      Entry: 7
-      Data: UnityEngine.Vector2Int, UnityEngine.CoreModule
-    - Name: 
-      Entry: 3
-      Data: 0
-    - Name: 
-      Entry: 3
-      Data: 0
-    - Name: 
-      Entry: 8
-      Data: 
     - Name: 
       Entry: 8
       Data: 
@@ -175,30 +121,12 @@ MonoBehaviour:
     - Name: $v
       Entry: 7
       Data: Script.Data.ValueObjects.CubeData, Assembly-CSharp
-    - Name: cubeType
-      Entry: 3
-      Data: 3
-    - Name: cubeState
-      Entry: 3
-      Data: 0
     - Name: cubeSprite
       Entry: 10
       Data: 6
     - Name: cubeTntSprite
       Entry: 10
       Data: 7
-    - Name: matrixPosition
-      Entry: 7
-      Data: UnityEngine.Vector2Int, UnityEngine.CoreModule
-    - Name: 
-      Entry: 3
-      Data: 0
-    - Name: 
-      Entry: 3
-      Data: 0
-    - Name: 
-      Entry: 8
-      Data: 
     - Name: 
       Entry: 8
       Data: 
@@ -211,3 +139,7 @@ MonoBehaviour:
     - Name: 
       Entry: 8
       Data: 
+  tntData:
+    ExplosionRange: 0
+    Type: 5
+    Sprite: {fileID: 21300000, guid: 27d5069311fa0024da2f9aadcc3da1b7, type: 3}

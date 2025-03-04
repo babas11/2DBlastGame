@@ -14,6 +14,7 @@ namespace Script.Data.UnityObjects
         public class CD_Cube : SerializedScriptableObject
         {
             public Dictionary<CubeType,CubeData>  Data = new Dictionary<CubeType, CubeData>();
+            public TntData tntData;
         }
     }
 }   

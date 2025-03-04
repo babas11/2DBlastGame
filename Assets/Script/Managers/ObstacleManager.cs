@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using Script.Controllers.Obstacle;
 using Script.Data.UnityObjects;
@@ -25,6 +26,7 @@ namespace Script.Managers
         [ShowInInspector] private ObstaccleType _obstacleType;
         [ShowInInspector] private InteractableType _interactableType;
         [ShowInInspector] private byte _obtacleHealth;
+        [ShowInInspector] private bool _canFall;
         [ShowInInspector] private ObstaccleData _obstacleTypeData;
         
         
@@ -44,27 +46,70 @@ namespace Script.Managers
         public Vector2Int MatrixPosition => _matrixPosition;
         public Transform ElementTransfom => transform;
         public InteractableType Type => _interactableType;
-    
+        public bool CanFall => _canFall;
+        
+        public bool IsIdle { get; set; } = true;
+        
+        #endregion
 
+        #endregion
+        
+        #region IGridElement Functions
         public void SetGridElement(InteractableType assignedType,Vector2Int matrixPosition,Vector3 worldPosition)
         {
             _obstacleTypeData = _obstacleData.Data[assignedType.InteractableTypeToObstacleType()];
+            _canFall = _obstacleData.Data[assignedType.InteractableTypeToObstacleType()].CanFall;
             _matrixPosition = matrixPosition;
             transform.position = worldPosition;
             _obstacleType = assignedType.InteractableTypeToObstacleType();
             _interactableType = assignedType;
             _obtacleHealth = _obstacleTypeData.Health; 
             _obstacleSpriteController.SetSpriteData(_obstacleTypeData.Sprites);
-        }   
+        }
 
+        public bool UpdateElement(GridElementUpdate updateType)
+        {
+            switch (updateType)
+            {
+                case(GridElementUpdate.UpdateToDamaged):
+                    return DamageObstacle();
+                    break;
+                default:
+                    throw new ArgumentException("This obstacle do not have an update for this type"); ;
+            }
+        }
+
+        public void SetMetrixPosition(Vector2Int matrixPosition)
+        {
+            _matrixPosition = matrixPosition;
+        }
+        
+        public void ResetElement()
+        {
+            _obstacleTypeData = default(ObstaccleData);
+            _matrixPosition = default;
+            transform.position = default;
+            _obstacleType = default(ObstaccleType);
+            _interactableType = default(InteractableType);
+            _obtacleHealth = default; 
+           // _obstacleSpriteController.SetSpriteData(_obstacleTypeData.Sprites);
+            PoolSignals.Instance.onSendObstacleToPool(this);
+        }
+        
         #endregion
 
-        #endregion
 
         private void Awake() 
         {
             _obstacleData = GetData();
+            SendDataToControllers();
         }
+
+        private void SendDataToControllers()
+        {
+            _obstacleSpriteController.SetSpriteData(_obstacleData.Data[_obstacleType].Sprites);
+        }
+
         private void OnEnable()
         {
             SubscribeEvents();
@@ -98,8 +143,22 @@ namespace Script.Managers
             return Resources.Load<CD_Obstacle>("Data/Interactables/Obstacles/CD_Obstacle");
             
         }
-
-        
+        private bool DamageObstacle()
+        {
+            if (_obtacleHealth == 0)
+            {
+                ResetElement();
+                return true;
+            }
+            _obtacleHealth--;
+            if (_obtacleHealth == 0)
+            {
+                ResetElement();
+                return true;
+            }
+            _obstacleSpriteController.ChangeObstacleSpriteAfterDamage();
+            return false;
+        }
     }
         
     }

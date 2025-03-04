@@ -1,14 +1,14 @@
-using System;
+using System.Collections.Generic;
 using Script.Commands.Grid;
 using Script.Controllers.Grid;
 using Script.Data.UnityObjects;
 using Script.Data.ValueObjects;
 using Script.Interfaces;
+using Script.Keys;
 using Script.Signals;
 using Script.Utilities.Grid;
 using Sirenix.OdinInspector;
 using UnityEngine;
-using UnityEngine.Events;
 
 namespace Script.Managers
 {
@@ -34,7 +34,8 @@ namespace Script.Managers
         private PlaceGridCommand _placeGridCommand;
         private FallGridElementCommand _fallElementCommand;
         private GridCubeStateCommand _gridCubeStateCommand;
-        private GridElementTouchCommand _gridElementTouchCommand;
+        private OnridTouchCommand _onridTouchCommand;
+        private GridFallCommand _gridFallCommand;
         private GridManipulationUtilities<IGridElement> _gridManipulationUtilities;
         private GridFinder _gridFinder;
 
@@ -52,12 +53,13 @@ namespace Script.Managers
         private void Init()
         {
             _placeGridCommand = new PlaceGridCommand(this,_levelData.jsonLevel,_gridData.GridViewData);
-            _gridManipulationUtilities = new GridManipulationUtilities<IGridElement>(_dimensions, ref _grid,transform);
+            _gridManipulationUtilities = new GridManipulationUtilities<IGridElement>(_dimensions, _grid,transform);
             _gridFinder = new GridFinder(_gridManipulationUtilities);
             _buidGridCommand = new BuildGridCommand(this,_levelData.jsonLevel, ref _grid,_gridManipulationUtilities,_gridData);
             _fallElementCommand = new FallGridElementCommand(_gridData.GridViewData);
             _gridCubeStateCommand = new GridCubeStateCommand(_gridFinder,_dimensions,_gridData);
-            _gridElementTouchCommand = new GridElementTouchCommand();
+            _onridTouchCommand = new OnridTouchCommand(_gridManipulationUtilities,_gridFinder);
+            _gridFallCommand = new GridFallCommand(_dimensions,_gridManipulationUtilities);
 
         }
 
@@ -85,7 +87,8 @@ namespace Script.Managers
             GridSignals.Instance.onGridPlaced += OnGridPlaced;
             GridSignals.Instance.onElementsFall += _fallElementCommand.Execute;
             GridSignals.Instance.onSetCubeState += _gridCubeStateCommand.Execute;
-            InputSignals.Instance.onGridTouch += _gridElementTouchCommand.Execute;
+            GridSignals.Instance.onBlastCompleted += _gridFallCommand.Execute;
+            InputSignals.Instance.onGridTouch += _onridTouchCommand.Execute;
         }
 
         private void OnLevelSceneInitialize()
@@ -111,7 +114,8 @@ namespace Script.Managers
             GridSignals.Instance.onGridPlaced -= OnGridPlaced;
             GridSignals.Instance.onElementsFall -= _fallElementCommand.Execute;
             GridSignals.Instance.onSetCubeState -= _gridCubeStateCommand.Execute;
-            InputSignals.Instance.onGridTouch -= _gridElementTouchCommand.Execute;
+            GridSignals.Instance.onBlastCompleted -= _gridFallCommand.Execute;
+            InputSignals.Instance.onGridTouch -= _onridTouchCommand.Execute;
         }
     }
 }

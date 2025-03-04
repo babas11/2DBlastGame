@@ -1,3 +1,6 @@
+using Script.Data.UnityObjects.Script.Data.UnityObjects;
+using Script.Data.ValueObjects;
+using Sirenix.OdinInspector;
 using UnityEngine;
 
 namespace Script.Controllers.Cube
@@ -14,28 +17,42 @@ namespace Script.Controllers.Cube
 
         #region Private Variables
 
-        private Sprite _cubeSprite;
-        private Sprite _cubeTntSprite;
-
+        [ShowInInspector] private Sprite _tntSprite;
+        [ShowInInspector] private Sprite _cubeSprite;
+        [ShowInInspector] private Sprite _cubeTntSprite;
+        
         #endregion
 
         #endregion
 
-        internal void SetCubeSpriteOnDefault(Sprite cubeSprite)
+        internal void SetControllerData(CubeData cubeData,TntData tntData)
         {
-            spriteRenderer.sprite = cubeSprite;
+            _tntSprite = tntData.Sprite;
+            _cubeSprite = cubeData.cubeSprite;
+            _cubeTntSprite = cubeData.cubeTntSprite;
+            SetCubeSpriteOnDefault();
+        }
+
+        internal void SetCubeSpriteOnDefault()
+        {
+            spriteRenderer.sprite = _cubeSprite;
         }
         
-        internal void SetCubeSpriteOnTnt(Sprite cubeTntSprite)
+        internal void SetCubeSpriteOnTnt()
         {
-            spriteRenderer.sprite = cubeTntSprite;
+            spriteRenderer.sprite = _cubeTntSprite;
+        }
+        internal void SetTntSprite()
+        {
+            spriteRenderer.sprite = _tntSprite;
         }
 
         internal void SetSortingOrder(Vector2Int matrixPosition)
         {
             spriteRenderer.sortingOrder = matrixPosition.y;
         }
-     
-        
+
+
+       
     }
 }

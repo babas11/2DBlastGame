@@ -44,10 +44,7 @@ namespace Script.Commands.Grid
                         if (match.Type == InteractableType.green || match.Type == InteractableType.red ||
                             match.Type == InteractableType.blue || match.Type == InteractableType.yellow)
                         {
-                            if (match is CubeManager cube && cube.CubeState != CubeState.TntState) 
-                            {
-                                cube.SetCubeToTntState();
-                            }
+                            match.UpdateElement(GridElementUpdate.UpdateToCubeTnt);
                         }
                     }
                 }

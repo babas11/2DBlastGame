@@ -1,3 +1,4 @@
+using Sirenix.OdinInspector;
 using UnityEngine;
 
 namespace Script.Controllers.Obstacle
@@ -14,7 +15,7 @@ namespace Script.Controllers.Obstacle
         
         #region Private Variables
 
-        private Sprite[] _obstacleSprites;
+        [ShowInInspector]private Sprite[] _obstacleSprites;
         private byte _currentSpriteIndex;
         
         #endregion

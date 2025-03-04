@@ -94,7 +94,7 @@ public class InputManager : MonoBehaviour
             
             Vector2 mouseWorldPos = Camera.main.ScreenToWorldPoint(Input.mousePosition);
             RaycastHit2D hitInfo = Physics2D.Raycast(mouseWorldPos, Vector2.zero);
-            if (hitInfo != null)
+            if (hitInfo.collider != null)
             {
                 IGridElement touchedElement;
                 if (hitInfo.collider.CompareTag("Cube"))

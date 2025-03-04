@@ -18,7 +18,7 @@ namespace Script.Managers
 
         #region Private Variables
 
-        private CubeData  _data;
+        private CD_Cube  _data;
         
         [ShowInInspector] private Vector2Int _matrixPosition;
         [ShowInInspector] private CubeType _cubeType;
@@ -38,40 +38,69 @@ namespace Script.Managers
         public Transform ElementTransfom => transform;
         public InteractableType Type => _interactableType;
         public CubeState CubeState => _cubeState;
+        public bool CanFall => true;
+        public bool IsIdle { get; set; } = true;
         
         #endregion
         
         #endregion
-        
-        
+
+        private void Awake()
+        {
+            _data = GetData();
+        }
+
+        #region IGridElement Functions 
         public void SetGridElement(InteractableType assignedType,Vector2Int matrixPosition,Vector3 worldPosition)
         {
-            _data = GetData()[assignedType.InteractableTypeToCubeType()];
             _matrixPosition = matrixPosition;
             transform.position = worldPosition;
             _cubeType = assignedType.InteractableTypeToCubeType();
             _interactableType = assignedType;
             _cubeState = CubeState.DefaultState;
-            cubeSpriteController.SetCubeSpriteOnDefault(_data.cubeSprite);
+            cubeSpriteController.SetControllerData(_data.Data[_cubeType],_data.tntData);
+        }
+        
+        [Button]
+        public bool UpdateElement(GridElementUpdate updateType)
+        {
+            switch (updateType)
+            {
+                case GridElementUpdate.UpdateToCubeTnt:
+                    SetCubeToTntState();
+                    return false;
+                    break;
+                case GridElementUpdate.UpdateToTnt:
+                    SetCubeToTnt();
+                    return false;
+                    break;
+                case GridElementUpdate.UpdateToDamaged:
+                    ResetElement();
+                    return true;
+                default:
+                    throw new ArgumentException($"Cubes do not have an update for {updateType}");
+            }
         }
 
-        public void SetCubeToTntState()
+        public void SetMetrixPosition(Vector2Int matrixPosition)
         {
-            _cubeState = CubeState.TntState;
-            cubeSpriteController.SetCubeSpriteOnTnt(_data.cubeTntSprite);
+            _matrixPosition = matrixPosition;
         }
 
-        public void ResetCube()
+        public void ResetElement()
         {
-            _data = default (CubeData);
+            _data = null ;
             _matrixPosition = default;
             _cubeType = default;
             _interactableType = default;
             _cubeState = default;
             //cubeSpriteController.SetCubeSpriteOnDefault(null);
+            PoolSignals.Instance.onSendCubeToPool.Invoke(this);
 
         }
+        #endregion
 
+        
         private void OnEnable()
         {
             SubscribeEvents();
@@ -101,9 +130,22 @@ namespace Script.Managers
         }
 
 
-        private Dictionary<CubeType,CubeData> GetData()
+        private CD_Cube GetData()
         {
-            return Resources.Load<CD_Cube>("Data/Interactables/Cube/CD_Cube").Data;
+            return Resources.Load<CD_Cube>("Data/Interactables/Cube/CD_Cube");
+        }
+        
+        private void SetCubeToTnt()
+        {
+            _interactableType = InteractableType.tnt;
+            _cubeState = CubeState.Tnt;
+            cubeSpriteController.SetTntSprite();
+        }
+
+        private void SetCubeToTntState()
+        {
+            _cubeState = CubeState.TntState;
+            cubeSpriteController.SetCubeSpriteOnTnt();
         }
 
         

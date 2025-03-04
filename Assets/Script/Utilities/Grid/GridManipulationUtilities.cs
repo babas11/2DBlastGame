@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using Script.Interfaces;
 using UnityEngine;
 
 namespace Script.Utilities.Grid
@@ -9,14 +10,14 @@ namespace Script.Utilities.Grid
         private T[,] _matrix;
         private Transform _transform;
     
-        public GridManipulationUtilities(Vector2Int dimensions, ref T[,] matrix, Transform transform)
+        public GridManipulationUtilities(Vector2Int dimensions, T[,] matrix, Transform transform)
         {
             this._dimensions = dimensions;
             this._matrix = matrix;
             _transform = transform;
         }
     
-        public  void PutItemAt(int x, int y, T item)
+        public  void PutItemAt(int x, int y, T item) 
         {
             if (!CheckBounds(x,y))
             {

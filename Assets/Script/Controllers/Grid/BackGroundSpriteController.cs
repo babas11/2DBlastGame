@@ -49,12 +49,5 @@ namespace Script.Controllers.Grid
             
             _renderer.size = new Vector2(_dimensions.x * gridUnit * overScale , _dimensions.y * overScale * gridUnit + sizeDifference );
         }
-
-        /*private void SetSpriteMask()
-        {
-            _spriteMask.sprite = _renderer.sprite;
-            _spriteMask.alphaCutoff = 0;
-            _spriteMask.transform.localScale = new Vector3(_dimensions.x + 1.5f, _dimensions.y + 1.5f);
-        }*/
     }
 }

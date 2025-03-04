@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using Script.Extensions;
 using Script.Interfaces;
@@ -12,7 +13,9 @@ namespace Script.Signals
         public UnityAction onSetSortOrder = delegate { };
         public UnityAction onSetCubeState = delegate { };
         
+        public UnityAction onBlastCompleted = delegate { };
         
         public UnityAction<FallElementBach> onElementsFall = delegate { };
+        public Func<IGridElement, List<IGridElement>> onGetAdjacentElements = delegate { return new List<IGridElement>(); };
     }
 }
