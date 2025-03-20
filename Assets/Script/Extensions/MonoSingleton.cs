@@ -5,17 +5,19 @@ namespace Script.Extensions
     public class MonoSingleton<T> : MonoBehaviour where T : Component
     {
         private static T _instance;
+        private static bool _shuttingDown = false;
         public static T Instance
         {
             get
             {
+                //if (_shuttingDown) return null; // Don't recreate if we're shutting down
+        
                 if (_instance == null)
                 {
                     _instance = FindObjectOfType<T>();
                     if (_instance == null)
                     {
-                        var newGo = new GameObject(typeof(T).Name);
-                        _instance = newGo.AddComponent<T>();
+                        print($"Eklesene babo bi {typeof(T)}");
                     }
                 }
                 return _instance;
@@ -32,6 +34,11 @@ namespace Script.Extensions
             {
                 Destroy(gameObject);
             }
+        }
+        
+        private void OnApplicationQuit()
+        {
+            _shuttingDown = true;
         }
     }
 }

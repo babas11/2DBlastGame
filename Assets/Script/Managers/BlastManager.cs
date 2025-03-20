@@ -1,8 +1,6 @@
 using Script.Interfaces;
 using Script.Strategies;
-using Script.Utilities.Grid;
 using UnityEngine;
-using UnityEngine.PlayerLoop;
 
 namespace Script.Managers
 {
@@ -27,8 +25,7 @@ namespace Script.Managers
                 Debug.LogError("[BlastManager] Attempted to explode a null element!");
                 return;
             }
-
-            // Use the factory to pick the correct strategy
+            
             var strategy = _strategyFactory.CreateStrategy(element.Type);
             strategy.Explode(element);
         }

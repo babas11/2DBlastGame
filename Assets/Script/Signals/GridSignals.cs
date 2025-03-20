@@ -15,7 +15,7 @@ namespace Script.Signals
         
         public UnityAction onBlastCompleted = delegate { };
         
-        public UnityAction<FallingElementGroup> onElementsFall = delegate { };
+        public UnityAction<FallingElementGroup> onElementsFallWithGroup = delegate { };
         public Func<IGridElement, List<IGridElement>> onGetAdjacentElements = delegate { return new List<IGridElement>(); };
     }
 }

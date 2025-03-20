@@ -17,9 +17,18 @@ MonoBehaviour:
     SerializedBytes: 
     ReferencedUnityObjects:
     - {fileID: 21300000, guid: 9b76118e30c632343a351f6c42a0e7db, type: 3}
+    - {fileID: 21300000, guid: a1854cf6ef7bd4943b58f49e2c8f57a8, type: 3}
+    - {fileID: 21300000, guid: 9c0506215510f974980db28dd567e196, type: 3}
+    - {fileID: 21300000, guid: fc33c537cfaad3342b61d8efdeb30163, type: 3}
     - {fileID: 21300000, guid: bb0dd12e38ecbac44809ab225f067c2c, type: 3}
     - {fileID: 21300000, guid: e3ee8378d88dd3747ae9dfc4e4ab3d50, type: 3}
+    - {fileID: 21300000, guid: 765cae41da107454c894b50c5260742b, type: 3}
+    - {fileID: 21300000, guid: 8539bd0141a4fb64584364bcdcbd5643, type: 3}
+    - {fileID: 21300000, guid: 17fcc24041f21fd489a064cacb02368a, type: 3}
     - {fileID: 21300000, guid: 9086313e3c327b14c9b7f3c9eeb11a99, type: 3}
+    - {fileID: 21300000, guid: d26cf4f7101875446852444d89d595a2, type: 3}
+    - {fileID: 21300000, guid: 406741c8808174e4a9b72c0e76d3463f, type: 3}
+    - {fileID: 21300000, guid: dd32e0d2cadd5d94cb95cb58b7bb7c17, type: 3}
     SerializedBytesString: 
     Prefab: {fileID: 0}
     PrefabModificationsReferencedUnityObjects: []
@@ -79,84 +88,33 @@ MonoBehaviour:
     - Name: 
       Entry: 8
       Data: 
-    - Name: MatrixPosition
-      Entry: 7
-      Data: UnityEngine.Vector2Int, UnityEngine.CoreModule
-    - Name: 
-      Entry: 3
-      Data: 0
-    - Name: 
-      Entry: 3
-      Data: 0
-    - Name: 
-      Entry: 8
-      Data: 
     - Name: ObstacleType
       Entry: 3
       Data: 0
     - Name: OnlyPowerDamage
       Entry: 5
       Data: false
-    - Name: 
-      Entry: 8
-      Data: 
-    - Name: 
-      Entry: 8
-      Data: 
-    - Name: 
-      Entry: 7
-      Data: 
-    - Name: $k
-      Entry: 3
-      Data: 1
-    - Name: $v
-      Entry: 7
-      Data: Script.Data.ValueObjects.ObstaccleData, Assembly-CSharp
-    - Name: CanFall
-      Entry: 5
-      Data: true
-    - Name: DefaultSprite
-      Entry: 10
-      Data: 1
-    - Name: Health
-      Entry: 3
-      Data: 2
-    - Name: Sprites
+    - Name: ParticleSprites
       Entry: 7
       Data: 3|UnityEngine.Sprite[], UnityEngine.CoreModule
     - Name: 
       Entry: 12
-      Data: 2
+      Data: 3
     - Name: 
       Entry: 10
       Data: 1
     - Name: 
       Entry: 10
       Data: 2
+    - Name: 
+      Entry: 10
+      Data: 3
     - Name: 
       Entry: 13
       Data: 
     - Name: 
       Entry: 8
       Data: 
-    - Name: MatrixPosition
-      Entry: 7
-      Data: UnityEngine.Vector2Int, UnityEngine.CoreModule
-    - Name: 
-      Entry: 3
-      Data: 0
-    - Name: 
-      Entry: 3
-      Data: 0
-    - Name: 
-      Entry: 8
-      Data: 
-    - Name: ObstacleType
-      Entry: 3
-      Data: 1
-    - Name: OnlyPowerDamage
-      Entry: 5
-      Data: false
     - Name: 
       Entry: 8
       Data: 
@@ -168,7 +126,7 @@ MonoBehaviour:
       Data: 
     - Name: $k
       Entry: 3
-      Data: 2
+      Data: 1
     - Name: $v
       Entry: 7
       Data: Script.Data.ValueObjects.ObstaccleData, Assembly-CSharp
@@ -177,34 +135,91 @@ MonoBehaviour:
       Data: false
     - Name: DefaultSprite
       Entry: 10
-      Data: 3
+      Data: 4
     - Name: Health
       Entry: 3
-      Data: 1
+      Data: 2
     - Name: Sprites
       Entry: 7
       Data: 4|UnityEngine.Sprite[], UnityEngine.CoreModule
     - Name: 
       Entry: 12
-      Data: 1
+      Data: 2
     - Name: 
       Entry: 10
-      Data: 3
+      Data: 4
+    - Name: 
+      Entry: 10
+      Data: 5
     - Name: 
       Entry: 13
       Data: 
     - Name: 
       Entry: 8
       Data: 
-    - Name: MatrixPosition
+    - Name: ObstacleType
+      Entry: 3
+      Data: 1
+    - Name: OnlyPowerDamage
+      Entry: 5
+      Data: false
+    - Name: ParticleSprites
       Entry: 7
-      Data: UnityEngine.Vector2Int, UnityEngine.CoreModule
+      Data: 5|UnityEngine.Sprite[], UnityEngine.CoreModule
     - Name: 
-      Entry: 3
-      Data: 0
+      Entry: 12
+      Data: 3
     - Name: 
+      Entry: 10
+      Data: 6
+    - Name: 
+      Entry: 10
+      Data: 7
+    - Name: 
+      Entry: 10
+      Data: 8
+    - Name: 
+      Entry: 13
+      Data: 
+    - Name: 
+      Entry: 8
+      Data: 
+    - Name: 
+      Entry: 8
+      Data: 
+    - Name: 
+      Entry: 8
+      Data: 
+    - Name: 
+      Entry: 7
+      Data: 
+    - Name: $k
       Entry: 3
-      Data: 0
+      Data: 2
+    - Name: $v
+      Entry: 7
+      Data: Script.Data.ValueObjects.ObstaccleData, Assembly-CSharp
+    - Name: CanFall
+      Entry: 5
+      Data: false
+    - Name: DefaultSprite
+      Entry: 10
+      Data: 9
+    - Name: Health
+      Entry: 3
+      Data: 1
+    - Name: Sprites
+      Entry: 7
+      Data: 6|UnityEngine.Sprite[], UnityEngine.CoreModule
+    - Name: 
+      Entry: 12
+      Data: 1
+    - Name: 
+      Entry: 10
+      Data: 9
+    - Name: 
+      Entry: 13
+      Data: 
     - Name: 
       Entry: 8
       Data: 
@@ -214,6 +229,27 @@ MonoBehaviour:
     - Name: OnlyPowerDamage
       Entry: 5
       Data: true
+    - Name: ParticleSprites
+      Entry: 7
+      Data: 7|UnityEngine.Sprite[], UnityEngine.CoreModule
+    - Name: 
+      Entry: 12
+      Data: 3
+    - Name: 
+      Entry: 10
+      Data: 10
+    - Name: 
+      Entry: 10
+      Data: 11
+    - Name: 
+      Entry: 10
+      Data: 12
+    - Name: 
+      Entry: 13
+      Data: 
+    - Name: 
+      Entry: 8
+      Data: 
     - Name: 
       Entry: 8
       Data: 

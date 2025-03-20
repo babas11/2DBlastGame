@@ -1,14 +1,8 @@
-using System;
-using Script.Commands.Level;
-using Script.Data.UnityObjects;
 using Script.Data.ValueObjects;
-using Script.Enums;
 using Script.Signals;
 using Sirenix.OdinInspector;
 using UnityEngine;
 using UnityEngine.SceneManagement;
-using UnityEngine.Serialization;
-
 namespace Script.Managers
 {
     public class LevelManager : MonoBehaviour
@@ -20,14 +14,14 @@ namespace Script.Managers
         #region Private Variables
         
         [ShowInInspector]private string _levelName;
-        [ShowInInspector] private new LevelDatas _levelData;
+        [ShowInInspector] private new LevelData levelData;
         [ShowInInspector] private byte _currentLevel;
         #endregion
         #endregion
 
         private void Awake()
         {
-            _levelData.jsonLevel = GetLevelData();
+            levelData.jsonLevel = GetLevelData();
             _currentLevel = GetActiveLevel();
             _levelName = SceneManager.GetActiveScene().name;
         }
@@ -49,8 +43,6 @@ namespace Script.Managers
         private void OnEnable()
         {
             SubscribeEvents();
-            
-            
         }
         
         private void OnDisable()
@@ -64,9 +56,15 @@ namespace Script.Managers
             CoreGameSignals.Instance.onGetLevelValue += OnGetLevelValue;
             CoreGameSignals.Instance.OnGetLevelIndex += OnGetLevelIndex;
             CoreGameSignals.Instance.onLevelPlay += () => SceneManager.LoadScene("LevelScene2");
-            //CoreGameSignals.Instance.onNextLevel += OnNextLevel;
+            CoreGameSignals.Instance.onNextLevel += OnNextLevel;
             //CoreGameSignals.Instance.onRestartLevel += OnRestartLevel;
         }
+
+        private void OnNextLevel()
+        {
+            _currentLevel++;SceneManager.LoadScene("MainScene");
+        }
+
 
         private byte OnGetLevelIndex()
         {
@@ -74,27 +72,20 @@ namespace Script.Managers
         }
         
         
-        public LevelDatas OnGetLevelValue(){
-            return _levelData;
-        }
-        
-        private void OnLevelPlay()
-        {
-            throw new NotImplementedException();
+        private LevelData OnGetLevelValue(){
+            return levelData;
         }
         
         private void UnSubscribeEvents()
         {
             CoreGameSignals.Instance.onGetLevelValue -= OnGetLevelValue;
             CoreGameSignals.Instance.OnGetLevelIndex -= OnGetLevelIndex;
-            CoreGameSignals.Instance.onLevelPlay -= OnLevelPlay;
+            CoreGameSignals.Instance.onLevelPlay -= () => SceneManager.LoadScene("LevelScene2");
             //CoreGameSignals.Instance.onLevelSceneInitialize -= levelLoaderCommand.Execute();
-            //CoreGameSignals.Instance.onNextLevel -= OnNextLvel;
+            CoreGameSignals.Instance.onNextLevel -= OnNextLevel;
             //CoreGameSignals.Instance.onRestartLevel -= OnRestartLevel;
         }
-
-       
-
+        
         private void Start()
         {
             if (_levelName ==  "MainScene")
@@ -105,8 +96,6 @@ namespace Script.Managers
             {
                 CoreGameSignals.Instance.onLevelSceneInitialize?.Invoke();
             }
-           
-            //CoreUISignals.Instance.onOpenPanel(UIPanelTypes.Start, 0);
         }
     }
 }

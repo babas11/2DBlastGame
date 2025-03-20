@@ -19,6 +19,6 @@ MonoBehaviour:
     GridBackground: {fileID: 21300000, guid: 75c95367a52a640458466da45814c0dc, type: 3}
     BackgroundOverScale: 1.05
     InteractableSizeDifference: 0.07
-    FallDuration: 0.4
+    FallDuration: 0.3
   GridRuleData:
     minimumAmounToMakeTnt: 5

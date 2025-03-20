@@ -10,6 +10,7 @@ using Script.Interfaces;
 using Script.Signals;
 using Sirenix.OdinInspector;
 using UnityEngine;
+using UnityEngine.Serialization;
 
 namespace Script.Managers
 {
@@ -27,6 +28,7 @@ namespace Script.Managers
         [ShowInInspector] private InteractableType _interactableType;
         [ShowInInspector] private byte _obtacleHealth;
         [ShowInInspector] private bool _canFall;
+        [ShowInInspector] private bool _onlyPowerDamage;
         [ShowInInspector] private ObstaccleData _obstacleTypeData;
         
         
@@ -36,8 +38,8 @@ namespace Script.Managers
         
         #region Serialized Variables
         
-         [SerializeField] private ObstacleSpriteController _obstacleSpriteController;
-         [FilePath] private string _dataPth;
+         [SerializeField] private ObstacleSpriteController obstacleSpriteController;
+         [SerializeField] private ObstacleParticleController obstacleParticleController;
 
         #endregion
 
@@ -47,8 +49,8 @@ namespace Script.Managers
         public Transform ElementTransfom => transform;
         public InteractableType Type => _interactableType;
         public bool CanFall => _canFall;
-        
-        
+        public bool OnlyPowerDamage { get => _onlyPowerDamage; }
+
         #endregion
 
         #endregion
@@ -58,13 +60,15 @@ namespace Script.Managers
         {
             _obstacleTypeData = _obstacleData.Data[assignedType.InteractableTypeToObstacleType()];
             _canFall = _obstacleData.Data[assignedType.InteractableTypeToObstacleType()].CanFall;
+            _onlyPowerDamage = _obstacleData.Data[assignedType.InteractableTypeToObstacleType()].OnlyPowerDamage;
             _matrixPosition = matrixPosition;
             transform.position = worldPosition;
             transform.localScale = new Vector3(1, 1, 1);
             _obstacleType = assignedType.InteractableTypeToObstacleType();
             _interactableType = assignedType;
             _obtacleHealth = _obstacleTypeData.Health; 
-            _obstacleSpriteController.SetSpriteData(_obstacleTypeData.Sprites);
+            obstacleSpriteController.SetSpriteData(_obstacleTypeData.Sprites);
+            obstacleParticleController.SetParticleData(_obstacleTypeData.ParticleSprites);
         }
 
         public bool UpdateElement(GridElementUpdate updateType)
@@ -72,7 +76,7 @@ namespace Script.Managers
             switch (updateType)
             {
                 case(GridElementUpdate.UpdateToDamaged):
-                    return DamageObstacle();
+                     return DamageObstacle();
                     break;
                 default:
                     throw new ArgumentException("This obstacle do not have an update for this type"); ;
@@ -95,7 +99,12 @@ namespace Script.Managers
            // _obstacleSpriteController.SetSpriteData(_obstacleTypeData.Sprites);
             PoolSignals.Instance.onSendObstacleToPool(this);
         }
-        
+
+        public void BringElementFront()
+        {
+            obstacleSpriteController.SetSortingOrder(_matrixPosition,true);
+        }
+
         #endregion
 
 
@@ -107,7 +116,7 @@ namespace Script.Managers
 
         private void SendDataToControllers()
         {
-            _obstacleSpriteController.SetSpriteData(_obstacleData.Data[_obstacleType].Sprites);
+            obstacleSpriteController.SetSpriteData(_obstacleData.Data[_obstacleType].Sprites);
         }
 
         private void OnEnable()
@@ -124,7 +133,7 @@ namespace Script.Managers
         {
             if (gameObject.activeInHierarchy)
             {
-                _obstacleSpriteController.SetSortingOrder(_matrixPosition);
+                obstacleSpriteController.SetSortingOrder(_matrixPosition);
             }
         }
 
@@ -147,16 +156,18 @@ namespace Script.Managers
         {
             if (_obtacleHealth == 0)
             {
-                ResetElement();
+                transform.localScale = new Vector3(0, 0, 0);
+                obstacleParticleController.PlayObstacleParticle(() => ResetElement());
                 return true;
             }
             _obtacleHealth--;
             if (_obtacleHealth == 0)
             {
-                ResetElement();
+                transform.localScale = new Vector3(0, 0, 0);
+                obstacleParticleController.PlayObstacleParticle(() => ResetElement());
                 return true;
             }
-            _obstacleSpriteController.ChangeObstacleSpriteAfterDamage();
+            obstacleSpriteController.ChangeObstacleSpriteAfterDamage();
             return false;
         }
     }

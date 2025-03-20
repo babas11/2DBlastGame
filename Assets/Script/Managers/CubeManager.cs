@@ -30,6 +30,7 @@ namespace Script.Managers
         #region Serialized Variables
         
         [SerializeField] private CubeSpriteController cubeSpriteController;
+        [SerializeField] private CubeParticleController cubeParticleController;
         #endregion
         
         #region Public Variables
@@ -39,8 +40,8 @@ namespace Script.Managers
         public InteractableType Type => _interactableType;
         public CubeState CubeState => _cubeState;
         public bool CanFall => true;
+        public bool OnlyPowerDamage { get => true; }
 
-        
         #endregion
         
         #endregion
@@ -60,6 +61,7 @@ namespace Script.Managers
             _interactableType = assignedType;
             _cubeState = CubeState.DefaultState;
             cubeSpriteController.SetControllerData(_data.Data[_cubeType],_data.tntData);
+            cubeParticleController.SetParticleData(_data.Data[_cubeType].cubeparticle);
         }
         
         [Button]
@@ -67,6 +69,10 @@ namespace Script.Managers
         {
             switch (updateType)
             {
+                case GridElementUpdate.UpdateToDefault:
+                    SetCubeToDefaultState();
+                    return false;
+                    break;
                 case GridElementUpdate.UpdateToCubeTnt:
                     SetCubeToTntState();
                     return false;
@@ -75,7 +81,12 @@ namespace Script.Managers
                     return false;
                     break;
                 case GridElementUpdate.UpdateToDamaged:
-                    ResetElement();
+                    transform.localScale = new Vector3(0, 0, 0);
+                    cubeParticleController.PlayCubeParticle(() => ResetElement());
+                    return true;    
+                case GridElementUpdate.UpdateToTntExplode:
+                    transform.localScale = new Vector3(0, 0, 0);
+                    cubeParticleController.PlayTntParticle();
                     return true;
                 default:
                     throw new ArgumentException($"Cubes do not have an update for {updateType}");
@@ -93,10 +104,15 @@ namespace Script.Managers
             _cubeType = default;
             _interactableType = default;
             _cubeState = default;
-            //cubeSpriteController.SetCubeSpriteOnDefault(null);
             PoolSignals.Instance.onSendCubeToPool.Invoke(this);
 
         }
+
+        public void BringElementFront()
+        {
+            cubeSpriteController.SetSortingOrder(_matrixPosition,true);
+        }
+
         #endregion
 
         
@@ -145,6 +161,11 @@ namespace Script.Managers
         {
             _cubeState = CubeState.TntState;
             cubeSpriteController.SetCubeSpriteOnTnt();
+        }
+        private void SetCubeToDefaultState()
+        {
+            _cubeState = CubeState.DefaultState;
+            cubeSpriteController.SetCubeSpriteOnDefault();
         }
 
         

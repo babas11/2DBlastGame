@@ -12,9 +12,8 @@ namespace Script.Data.ValueObjects
         public Sprite DefaultSprite;
         public byte Health;
         public Sprite[] Sprites;
-        public Vector2Int MatrixPosition;
         public ObstaccleType ObstacleType;
         public bool OnlyPowerDamage;
-
+        public Sprite[] ParticleSprites;
     }
 }

@@ -9,5 +9,6 @@ namespace Script.Data.ValueObjects
     {
         public Sprite cubeSprite;
         public Sprite cubeTntSprite;
+        public Sprite cubeparticle;
     }
 }

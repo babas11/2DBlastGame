@@ -25,7 +25,6 @@ namespace Script.Commands.Grid
 
         internal void Execute()
         {
-            // Search the whole grid for matches
             for (int y = 0; y < _dimensions.y; y++)
             {
                 for (int x = 0; x < _dimensions.x; x++)
@@ -36,8 +35,15 @@ namespace Script.Commands.Grid
                     
                     List<IGridElement> currentMatches = new List<IGridElement>();
                     _gridFinder.LookInteractableForMatchingAdjacent(out currentMatches, interactable);
-                    
-                    if(currentMatches.Count < _gridData.GridRuleData.minimumAmounToMakeTnt) { continue;}
+
+                    if (currentMatches.Count < _gridData.GridRuleData.minimumAmounToMakeTnt)
+                    {
+                        foreach (var match in currentMatches)
+                        {
+                            match.UpdateElement(GridElementUpdate.UpdateToDefault);
+                        }
+                        continue;
+                    }
 
                     foreach (var match in currentMatches)
                     {

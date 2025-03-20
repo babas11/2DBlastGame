@@ -4,13 +4,14 @@ using DG.Tweening;
 using Script.Enums;
 using Script.Extensions;
 using Script.Interfaces;
+using Script.Keys;
 using Script.Signals;
 using Script.Utilities.Grid;
 using UnityEngine;
 
 namespace Script.Strategies
 {
-    public class CubeExplodeStrategy: IExplodeStrategy
+    public class CubeExplodeStrategy : IExplodeStrategy
     {
         private GridManipulationUtilities<IGridElement> _gridUtils;
         private GridFinder _gridFinder;
@@ -22,60 +23,82 @@ namespace Script.Strategies
             _minimumAmountToMakeTnt = 5;
             _gridFinder = gridFinder;
         }
+
         public void Explode(IGridElement element)
         {
-            if (_gridFinder.LookInteractableForMatchingAdjacent(out List<IGridElement> matchingElements,element))
+            if (_gridFinder.LookInteractableForMatchingAdjacent(out List<IGridElement> matchingElements, element))
             {
-                HandleBlast(matchingElements,element);
+                HandleBlast(matchingElements, element);
             }
             else
             {
-                //ToDo Interactable aniation to give visual feedback
+                //ToDo Interactable animation to give visual feedback
             }
         }
 
-        private void HandleBlast(List<IGridElement> matchingElements,IGridElement pressedElement)
+        private void HandleBlast(List<IGridElement> matchingElements, IGridElement pressedElement)
         {
-            if (matchingElements == null || matchingElements.Count == 0)  return;
+            if (matchingElements == null || matchingElements.Count == 0) return;
+            bool isTnt = false;
             if (matchingElements.Count >= _minimumAmountToMakeTnt)
             {
                 pressedElement.UpdateElement(GridElementUpdate.UpdateToTnt);
-                matchingElements.Remove(pressedElement);
+                isTnt = true;
             }
-            RemoveElementsFromGrid(matchingElements);
+
             DamageObstaclesAround(matchingElements, pressedElement);
-            
-            AnimateElementsToScaleZero(matchingElements,() => DeactivateElements(matchingElements));
-             GridSignals.Instance.onBlastCompleted.Invoke();
-            GridSignals.Instance.onSetSortOrder.Invoke();
+            if (isTnt) matchingElements.Remove(pressedElement);
+            RemoveElementsFromGrid(matchingElements);
+            AnimateElementsToScaleZero(matchingElements, () => DeactivateElements(matchingElements));
+
+            GridSignals.Instance.onBlastCompleted.Invoke();
         }
 
-        private void DamageObstaclesAround(List<IGridElement> matchingElements,IGridElement startElement)
+        private void DamageObstaclesAround(List<IGridElement> matchingElements, IGridElement startElement)
         {
             var nearbyObstacles = FindObstaclesAroundElements(matchingElements);
-
+            if (nearbyObstacles.Count == 0) return;
+            ObstaccleType currentType;
+            CleanedObstacles cleanedObstacles = new();
+            Dictionary<ObstaccleType, byte> Obstacles = new();
             Vector2Int currentMatrixPosition;
             foreach (var obstacle in nearbyObstacles)
             {
-                currentMatrixPosition = obstacle.MatrixPosition; 
-                
-                if(obstacle.UpdateElement(GridElementUpdate.UpdateToDamaged))
+                currentMatrixPosition = obstacle.MatrixPosition;
+                currentType = obstacle.Type.InteractableTypeToObstacleType();
+
+                if (obstacle.UpdateElement(GridElementUpdate.UpdateToDamaged))
                 {
-                    _gridUtils.RemoveItemAt(currentMatrixPosition.x,currentMatrixPosition.y);
+                    _gridUtils.RemoveItemAt(currentMatrixPosition.x, currentMatrixPosition.y);
+                    if (!Obstacles.ContainsKey(currentType))
+                    {
+                        Obstacles.Add(currentType, 1);
+                    }
+                    else
+                    {
+                        Obstacles[currentType]++;
+                    }
                 }
             }
+
+            cleanedObstacles.Obstacles = Obstacles;
+            LevelObjectivesSignals.Instance.onObjectiveCleaned(cleanedObstacles);
         }
 
-        private List<IGridElement> FindObstaclesAroundElements(List<IGridElement> matchingElements)
+        private HashSet<IGridElement> FindObstaclesAroundElements(List<IGridElement> matchingElements)
         {
-            List<IGridElement> nearObstacles = new List<IGridElement>();
+            HashSet<IGridElement> nearObstacles = new HashSet<IGridElement>();
 
             foreach (var element in matchingElements)
             {
                 _gridFinder.LookForInteractablesOnAxis(out HashSet<IGridElement> foundObstacles, element,
-                    x => x.Type.IsObstacle());
-                nearObstacles.AddRange(foundObstacles);
+                    x => x.Type.IsObstacle() && !x.OnlyPowerDamage);
+                foreach (var obstacle in foundObstacles)
+                {
+                    nearObstacles.Add(obstacle);
+                }
             }
+
             return nearObstacles;
         }
 
@@ -84,7 +107,7 @@ namespace Script.Strategies
         {
             foreach (var cube in matchingElements)
             {
-                cube.ResetElement();
+                cube.UpdateElement(GridElementUpdate.UpdateToDamaged);
             }
         }
 
@@ -93,22 +116,26 @@ namespace Script.Strategies
             foreach (var element in matchingElements)
             {
                 Vector2Int pos = element.MatrixPosition;
-                _gridUtils.RemoveItemAt(pos.x,pos.y);
+                _gridUtils.RemoveItemAt(pos.x, pos.y);
             }
         }
 
-        private void AnimateElementsToScaleZero(List<IGridElement> elementsToAnimate,Action onComplete)
+        private void AnimateElementsToScaleZero(List<IGridElement> elementsToAnimate, Action onComplete)
         {
             Sequence animateSequence = DOTween.Sequence();
             foreach (var element in elementsToAnimate)
             {
-               Tween anim = element.ElementTransfom.DOScale(0, 0.1f).SetEase(Ease.InQuad);
-               animateSequence.Join(anim);
+                Tween anim = element.ElementTransfom.DOScale(0, 0.1f).SetEase(Ease.InQuad);
+                animateSequence.Join(anim);
             }
-            animateSequence.OnComplete(() =>
-            {
-                onComplete?.Invoke();
-            });
+
+            animateSequence.OnComplete(() => { onComplete?.Invoke(); });
+        }
+
+        private void AnimateElementZeroToOne(IGridElement elementToAnimate, Action onComplete = null)
+        {
+            Tween anim = elementToAnimate.ElementTransfom.DOScale(1, 0.1f).SetEase(Ease.InQuad).From(Vector3.zero);
+            anim.OnComplete(() => { onComplete?.Invoke(); });
         }
     }
 }

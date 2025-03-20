@@ -41,9 +41,9 @@ namespace Script.Controllers.Obstacle
             
         }
 
-        internal void SetSortingOrder(Vector2Int matrixPosition)
+        internal void SetSortingOrder(Vector2Int matrixPosition,bool bringFront = false)
         {
-            spriteRenderer.sortingOrder = matrixPosition.y + 1;
+            spriteRenderer.sortingOrder = bringFront ? matrixPosition.y + 10 : matrixPosition.y + 1;
         }
 
     }

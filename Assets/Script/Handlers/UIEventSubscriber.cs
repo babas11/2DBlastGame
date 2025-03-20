@@ -1,8 +1,11 @@
 using System;
+using Script.Controllers.UI;
 using Script.Enums;
 using Script.Managers;
+using Script.Signals;
 using Sirenix.OdinInspector;
 using UnityEngine;
+using UnityEngine.Serialization;
 using UnityEngine.UI;
 
 namespace Script.Handlers
@@ -14,13 +17,13 @@ namespace Script.Handlers
         #region Serialized Variables
 
         [SerializeField] private UIEventSubscriptionTypes type;
-        [SerializeField]  private Button button;
+        [SerializeField] private Button levelButton;
 
         #endregion
         
         #region Private Variables
 
-        [ShowInInspector]private UIManager _manager;
+        [ShowInInspector]  private UIManager _manager;
 
         #endregion
 
@@ -46,13 +49,13 @@ namespace Script.Handlers
             switch (type)
             {
                 case UIEventSubscriptionTypes.OnLevelPlay:
-                    button.onClick.AddListener(_manager.OnLevelPlay);
+                    levelButton.onClick.AddListener(_manager.OnLevelPlay);
                     break;
                 case UIEventSubscriptionTypes.OnNextLevel:
-                    button.onClick.AddListener(_manager.OnNextLevel);
+                    levelButton.onClick.AddListener(_manager.OnNextLevel);
                     break;
                 case UIEventSubscriptionTypes.OnRestrart:
-                    button.onClick.AddListener(_manager.RestartLevel);
+                    levelButton.onClick.AddListener(_manager.RestartLevel);
                     break;
                 default:
                     throw new ArgumentOutOfRangeException();
@@ -64,13 +67,13 @@ namespace Script.Handlers
             switch (type)
             {
                 case UIEventSubscriptionTypes.OnLevelPlay:
-                    button.onClick.RemoveListener(_manager.OnLevelPlay);
+                    levelButton.onClick.RemoveListener(_manager.OnLevelPlay);
                     break;
                 case UIEventSubscriptionTypes.OnNextLevel:
-                    button.onClick.RemoveListener(_manager.OnNextLevel);
+                    levelButton.onClick.RemoveListener(_manager.OnNextLevel);
                     break;
                 case UIEventSubscriptionTypes.OnRestrart:
-                    button.onClick.RemoveListener(_manager.RestartLevel);
+                    levelButton.onClick.RemoveListener(_manager.RestartLevel);
                     break;
                 default:
                     throw new ArgumentOutOfRangeException();

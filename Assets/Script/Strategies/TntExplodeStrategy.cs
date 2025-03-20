@@ -4,6 +4,7 @@ using DG.Tweening;
 using Script.Enums;
 using Script.Extensions;
 using Script.Interfaces;
+using Script.Keys;
 using Script.Signals;
 using Script.Utilities.Grid;
 using UnityEngine;
@@ -25,6 +26,7 @@ namespace Script.Strategies
 
         public void Explode(IGridElement startTnt)
         {
+            startTnt.BringElementFront();
             bool isMegaTnt =_gridFinder.LookForInteractablesOnAxis(out HashSet<IGridElement> nearTnts, startTnt, 
                 x => x.Type == InteractableType.tnt);
             HashSet<IGridElement> visited = new HashSet<IGridElement>();
@@ -118,6 +120,9 @@ namespace Script.Strategies
                 mainTnt.ElementTransfom.DORotate(new Vector3(0, 0, 360), 0.15f * 0.7f, RotateMode.FastBeyond360)
                     .SetEase(Ease.OutElastic)
             );
+            seq.Join(
+                mainTnt.ElementTransfom.DOScale(0f, 0.15f * 0.7f).SetEase(Ease.InElastic)
+            );
             
 
             // 4) Then do the "mega" explosion with synergy range
@@ -164,27 +169,46 @@ namespace Script.Strategies
             );
 
             Vector2Int currentPos;
+            InteractableType currentType;
+            CleanedObstacles cleanedObstacles = new(); 
+            Dictionary<ObstaccleType, byte> Obstacles = new();
             foreach (var elem in nearElements)
             {
                 currentPos = elem.MatrixPosition;
+                currentType = elem.Type;
+                
                 if (elem.UpdateElement(GridElementUpdate.UpdateToDamaged))
                 {
                     _gridUtils.RemoveItemAt(currentPos.x,currentPos.y);
+                    
+                    if (currentType.IsObstacle())
+                    {
+                        ObstaccleType obsType = currentType.InteractableTypeToObstacleType();
+                        if (!Obstacles.ContainsKey(obsType))
+                        {
+                            Obstacles.Add(obsType, 1);
+                        }
+                        else
+                        {
+                            Obstacles[obsType]++;
+                        }
+                    }
                 }
             }
+            cleanedObstacles.Obstacles = Obstacles;
+            LevelObjectivesSignals.Instance.onObjectiveCleaned(cleanedObstacles);
         }
 
         private void RemoveTnt(IGridElement tnt)
         {
             Vector2Int pos = tnt.MatrixPosition;
             _gridUtils.RemoveItemAt(pos.x, pos.y);
-            tnt.UpdateElement(GridElementUpdate.UpdateToDamaged);
+            tnt.UpdateElement(GridElementUpdate.UpdateToTntExplode);
         }
 
         private void OnAllExplosionsComplete()
         {
             GridSignals.Instance.onBlastCompleted?.Invoke();
-            GridSignals.Instance.onSetSortOrder?.Invoke();
         }
     }
 }

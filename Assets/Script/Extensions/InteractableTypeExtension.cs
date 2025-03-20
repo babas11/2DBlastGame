@@ -45,6 +45,18 @@ namespace Script.Extensions
                     throw new ArgumentException($"This string value do not have a corresponding InteractableType : {stringValue}");
             }
         }
+        
+        public static ObstaccleType StringToObstacleType(this string stringValue)
+        {
+            switch (stringValue)
+            {
+                case "v":    return ObstaccleType.Vase;
+                case "bo":   return ObstaccleType.Box;
+                case "s":    return ObstaccleType.Stone;  
+                default:
+                    throw new ArgumentException($"This string value do not have a corresponding Obstacle Type : {stringValue}");
+            }
+        }
         public static InteractableBehaviorType StringToPoolType(this string stringValue)
         {
             switch (stringValue)

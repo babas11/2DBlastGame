@@ -9,15 +9,15 @@ namespace Script.Commands.Level
     {
         private string _levelName;
         private byte _levelIndex;
-        private LevelDatas _data;
-        public OnLevelLoaderCommand(LevelDatas data)
+        private LevelData data;
+        public OnLevelLoaderCommand(LevelData data)
         {
-            _data = data;
+            this.data = data;
         }
 
         public void Execute()
         {
-            _levelIndex = _data.jsonLevel.level_number;
+            _levelIndex = data.jsonLevel.level_number;
             string levelIndexString  = _levelIndex > 9 ? _levelIndex.ToString() : $"0{_levelIndex}";
             
             _levelName = GetCurrentLevelName();

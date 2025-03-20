@@ -1,10 +1,8 @@
-using System.Collections.Generic;
 using Script.Commands.Grid;
 using Script.Controllers.Grid;
 using Script.Data.UnityObjects;
 using Script.Data.ValueObjects;
 using Script.Interfaces;
-using Script.Keys;
 using Script.Signals;
 using Script.Utilities.Grid;
 using Sirenix.OdinInspector;
@@ -15,18 +13,18 @@ namespace Script.Managers
     public class GridManager : MonoBehaviour
     {
         #region Self Variables
-        
+
         #region Serialized Variables
 
         [SerializeField] private BackGroundSpriteController _backGroundSpriteController;
         [SerializeField] private SpriteMaskController _spriteMaskController;
         [SerializeField] private Transform _gridElementsParent;
-        
+
         #endregion
-        
+
         #region Private Variables
 
-        [ShowInInspector] private LevelDatas _levelData;
+        [ShowInInspector] private LevelData levelData;
         [ShowInInspector] private CD_Grid _gridData;
         [ShowInInspector] private Vector2Int _dimensions;
         private IGridElement[,] _grid;
@@ -35,7 +33,8 @@ namespace Script.Managers
         private FallGridElementCommand _fallElementCommand;
         private GridCubeStateCommand _gridCubeStateCommand;
         private OnridTouchCommand _onridTouchCommand;
-        private GridFallCommand _gridFallCommand;
+        private RePopulateGridCommand _rePopulateGridCommand;
+        private OnApplyGravity onApplyGravity;
         private GridManipulationUtilities<IGridElement> _gridManipulationUtilities;
         private GridFinder _gridFinder;
 
@@ -46,36 +45,40 @@ namespace Script.Managers
         private void Awake()
         {
             GetDatas();
-            SendDataToControllers();
             Init();
+            SendDataToControllers();
         }
 
         private void Init()
         {
-            _placeGridCommand = new PlaceGridCommand(this,_levelData.jsonLevel,_gridData.GridViewData);
-            _gridManipulationUtilities = new GridManipulationUtilities<IGridElement>(_dimensions, _grid,transform);
+            levelData = CoreGameSignals.Instance.onGetLevelValue.Invoke();
+            _dimensions = new Vector2Int(levelData.jsonLevel.grid_width, levelData.jsonLevel.grid_height);
+            _grid = new IGridElement[_dimensions.x, _dimensions.y];
+            
+            _placeGridCommand = new PlaceGridCommand(this, levelData.jsonLevel, _gridData.GridViewData);
+            _gridManipulationUtilities = new GridManipulationUtilities<IGridElement>(_dimensions, _grid, transform);
             _gridFinder = new GridFinder(_gridManipulationUtilities);
-            _buidGridCommand = new BuildGridCommand(this,_levelData.jsonLevel, ref _grid,_gridManipulationUtilities,_gridData);
+            _buidGridCommand = new BuildGridCommand(this, levelData.jsonLevel, ref _grid, _gridManipulationUtilities,
+                _gridData);
             _fallElementCommand = new FallGridElementCommand(_gridData.GridViewData);
-            _gridCubeStateCommand = new GridCubeStateCommand(_gridFinder,_dimensions,_gridData);
-            _onridTouchCommand = new OnridTouchCommand(_gridManipulationUtilities,_gridFinder);
-            _gridFallCommand = new GridFallCommand(_dimensions,_gridManipulationUtilities);
-
+            _gridCubeStateCommand = new GridCubeStateCommand(_gridFinder, _dimensions, _gridData);
+            _onridTouchCommand = new OnridTouchCommand(_gridManipulationUtilities, _gridFinder);
+            onApplyGravity = new OnApplyGravity(_dimensions, _gridManipulationUtilities, _gridData.GridViewData);
+            _rePopulateGridCommand = new RePopulateGridCommand(levelData.jsonLevel, _gridManipulationUtilities,
+                _gridData, _gridElementsParent);
         }
 
         private void SendDataToControllers()
         {
-            _backGroundSpriteController.SetRendererData(_gridData,_dimensions);
-            _spriteMaskController.SetMaskControllerData(_gridData,_dimensions);
+            _backGroundSpriteController.SetRendererData(_gridData, _dimensions);
+            _spriteMaskController.SetMaskControllerData(_gridData, _dimensions);
         }
+
         private void GetDatas()
         {
-            _gridData = Resources.Load<CD_Grid>("Data/Grid/CD_Grid");   
-            _levelData = CoreGameSignals.Instance.onGetLevelValue.Invoke();
-            _dimensions = new Vector2Int(_levelData.jsonLevel.grid_width, _levelData.jsonLevel.grid_height);
-            _grid = new IGridElement[_dimensions.x, _dimensions.y];
+            _gridData = Resources.Load<CD_Grid>("Data/Grid/CD_Grid");
         }
-        
+
         private void OnEnable()
         {
             SubscribeEvents();
@@ -84,11 +87,8 @@ namespace Script.Managers
         [Button]
         private void DebugGrid()
         {
-            // Just a header for clarity
             Debug.Log("=== Grid Debug Start ===");
 
-            // We can loop from top row (y = _dimensions.y - 1) down to bottom (y = 0),
-            // or bottom to top – whichever you prefer. Here we go bottom to top.
             for (int y = _dimensions.y - 1; y >= 0; y--)
             {
                 // Build a single string representing row y
@@ -112,33 +112,38 @@ namespace Script.Managers
 
             Debug.Log("=== Grid Debug End ===");
         }
-        
+
         private void SubscribeEvents()
         {
             CoreGameSignals.Instance.onLevelSceneInitialize += OnLevelSceneInitialize;
             GridSignals.Instance.onGridPlaced += OnGridPlaced;
-            GridSignals.Instance.onElementsFall += _fallElementCommand.Execute;
-            GridSignals.Instance.onSetCubeState += _gridCubeStateCommand.Execute;
+            GridSignals.Instance.onElementsFallWithGroup += _fallElementCommand.Execute;
             GridSignals.Instance.onBlastCompleted += OnBlastCompleted;
+            GridSignals.Instance.onSetCubeState += _gridCubeStateCommand.Execute;
             InputSignals.Instance.onGridTouch += _onridTouchCommand.Execute;
         }
 
         private void OnLevelSceneInitialize()
-        { 
+        {
             _placeGridCommand.Execute();
             _buidGridCommand.Execute(_gridElementsParent);
         }
+
         private void OnGridPlaced()
         {
             _backGroundSpriteController.SetGridBackGroundSprite();
             _spriteMaskController.SetSpriteMask();
             InputSignals.Instance.onEnableInput?.Invoke();
+            GridSignals.Instance.onSetSortOrder?.Invoke();
+            GridSignals.Instance.onSetCubeState?.Invoke();
         }
 
         private void OnBlastCompleted()
         {
-            _gridFallCommand.Execute();
-            _buidGridCommand.Execute(_gridElementsParent,false);
+            onApplyGravity.Execute();
+            _rePopulateGridCommand.Execute();
+            _gridCubeStateCommand.Execute();
+            GridSignals.Instance.onSetSortOrder?.Invoke();
         }
 
         private void OnDisable()
@@ -150,9 +155,9 @@ namespace Script.Managers
         {
             CoreGameSignals.Instance.onLevelSceneInitialize -= OnLevelSceneInitialize;
             GridSignals.Instance.onGridPlaced -= OnGridPlaced;
-            GridSignals.Instance.onElementsFall -= _fallElementCommand.Execute;
-            GridSignals.Instance.onSetCubeState -= _gridCubeStateCommand.Execute;
+            GridSignals.Instance.onElementsFallWithGroup -= _fallElementCommand.Execute;
             GridSignals.Instance.onBlastCompleted -= OnBlastCompleted;
+            GridSignals.Instance.onSetCubeState -= _gridCubeStateCommand.Execute;
             InputSignals.Instance.onGridTouch -= _onridTouchCommand.Execute;
         }
     }

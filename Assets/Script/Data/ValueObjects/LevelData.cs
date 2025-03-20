@@ -1,0 +1,12 @@
+using System;
+using System.Collections.Generic;
+using UnityEngine.Serialization;
+
+namespace Script.Data.ValueObjects
+{
+    [Serializable]
+    public struct LevelData
+    {
+        public JsonLevelData jsonLevel;
+    }
+}

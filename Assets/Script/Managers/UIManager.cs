@@ -30,7 +30,8 @@ namespace Script.Managers
         private void OnMainLevelInitialize()
         {
             CoreUISignals.Instance.onOpenPanel?.Invoke(UIPanelTypes.Start,0);
-            UISignals.Instance.onSetMainLevelData?.Invoke((byte)CoreGameSignals.Instance.OnGetLevelIndex?.Invoke());
+            //UISignals.Instance.onSetMainLevelData?.Invoke((byte)CoreGameSignals.Instance.OnGetLevelIndex?.Invoke());
+            
         }
 
 
@@ -47,7 +48,7 @@ namespace Script.Managers
 
         void OnReset()
         {
-            CoreUISignals.Instance.onCloseAllPanel?.Invoke();
+            CoreUISignals.Instance.onCloseAllPanels?.Invoke();
             CoreUISignals.Instance.onOpenPanel?.Invoke(UIPanelTypes.Start,1);
         }
 
@@ -67,13 +68,13 @@ namespace Script.Managers
 
         public void OnLevelPlay()
         {
-            CoreGameSignals.Instance.onLevelPlay?.Invoke();
+            UISignals.Instance.onStartLevelButtonPressed?.Invoke();
+            //CoreGameSignals.Instance.onLevelPlay?.Invoke();
         }
 
         public void OnNextLevel()
         {
             CoreGameSignals.Instance.onNextLevel?.Invoke();
-            //CoreGameSignals.Instance.onReset?.Invoke();
         }
 
         public void RestartLevel()
