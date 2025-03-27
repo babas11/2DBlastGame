@@ -10,7 +10,7 @@ namespace Script.Utilities.Grid
         private T[,] _matrix;
         private Transform _transform;
     
-        public GridManipulationUtilities(Vector2Int dimensions, T[,] matrix, Transform transform)
+        public GridManipulationUtilities(Vector2Int dimensions, Transform transform, ref T[,] matrix)
         {
             this._dimensions = dimensions;
             this._matrix = matrix;

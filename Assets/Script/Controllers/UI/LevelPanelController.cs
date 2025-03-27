@@ -83,9 +83,12 @@ namespace Script.Controllers.UI
         
         private void UnSubscribeEvents()
         {
-            UISignals.Instance.onSetObjectiveUI -= OnSetObjectiveUI;
-            UISignals.Instance.onUpdateObjectiveUI -= OnUpdateOjectiveUI;
-            UISignals.Instance.onMoveCountUpdate -= SetMoveCount;
+            if(UISignals.Instance != null)
+            {
+                UISignals.Instance.onSetObjectiveUI -= OnSetObjectiveUI;
+                UISignals.Instance.onUpdateObjectiveUI -= OnUpdateOjectiveUI;
+                UISignals.Instance.onMoveCountUpdate -= SetMoveCount;
+            }
         }
         
         private void Awake()

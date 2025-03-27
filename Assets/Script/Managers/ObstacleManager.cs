@@ -144,7 +144,8 @@ namespace Script.Managers
 
         private void UnsubscribeEvents()
         {
-            GridSignals.Instance.onSetSortOrder -= OnSetSortOrder;
+            if(GridSignals.Instance != null)
+                GridSignals.Instance.onSetSortOrder -= OnSetSortOrder;
         }
 
         private CD_Obstacle GetData()

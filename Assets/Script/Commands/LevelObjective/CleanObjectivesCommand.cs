@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using Script.Enums;
@@ -17,22 +18,39 @@ namespace Script.Commands.LevelObjective
 
         internal void Execute(CleanedObstacles cleanedObstacles,byte _moveCount)
         {
-            _moveCount--;
-            
-            foreach (var type in cleanedObstacles.Obstacles.Keys)
-            {
-                _objectives[type] -= cleanedObstacles.Obstacles[type];
-                
-            }
-              
-            if(_objectives.All(x => x.Value == 0))
-            {
-                CoreGameSignals.Instance.onLevelSuccesful?.Invoke();
-            }
-            
+
+            // If already 0, fail immediately and exit
             if (_moveCount == 0)
             {
-                //CoreGameSignals.onFail?.Invoke();
+                CoreGameSignals.Instance.onLevelFail?.Invoke();
+                return; // Prevent underflow and unnecessary execution
+            }
+
+            // Safe to decrement
+            _moveCount--;
+
+            // Subtract cleaned obstacles from objectives
+            foreach (var type in cleanedObstacles.Obstacles.Keys)
+            {
+                // Prevent underflow in objectives too!
+                var cleanedCount = cleanedObstacles.Obstacles[type];
+                if (_objectives.ContainsKey(type))
+                {
+                    _objectives[type] = (byte)Math.Max(0, _objectives[type] - cleanedCount);
+                }
+            }
+
+            // Check for level success
+            if (_objectives.All(x => x.Value == 0))
+            {
+                CoreGameSignals.Instance.onLevelSuccesful?.Invoke();
+                return;
+            }
+
+            // If moveCount just hit 0 after decrement, fail level
+            if (_moveCount == 0)
+            {
+                CoreGameSignals.Instance.onLevelFail?.Invoke();
             }
         }
     }

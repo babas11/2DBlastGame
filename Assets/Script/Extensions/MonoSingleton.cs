@@ -1,3 +1,4 @@
+using System;
 using UnityEngine;
 
 namespace Script.Extensions
@@ -5,20 +6,18 @@ namespace Script.Extensions
     public class MonoSingleton<T> : MonoBehaviour where T : Component
     {
         private static T _instance;
-        private static bool _shuttingDown = false;
+        
+        [SerializeField] private bool isGlobal = true; 
+        // ^ This can be set in the inspector 
+        //   or made public if you want to set it from other scripts
+
         public static T Instance
         {
             get
             {
-                //if (_shuttingDown) return null; // Don't recreate if we're shutting down
-        
                 if (_instance == null)
                 {
                     _instance = FindObjectOfType<T>();
-                    if (_instance == null)
-                    {
-                        print($"Eklesene babo bi {typeof(T)}");
-                    }
                 }
                 return _instance;
             }
@@ -29,16 +28,17 @@ namespace Script.Extensions
             if (_instance == null)
             {
                 _instance = this as T;
+
+                if (isGlobal)
+                {
+                    DontDestroyOnLoad(gameObject);
+                }
             }
             else if (_instance != this)
             {
-                Destroy(gameObject);
+                Destroy(gameObject); 
             }
         }
         
-        private void OnApplicationQuit()
-        {
-            _shuttingDown = true;
-        }
     }
 }

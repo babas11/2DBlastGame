@@ -56,7 +56,7 @@ namespace Script.Managers
             _grid = new IGridElement[_dimensions.x, _dimensions.y];
             
             _placeGridCommand = new PlaceGridCommand(this, levelData.jsonLevel, _gridData.GridViewData);
-            _gridManipulationUtilities = new GridManipulationUtilities<IGridElement>(_dimensions, _grid, transform);
+            _gridManipulationUtilities = new GridManipulationUtilities<IGridElement>(_dimensions , transform,ref _grid);
             _gridFinder = new GridFinder(_gridManipulationUtilities);
             _buidGridCommand = new BuildGridCommand(this, levelData.jsonLevel, ref _grid, _gridManipulationUtilities,
                 _gridData);
@@ -116,11 +116,27 @@ namespace Script.Managers
         private void SubscribeEvents()
         {
             CoreGameSignals.Instance.onLevelSceneInitialize += OnLevelSceneInitialize;
+            CoreGameSignals.Instance.onRestartLevel += OnRestartLevel;
             GridSignals.Instance.onGridPlaced += OnGridPlaced;
             GridSignals.Instance.onElementsFallWithGroup += _fallElementCommand.Execute;
             GridSignals.Instance.onBlastCompleted += OnBlastCompleted;
             GridSignals.Instance.onSetCubeState += _gridCubeStateCommand.Execute;
             InputSignals.Instance.onGridTouch += _onridTouchCommand.Execute;
+        }
+
+        private void OnRestartLevel()
+        {
+            for (int i = 0; i < _grid.GetLength(0); i++) 
+            {
+                for (int j = 0; j < _grid.GetLength(1); j++) 
+                {
+                    _grid[i, j]?.ResetElement();
+                    _grid[i, j] = null;
+                }
+                
+            }
+            _placeGridCommand.Execute();
+            _buidGridCommand.Execute(_gridElementsParent);
         }
 
         private void OnLevelSceneInitialize()
@@ -153,12 +169,17 @@ namespace Script.Managers
 
         private void Unsubscribe()
         {
-            CoreGameSignals.Instance.onLevelSceneInitialize -= OnLevelSceneInitialize;
-            GridSignals.Instance.onGridPlaced -= OnGridPlaced;
-            GridSignals.Instance.onElementsFallWithGroup -= _fallElementCommand.Execute;
-            GridSignals.Instance.onBlastCompleted -= OnBlastCompleted;
-            GridSignals.Instance.onSetCubeState -= _gridCubeStateCommand.Execute;
-            InputSignals.Instance.onGridTouch -= _onridTouchCommand.Execute;
+            if( CoreGameSignals.Instance != null)
+                CoreGameSignals.Instance.onLevelSceneInitialize -= OnLevelSceneInitialize;
+            if (GridSignals.Instance != null)
+            {
+                GridSignals.Instance.onGridPlaced -= OnGridPlaced;
+                GridSignals.Instance.onElementsFallWithGroup -= _fallElementCommand.Execute;
+                GridSignals.Instance.onBlastCompleted -= OnBlastCompleted;
+                GridSignals.Instance.onSetCubeState -= _gridCubeStateCommand.Execute;
+            }
+            if(InputSignals.Instance != null)
+                InputSignals.Instance.onGridTouch -= _onridTouchCommand.Execute;
         }
     }
 }

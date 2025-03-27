@@ -40,9 +40,14 @@ namespace Script.Managers
 
         private void SubscribeEvents()
         {
-            CoreGameSignals.Instance.onResetActiveLevel += OnReset;
-            InputSignals.Instance.onEnableInput += OnEnableInput;
-            InputSignals.Instance.onDisableInput += OnDisableInput;
+            if (CoreGameSignals.Instance != null)
+                CoreGameSignals.Instance.onResetActiveLevel += OnReset;
+            
+            if (InputSignals.Instance != null)
+            {
+                InputSignals.Instance.onEnableInput += OnEnableInput;
+                InputSignals.Instance.onDisableInput += OnDisableInput;
+            }
         }
 
         private void OnReset()
@@ -61,9 +66,14 @@ namespace Script.Managers
         }
         private void UnSubscribeEvents()
         {
-            CoreGameSignals.Instance.onResetActiveLevel -= OnReset;
-            InputSignals.Instance.onEnableInput -= OnEnableInput;
-            InputSignals.Instance.onDisableInput -= OnDisableInput;
+            if(CoreGameSignals.Instance != null)
+                CoreGameSignals.Instance.onResetActiveLevel -= OnReset;
+            if (InputSignals.Instance != null)
+            {
+                InputSignals.Instance.onEnableInput -= OnEnableInput;
+                InputSignals.Instance.onDisableInput -= OnDisableInput;
+            }
+            
         }
     
         private void Update()

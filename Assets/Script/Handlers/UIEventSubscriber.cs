@@ -5,6 +5,7 @@ using Script.Managers;
 using Script.Signals;
 using Sirenix.OdinInspector;
 using UnityEngine;
+using UnityEngine.Events;
 using UnityEngine.Serialization;
 using UnityEngine.UI;
 
@@ -17,13 +18,14 @@ namespace Script.Handlers
         #region Serialized Variables
 
         [SerializeField] private UIEventSubscriptionTypes type;
-        [SerializeField] private Button levelButton;
+        [SerializeField] private Button _levelButton;
 
         #endregion
         
         #region Private Variables
 
         [ShowInInspector]  private UIManager _manager;
+        private UnityAction _cachedClickAction;
 
         #endregion
 
@@ -37,6 +39,7 @@ namespace Script.Handlers
         private void GetReferences()
         {
             _manager = FindObjectOfType<UIManager>();
+            _levelButton = GetComponent<Button>();
         }
 
         private void OnEnable()
@@ -49,13 +52,23 @@ namespace Script.Handlers
             switch (type)
             {
                 case UIEventSubscriptionTypes.OnLevelPlay:
-                    levelButton.onClick.AddListener(_manager.OnLevelPlay);
+                    // Store the lambda in _cachedClickAction
+                    _cachedClickAction = () => _manager.OnButtonPressed(UIEventSubscriptionTypes.OnLevelPlay);
+                    _levelButton.onClick.AddListener(_cachedClickAction);
                     break;
+                    
                 case UIEventSubscriptionTypes.OnNextLevel:
-                    levelButton.onClick.AddListener(_manager.OnNextLevel);
+                    _cachedClickAction = () => _manager.OnButtonPressed(UIEventSubscriptionTypes.OnNextLevel);
+                    _levelButton.onClick.AddListener(_cachedClickAction);
                     break;
-                case UIEventSubscriptionTypes.OnRestrart:
-                    levelButton.onClick.AddListener(_manager.RestartLevel);
+                    
+                case UIEventSubscriptionTypes.OnRestart:
+                    _cachedClickAction = () => _manager.OnButtonPressed(UIEventSubscriptionTypes.OnRestart);
+                    _levelButton.onClick.AddListener(_cachedClickAction);
+                    break;
+                case UIEventSubscriptionTypes.OnMainMenu:
+                    _cachedClickAction = () => _manager.OnButtonPressed(UIEventSubscriptionTypes.OnMainMenu);
+                    _levelButton.onClick.AddListener(_cachedClickAction);
                     break;
                 default:
                     throw new ArgumentOutOfRangeException();
@@ -64,19 +77,10 @@ namespace Script.Handlers
 
         private void UnSubscribeEvents()
         {
-            switch (type)
+            if (_cachedClickAction != null)
             {
-                case UIEventSubscriptionTypes.OnLevelPlay:
-                    levelButton.onClick.RemoveListener(_manager.OnLevelPlay);
-                    break;
-                case UIEventSubscriptionTypes.OnNextLevel:
-                    levelButton.onClick.RemoveListener(_manager.OnNextLevel);
-                    break;
-                case UIEventSubscriptionTypes.OnRestrart:
-                    levelButton.onClick.RemoveListener(_manager.RestartLevel);
-                    break;
-                default:
-                    throw new ArgumentOutOfRangeException();
+                _levelButton.onClick.RemoveListener(_cachedClickAction);
+                _cachedClickAction = null;
             }
         }
 

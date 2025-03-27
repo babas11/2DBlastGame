@@ -132,7 +132,7 @@ MonoBehaviour:
       Data: Script.Data.ValueObjects.ObstaccleData, Assembly-CSharp
     - Name: CanFall
       Entry: 5
-      Data: false
+      Data: true
     - Name: DefaultSprite
       Entry: 10
       Data: 4

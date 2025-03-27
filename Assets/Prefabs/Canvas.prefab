@@ -79,7 +79,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 207308327208360569}
-  - component: {fileID: 8630289352381546787}
+  - component: {fileID: 1641650517731690837}
   m_Layer: 5
   m_Name: UIPanelController
   m_TagString: Untagged
@@ -106,7 +106,7 @@ RectTransform:
   m_AnchoredPosition: {x: 0, y: 0}
   m_SizeDelta: {x: 100, y: 100}
   m_Pivot: {x: 0.5, y: 0.5}
---- !u!114 &8630289352381546787
+--- !u!114 &1641650517731690837
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -115,13 +115,13 @@ MonoBehaviour:
   m_GameObject: {fileID: 4621969641100895934}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: fec37c0c86d447e8ac661d251257faac, type: 3}
+  m_Script: {fileID: 11500000, guid: 26e8e5a4c6c444dd85c79b668bc9d2c3, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
   layers:
-  - {fileID: 7811289566207017487}
-  - {fileID: 4338339465627951409}
-  - {fileID: 5723451166893764150}
+  - {fileID: 3243121952874853623}
+  - {fileID: 6182922088026093411}
+  - {fileID: 1122015913496019001}
 --- !u!1 &4627506403607150360
 GameObject:
   m_ObjectHideFlags: 0

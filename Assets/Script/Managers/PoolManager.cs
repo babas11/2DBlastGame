@@ -95,10 +95,13 @@ namespace Script.Managers
         }
         private void UnSubscribeEvents()
         {
-            PoolSignals.Instance.onGetCubeFromPool -= OnGetCube;
-            PoolSignals.Instance.onGetObstacleFromPool -= OnGetObstacle;
-            PoolSignals.Instance.onSendCubeToPool -= OnSendCubeToPool;
-            PoolSignals.Instance.onSendObstacleToPool -= OnSendObstacleToPool;
+            if(PoolSignals.Instance != null)
+            {
+                PoolSignals.Instance.onGetCubeFromPool -= OnGetCube;
+                PoolSignals.Instance.onGetObstacleFromPool -= OnGetObstacle;
+                PoolSignals.Instance.onSendCubeToPool -= OnSendCubeToPool;
+                PoolSignals.Instance.onSendObstacleToPool -= OnSendObstacleToPool;
+            }
         }
         private void OnDisable()
         {

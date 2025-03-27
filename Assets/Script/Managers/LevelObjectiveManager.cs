@@ -1,15 +1,11 @@
-using System;
 using System.Collections.Generic;
 using Script.Commands.LevelObjective;
 using Script.Data.ValueObjects;
 using Script.Enums;
-using Script.Interfaces;
 using Script.Keys;
 using Script.Signals;
 using Sirenix.OdinInspector;
-using Sirenix.OdinInspector.Editor.GettingStarted;
 using UnityEngine;
-using UnityEngine.PlayerLoop;
 
 namespace Script.Managers
 {
@@ -32,7 +28,8 @@ namespace Script.Managers
         
         private void Awake()
         {
-            
+            Init();
+            GetData();
         }
 
         private void Init()
@@ -55,9 +52,18 @@ namespace Script.Managers
         private void SubscribeEvents()
         {
             CoreGameSignals.Instance.onLevelSceneInitialize += OnLevelSceneInitialize;
+            CoreGameSignals.Instance.onRestartLevel += OnRestartLevel;
             GridSignals.Instance.onBlastCompleted +=  OnBlastCompeted;
             LevelObjectivesSignals.Instance.onObjectiveCleaned += OnObjectivesCleaned;
             LevelObjectivesSignals.Instance.onGetLevelObjectives += () => _objectives;
+        }
+
+        private void OnRestartLevel()
+        {
+            _objectives.Clear();
+            _moveCount = _levelData.jsonLevel.move_count;
+            _findLevelObjectivesCommand.Execute();
+            UISignals.Instance.onSetObjectiveUI?.Invoke(_objectives);
         }
 
         private void OnBlastCompeted()
@@ -86,10 +92,15 @@ namespace Script.Managers
 
         private void UnSubscribeEvents()
         {
-            CoreGameSignals.Instance.onLevelSceneInitialize -= OnLevelSceneInitialize;
-            GridSignals.Instance.onBlastCompleted -=  OnBlastCompeted;
-            LevelObjectivesSignals.Instance.onObjectiveCleaned -= OnObjectivesCleaned;
-            LevelObjectivesSignals.Instance.onGetLevelObjectives -= () => _objectives;
+            if(CoreGameSignals.Instance != null)
+                CoreGameSignals.Instance.onLevelSceneInitialize -= OnLevelSceneInitialize;
+            if(GridSignals.Instance != null)
+                GridSignals.Instance.onBlastCompleted -=  OnBlastCompeted;
+            if(LevelObjectivesSignals.Instance != null)
+            {
+                LevelObjectivesSignals.Instance.onObjectiveCleaned -= OnObjectivesCleaned;
+                LevelObjectivesSignals.Instance.onGetLevelObjectives -= () => _objectives;
+            }
         }
     }
 }

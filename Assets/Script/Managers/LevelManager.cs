@@ -52,7 +52,6 @@ namespace Script.Managers
 
         private void SubscribeEvents()
         {
-            //CoreGameSignals.Instance.onLevelSceneInitialize += levelLoaderCommand.Execute();
             CoreGameSignals.Instance.onGetLevelValue += OnGetLevelValue;
             CoreGameSignals.Instance.OnGetLevelIndex += OnGetLevelIndex;
             CoreGameSignals.Instance.onLevelPlay += () => SceneManager.LoadScene("LevelScene2");
@@ -78,12 +77,14 @@ namespace Script.Managers
         
         private void UnSubscribeEvents()
         {
-            CoreGameSignals.Instance.onGetLevelValue -= OnGetLevelValue;
-            CoreGameSignals.Instance.OnGetLevelIndex -= OnGetLevelIndex;
-            CoreGameSignals.Instance.onLevelPlay -= () => SceneManager.LoadScene("LevelScene2");
-            //CoreGameSignals.Instance.onLevelSceneInitialize -= levelLoaderCommand.Execute();
-            CoreGameSignals.Instance.onNextLevel -= OnNextLevel;
-            //CoreGameSignals.Instance.onRestartLevel -= OnRestartLevel;
+            if (CoreGameSignals.Instance != null)
+            {
+                CoreGameSignals.Instance.onGetLevelValue -= OnGetLevelValue;
+                CoreGameSignals.Instance.OnGetLevelIndex -= OnGetLevelIndex;
+                CoreGameSignals.Instance.onLevelPlay -= () => SceneManager.LoadScene("LevelScene2");
+                CoreGameSignals.Instance.onNextLevel -= OnNextLevel;
+                //CoreGameSignals.Instance.onRestartLevel -= OnRestartLevel;}
+            }
         }
         
         private void Start()

@@ -3,6 +3,7 @@ using Script.Data.ValueObjects;
 using Script.Enums;
 using Script.Signals;
 using UnityEngine;
+using UnityEngine.Events;
 
 namespace Script.Managers
 {
@@ -18,8 +19,8 @@ namespace Script.Managers
             CoreGameSignals.Instance.onMainSceneInitialize += OnMainLevelInitialize;
             CoreGameSignals.Instance.onLevelSceneInitialize += OnLevelSceneInitialize;
             CoreGameSignals.Instance.onLevelSuccesful += OnLevelSuccesful ;
-            CoreGameSignals.Instance.onLevelFail += OnLevelFail ;
-            CoreGameSignals.Instance.onReset += OnReset;
+            CoreGameSignals.Instance.onLevelFail += OnLevelFail;
+            UISignals.Instance.onAnimationFinished += OnLevelPlay;
         }
 
         private void OnLevelSceneInitialize()
@@ -33,8 +34,13 @@ namespace Script.Managers
             //UISignals.Instance.onSetMainLevelData?.Invoke((byte)CoreGameSignals.Instance.OnGetLevelIndex?.Invoke());
             
         }
+        public void OnLevelPlay()
+        {
+            CoreGameSignals.Instance.onLevelPlay?.Invoke();
+        }
 
 
+        
         private void OnLevelFail()
         {
             CoreUISignals.Instance.onOpenPanel?.Invoke(UIPanelTypes.Fail,2);
@@ -49,16 +55,18 @@ namespace Script.Managers
         void OnReset()
         {
             CoreUISignals.Instance.onCloseAllPanels?.Invoke();
-            CoreUISignals.Instance.onOpenPanel?.Invoke(UIPanelTypes.Start,1);
+            CoreUISignals.Instance.onOpenPanel?.Invoke(UIPanelTypes.Level,0);
         }
 
         private void UnsubscribeEvents()
         {
-            CoreGameSignals.Instance.onMainSceneInitialize -= OnMainLevelInitialize;
-            CoreGameSignals.Instance.onLevelSceneInitialize -= OnLevelSceneInitialize;
-            CoreGameSignals.Instance.onLevelSuccesful -= OnLevelSuccesful ;
-            CoreGameSignals.Instance.onLevelFail -= OnLevelFail ;
-            CoreGameSignals.Instance.onReset -= OnReset;
+            if(CoreGameSignals.Instance != null)
+            {
+                CoreGameSignals.Instance.onMainSceneInitialize -= OnMainLevelInitialize;
+                CoreGameSignals.Instance.onLevelSceneInitialize -= OnLevelSceneInitialize;
+                CoreGameSignals.Instance.onLevelSuccesful -= OnLevelSuccesful;
+                CoreGameSignals.Instance.onLevelFail -= OnLevelFail;
+            }
         }
 
         private void OnDisable()
@@ -66,20 +74,37 @@ namespace Script.Managers
             UnsubscribeEvents();
         }
 
-        public void OnLevelPlay()
+        public void OnButtonPressed(UIEventSubscriptionTypes buttonType)
         {
-            UISignals.Instance.onStartLevelButtonPressed?.Invoke();
-            //CoreGameSignals.Instance.onLevelPlay?.Invoke();
+            switch (buttonType)
+            {
+                case UIEventSubscriptionTypes.OnLevelPlay:
+                    UISignals.Instance.onStartLevelButtonPressed?.Invoke();
+                    break;
+                case UIEventSubscriptionTypes.OnNextLevel:
+                    UISignals.Instance.onRestartPressed?.Invoke();
+                    break;
+                case UIEventSubscriptionTypes.OnRestart:
+                    UISignals.Instance.onRestartPressed?.Invoke();
+                    break;
+                default:
+                    throw new ArgumentOutOfRangeException(nameof(buttonType), buttonType, null);
+            }
+            
         }
 
+        
         public void OnNextLevel()
         {
             CoreGameSignals.Instance.onNextLevel?.Invoke();
         }
-
+        
         public void RestartLevel()
         {
+            CoreUISignals.Instance.onCloseAllPanels?.Invoke();
+            CoreUISignals.Instance.onOpenPanel?.Invoke(UIPanelTypes.Level,1);
             CoreGameSignals.Instance.onRestartLevel?.Invoke();
+            
         }
         
     }

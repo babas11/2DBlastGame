@@ -59,7 +59,7 @@ namespace Script.Controllers.UI
             Sequence seq = DOTween.Sequence();
             seq.Append(rectTransform.DOScale(Vector3.one * ScaleFactor, ScaleDuration).SetEase(Ease.OutBack));
             seq.Append(rectTransform.DOScale(Vector3.one, ScaleDuration).SetEase(Ease.OutBack));
-            seq.AppendCallback(() => CoreGameSignals.Instance.onLevelPlay?.Invoke());
+            seq.AppendCallback(() => _manager.OnLevelPlay());
             seq.Play();    
         }
 
@@ -70,8 +70,8 @@ namespace Script.Controllers.UI
 
         private void UnsubscribEvents()
         {
-            UISignals.Instance.onStartLevelButtonPressed -= OnStartLevelButtonPressed;
-
+            if (UISignals.Instance != null)
+                UISignals.Instance.onStartLevelButtonPressed -= OnStartLevelButtonPressed;
         }
     }
 }

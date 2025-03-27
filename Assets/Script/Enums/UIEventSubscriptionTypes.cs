@@ -4,6 +4,7 @@ namespace Script.Enums
     {
         OnLevelPlay,
         OnNextLevel,
-        OnRestrart
+        OnRestart,
+        OnMainMenu
     }
 }

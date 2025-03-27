@@ -20,7 +20,7 @@ namespace Script.Commands.Grid
         private Vector2Int _dimensions;
         private GridManipulationUtilities<IGridElement> gridManipulationUtilities;
         
-        public BuildGridCommand(GridManager manager, JsonLevelData data, ref IGridElement[,] grid, GridManipulationUtilities<IGridElement> gridManipulationUtilities, CD_Grid gridData)
+        public BuildGridCommand(GridManager manager, JsonLevelData data, ref IGridElement[,] grid, GridManipulationUtilities<IGridElement> gridManipulationUtilities, CD_Grid gridData )
         {
             _data = data;
             _dimensions = new Vector2Int(data.grid_width, data.grid_height);

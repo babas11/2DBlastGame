@@ -34,9 +34,12 @@ namespace Script.Controllers.UI
 
         private void UnsubscribeEvents()
         {
-            CoreUISignals.Instance.onOpenPanel -= OnOpenPanel;
-            CoreUISignals.Instance.onClosePanel -= OnClosePanel;
-            CoreUISignals.Instance.onCloseAllPanels -= OnCloseAllPanel;
+            if(CoreUISignals.Instance != null)
+            {
+                CoreUISignals.Instance.onOpenPanel -= OnOpenPanel;
+                CoreUISignals.Instance.onClosePanel -= OnClosePanel;
+                CoreUISignals.Instance.onCloseAllPanels -= OnCloseAllPanel;
+            }
         }
 
         private void OnDisable()
