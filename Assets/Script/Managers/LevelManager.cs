@@ -33,6 +33,7 @@ namespace Script.Managers
 
             CoreGameSignals.Instance.onLevelPlay += OnLevelPlay;
             CoreGameSignals.Instance.onMainLevel += OnNextLevel;
+            //CoreGameSignals.Instance.onRestartLevel -= OnLevelPlay;
         }
 
         private void OnNextLevel()
@@ -47,9 +48,10 @@ namespace Script.Managers
 
                 CoreGameSignals.Instance.onLevelPlay -= OnLevelPlay;
                 CoreGameSignals.Instance.onMainLevel -= OnNextLevel;
+                //CoreGameSignals.Instance.onRestartLevel -= OnLevelPlay;
             }
         }
-
+        
         private void OnLevelPlay()
         {
             SceneManager.LoadScene("LevelScene2");

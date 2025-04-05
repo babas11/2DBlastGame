@@ -61,6 +61,7 @@ namespace Script.Managers
                 PlayerPrefs.SetInt("LevelIndex",1); Debug.Log("Reset Level Index");
                 levelIndex = PlayerPrefs.GetInt("LevelIndex",1);
             }
+            
         }
 
         private void SaveGame()
@@ -107,7 +108,10 @@ namespace Script.Managers
         private void DeleteSave()
         {
             if (HasValidSave())
+            {
                 File.Delete(_saveFilePath);
+            }
+            
         }
         
         private void OnDisable()

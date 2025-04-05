@@ -125,6 +125,8 @@ namespace Script.Strategies
             Sequence animateSequence = DOTween.Sequence();
             foreach (var element in elementsToAnimate)
             {
+                if (element == null || element.ElementTransfom == null)
+                    return;
                 Tween anim = element.ElementTransfom.DOScale(0, 0.1f).SetEase(Ease.InQuad);
                 animateSequence.Join(anim);
             }

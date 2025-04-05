@@ -1,3 +1,4 @@
+using DG.Tweening;
 using Script.Commands.Grid;
 using Script.Controllers.Grid;
 using Script.Data.UnityObjects;
@@ -128,11 +129,15 @@ namespace Script.Managers
 
         private void OnRestartLevel()
         {
+            DOTween.KillAll(false);
             for (int i = 0; i < _grid.GetLength(0); i++) 
             {
-                for (int j = 0; j < _grid.GetLength(1); j++) 
+                for (int j = 0; j < _grid.GetLength(1); j++)
                 {
-                    _grid[i, j]?.ResetElement();
+                    if (_grid[i, j] != null)
+                    {
+                        _grid[i, j].ResetElement();
+                    }
                     _grid[i, j] = null;
                 }
                 
@@ -176,7 +181,10 @@ namespace Script.Managers
         private void Unsubscribe()
         {
             if( CoreGameSignals.Instance != null)
+            {
                 CoreGameSignals.Instance.onLevelSceneInitialize -= OnLevelSceneInitialize;
+                CoreGameSignals.Instance.onRestartLevel -= OnRestartLevel;
+            }
             if (GridSignals.Instance != null)
             {
                 GridSignals.Instance.onGetGridValue -= OnGetGridValue;

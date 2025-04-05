@@ -22,13 +22,7 @@ namespace Script.Commands.Grid
                 FallToPositionWithJumpEffect(element.ElementTransfom,group.offScreenValue);
             }
         }
-
-        private void Fall(Transform elementTransform,float offScreenValue)
-        {
-            Vector3 targetPos = elementTransform.position - new Vector3(0,offScreenValue, 0);
-            elementTransform.DOMove(targetPos, _gridViewData.FallDuration).SetEase(Ease.Linear);
-        }
-
+        
         private void FallToPositionWithJumpEffect(Transform elementTransform, float offScreenValue, float jumpHeight = 0.1f)
         {
             Vector3 targetPosition = elementTransform.position - new Vector3(0,offScreenValue, 0);
