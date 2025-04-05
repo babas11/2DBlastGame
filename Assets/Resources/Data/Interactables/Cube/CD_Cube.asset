@@ -1,0 +1,161 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 72b693c954e24568a92ac0848eccf9fe, type: 3}
+  m_Name: CD_Cube
+  m_EditorClassIdentifier: 
+  serializationData:
+    SerializedFormat: 2
+    SerializedBytes: 
+    ReferencedUnityObjects:
+    - {fileID: 21300000, guid: 24ea5975acf39594d80a087d0c53eb87, type: 3}
+    - {fileID: 21300000, guid: 9cac6b1e249e98147b871305c668ad31, type: 3}
+    - {fileID: 21300000, guid: 7f1d331c5b5313d4da9e0568ef64ddb6, type: 3}
+    - {fileID: 21300000, guid: 82f9dc7ad87b97a40bf015767a8451a8, type: 3}
+    - {fileID: 21300000, guid: ab8cda8b77c586c4991fb94e1623efc6, type: 3}
+    - {fileID: 21300000, guid: 560b542c55d88f34d9c60ae7a758ce16, type: 3}
+    - {fileID: 21300000, guid: d92dc9d0db9cf1f488e16c369ace2186, type: 3}
+    - {fileID: 21300000, guid: a820c8189a88b26439e877412a6dc54e, type: 3}
+    - {fileID: 21300000, guid: 83c6d0e439b2bcb408a7b4e66ba5ee5c, type: 3}
+    - {fileID: 21300000, guid: 1813d30b392b4a4409ec7be61d5a7641, type: 3}
+    - {fileID: 21300000, guid: ae7d4345abb26664ca9ce4dae9e3dd03, type: 3}
+    - {fileID: 21300000, guid: 4fbf504f4bef846499d8feb9d22f6cab, type: 3}
+    SerializedBytesString: 
+    Prefab: {fileID: 0}
+    PrefabModificationsReferencedUnityObjects: []
+    PrefabModifications: []
+    SerializationNodes:
+    - Name: Data
+      Entry: 7
+      Data: 0|System.Collections.Generic.Dictionary`2[[Script.Enums.CubeType, Assembly-CSharp],[Script.Data.ValueObjects.CubeData,
+        Assembly-CSharp]], mscorlib
+    - Name: comparer
+      Entry: 7
+      Data: 1|System.Collections.Generic.EnumEqualityComparer`1[[Script.Enums.CubeType,
+        Assembly-CSharp]], mscorlib
+    - Name: 
+      Entry: 12
+      Data: 0
+    - Name: 
+      Entry: 13
+      Data: 
+    - Name: 
+      Entry: 8
+      Data: 
+    - Name: 
+      Entry: 12
+      Data: 4
+    - Name: 
+      Entry: 7
+      Data: 
+    - Name: $k
+      Entry: 3
+      Data: 0
+    - Name: $v
+      Entry: 7
+      Data: Script.Data.ValueObjects.CubeData, Assembly-CSharp
+    - Name: cubeSprite
+      Entry: 10
+      Data: 0
+    - Name: cubeTntSprite
+      Entry: 10
+      Data: 1
+    - Name: cubeparticle
+      Entry: 10
+      Data: 2
+    - Name: 
+      Entry: 8
+      Data: 
+    - Name: 
+      Entry: 8
+      Data: 
+    - Name: 
+      Entry: 7
+      Data: 
+    - Name: $k
+      Entry: 3
+      Data: 1
+    - Name: $v
+      Entry: 7
+      Data: Script.Data.ValueObjects.CubeData, Assembly-CSharp
+    - Name: cubeSprite
+      Entry: 10
+      Data: 3
+    - Name: cubeTntSprite
+      Entry: 10
+      Data: 4
+    - Name: cubeparticle
+      Entry: 10
+      Data: 5
+    - Name: 
+      Entry: 8
+      Data: 
+    - Name: 
+      Entry: 8
+      Data: 
+    - Name: 
+      Entry: 7
+      Data: 
+    - Name: $k
+      Entry: 3
+      Data: 2
+    - Name: $v
+      Entry: 7
+      Data: Script.Data.ValueObjects.CubeData, Assembly-CSharp
+    - Name: cubeSprite
+      Entry: 10
+      Data: 6
+    - Name: cubeTntSprite
+      Entry: 10
+      Data: 7
+    - Name: cubeparticle
+      Entry: 10
+      Data: 8
+    - Name: 
+      Entry: 8
+      Data: 
+    - Name: 
+      Entry: 8
+      Data: 
+    - Name: 
+      Entry: 7
+      Data: 
+    - Name: $k
+      Entry: 3
+      Data: 3
+    - Name: $v
+      Entry: 7
+      Data: Script.Data.ValueObjects.CubeData, Assembly-CSharp
+    - Name: cubeSprite
+      Entry: 10
+      Data: 9
+    - Name: cubeTntSprite
+      Entry: 10
+      Data: 10
+    - Name: cubeparticle
+      Entry: 10
+      Data: 11
+    - Name: 
+      Entry: 8
+      Data: 
+    - Name: 
+      Entry: 8
+      Data: 
+    - Name: 
+      Entry: 13
+      Data: 
+    - Name: 
+      Entry: 8
+      Data: 
+  tntData:
+    ExplosionRange: 0
+    Type: 5
+    Sprite: {fileID: 21300000, guid: 27d5069311fa0024da2f9aadcc3da1b7, type: 3}

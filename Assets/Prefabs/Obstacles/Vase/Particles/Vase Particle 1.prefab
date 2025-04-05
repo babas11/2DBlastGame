@@ -74,17 +74,18 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 7048563434237669301, guid: 43ab379634dbc364fb9599f9baa49144, type: 3}
       propertyPath: m_SpriteTilingProperty.oldSize.x
-      value: 2.77
+      value: 0.97192985
       objectReference: {fileID: 0}
     - target: {fileID: 7048563434237669301, guid: 43ab379634dbc364fb9599f9baa49144, type: 3}
       propertyPath: m_SpriteTilingProperty.oldSize.y
-      value: 2.56
+      value: 0.89824563
       objectReference: {fileID: 0}
     - target: {fileID: 7581675275785504965, guid: 43ab379634dbc364fb9599f9baa49144, type: 3}
       propertyPath: m_Name
       value: Vase Particle 1
       objectReference: {fileID: 0}
-    m_RemovedComponents: []
+    m_RemovedComponents:
+    - {fileID: 0}
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
     m_AddedComponents: []
