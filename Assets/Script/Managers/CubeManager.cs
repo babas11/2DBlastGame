@@ -12,38 +12,43 @@ using UnityEngine;
 
 namespace Script.Managers
 {
-    public class CubeManager: MonoBehaviour, IGridElement
+    public class CubeManager : MonoBehaviour, IGridElement
     {
         #region Self Variables
 
         #region Private Variables
 
-        private CD_Cube  _data;
-        
+        private CD_Cube _data;
+
         [ShowInInspector] private Vector2Int _matrixPosition;
         [ShowInInspector] private CubeType _cubeType;
         [ShowInInspector] private InteractableType _interactableType;
         [ShowInInspector] private CubeState _cubeState;
-        
+
         #endregion
-        
+
         #region Serialized Variables
-        
+
         [SerializeField] private CubeSpriteController cubeSpriteController;
         [SerializeField] private CubeParticleController cubeParticleController;
+
         #endregion
-        
+
         #region Public Variables
-        
+
         public Vector2Int MatrixPosition => _matrixPosition;
         public Transform ElementTransfom => transform;
         public InteractableType Type => _interactableType;
         public CubeState CubeState => _cubeState;
         public bool CanFall => true;
-        public bool OnlyPowerDamage { get => true; }
+
+        public bool OnlyPowerDamage
+        {
+            get => true;
+        }
 
         #endregion
-        
+
         #endregion
 
         private void Awake()
@@ -51,8 +56,9 @@ namespace Script.Managers
             _data = GetData();
         }
 
-        #region IGridElement Functions 
-        public void SetGridElement(InteractableType assignedType,Vector2Int matrixPosition,Vector3 worldPosition)
+        #region IGridElement Functions
+
+        public void SetGridElement(InteractableType assignedType, Vector2Int matrixPosition, Vector3 worldPosition)
         {
             _matrixPosition = matrixPosition;
             transform.position = worldPosition;
@@ -60,10 +66,10 @@ namespace Script.Managers
             _cubeType = assignedType.InteractableTypeToCubeType();
             _interactableType = assignedType;
             _cubeState = CubeState.DefaultState;
-            cubeSpriteController.SetControllerData(_data.Data[_cubeType],_data.tntData);
+            cubeSpriteController.SetControllerData(_data.Data[_cubeType], _data.tntData);
             cubeParticleController.SetParticleData(_data.Data[_cubeType].cubeparticle);
         }
-        
+
         [Button]
         public bool UpdateElement(GridElementUpdate updateType)
         {
@@ -83,7 +89,7 @@ namespace Script.Managers
                 case GridElementUpdate.UpdateToDamaged:
                     transform.localScale = new Vector3(0, 0, 0);
                     cubeParticleController.PlayCubeParticle(() => ResetElement());
-                    return true;    
+                    return true;
                 case GridElementUpdate.UpdateToTntExplode:
                     transform.localScale = new Vector3(0, 0, 0);
                     cubeParticleController.PlayTntParticle();
@@ -105,17 +111,16 @@ namespace Script.Managers
             _interactableType = default;
             _cubeState = default;
             PoolSignals.Instance.onSendCubeToPool.Invoke(this);
-
         }
 
         public void BringElementFront()
         {
-            cubeSpriteController.SetSortingOrder(_matrixPosition,true);
+            cubeSpriteController.SetSortingOrder(_matrixPosition, true);
         }
 
         #endregion
 
-        
+
         private void OnEnable()
         {
             SubscribeEvents();
@@ -149,7 +154,7 @@ namespace Script.Managers
         {
             return Resources.Load<CD_Cube>("Data/Interactables/Cube/CD_Cube");
         }
-        
+
         private void SetCubeToTnt()
         {
             _interactableType = InteractableType.tnt;
@@ -162,12 +167,11 @@ namespace Script.Managers
             _cubeState = CubeState.TntState;
             cubeSpriteController.SetCubeSpriteOnTnt();
         }
+
         private void SetCubeToDefaultState()
         {
             _cubeState = CubeState.DefaultState;
             cubeSpriteController.SetCubeSpriteOnDefault();
         }
-
-        
     }
 }

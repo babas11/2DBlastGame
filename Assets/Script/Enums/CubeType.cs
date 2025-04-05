@@ -5,6 +5,6 @@ namespace Script.Enums
         Red,
         Green,
         Blue,
-        Yellow
+        Yellow,
     }
 }

@@ -8,9 +8,8 @@ namespace Script.Strategies
     {
         private readonly GridManipulationUtilities<IGridElement> _gridUtils;
         private readonly GridFinder _matchUtils;
-
-
-
+        
+        
         public ExplodeStrategyFactory(
             GridManipulationUtilities<IGridElement> gridUtils,
             GridFinder matchUtils)

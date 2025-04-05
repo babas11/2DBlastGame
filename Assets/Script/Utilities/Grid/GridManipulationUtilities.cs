@@ -71,7 +71,7 @@ namespace Script.Utilities.Grid
 
         public bool IsEmpty(int x, int y)
         {
-            if (!CheckBounds(x, y)) Debug.LogError($"{x}, {y} are not on the grid");
+            if (!CheckBounds(x, y)) Debug.LogError($"{x}, {y} is not on the grid");
         
             return EqualityComparer<T>.Default.Equals(_matrix[x, y], default);
         }
@@ -89,6 +89,7 @@ namespace Script.Utilities.Grid
 
             return new Vector3(xPosition, yPosition, 0);
         }
+        
     
     }
 }

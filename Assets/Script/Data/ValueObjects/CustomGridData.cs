@@ -10,8 +10,6 @@ namespace Script.Data.ValueObjects
         public byte grid_height; 
         public List<SavedCubeData> cubes;
         public List<SavedObstacleData> obstacles;
-        public List<GridElementSaveData> grid;
-        public byte move_count;
-        public byte level_number;
+ 
     }
 }

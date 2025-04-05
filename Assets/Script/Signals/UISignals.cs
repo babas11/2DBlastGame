@@ -14,10 +14,8 @@ namespace Script.Signals
         public UnityAction<Dictionary<ObstaccleType,byte>> onSetObjectiveUI = delegate{};
         public UnityAction<Dictionary<ObstaccleType,byte>> onUpdateObjectiveUI = delegate{};
         public UnityAction<byte> onMoveCountUpdate = delegate{};
-        public UnityAction onStartLevelButtonPressed = delegate{};
-        public UnityAction onNextLevelButtonPressed = delegate{};
         public UnityAction onAnimationFinished = delegate{};
+        public UnityAction onStartLevelButtonPressed = delegate{};
         public UnityAction onRestartPressed = delegate{};
-        
     }
 }

@@ -50,6 +50,7 @@ namespace Script.Managers
         public InteractableType Type => _interactableType;
         public bool CanFall => _canFall;
         public bool OnlyPowerDamage { get => _onlyPowerDamage; }
+        public byte Health => _obtacleHealth;
 
         #endregion
 
@@ -104,7 +105,6 @@ namespace Script.Managers
         {
             obstacleSpriteController.SetSortingOrder(_matrixPosition,true);
         }
-
         #endregion
 
 
@@ -170,6 +170,17 @@ namespace Script.Managers
             }
             obstacleSpriteController.ChangeObstacleSpriteAfterDamage();
             return false;
+        }
+        
+        public void SetHealth(byte savedHealth,bool isDefault)
+        {
+            byte maxHealth = _obstacleData.Data[_obstacleType].Health;
+            _obtacleHealth = isDefault ? maxHealth : savedHealth;
+    
+            byte damageIndex = (byte) (maxHealth - _obtacleHealth);
+            damageIndex = (byte)Mathf.Clamp(damageIndex, 0, _obstacleTypeData.Sprites.Length - 1);
+    
+            obstacleSpriteController.SetObstacleSprite(damageIndex);
         }
     }
         

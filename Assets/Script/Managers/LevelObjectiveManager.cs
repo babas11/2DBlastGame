@@ -1,7 +1,9 @@
+using System;
 using System.Collections.Generic;
 using Script.Commands.LevelObjective;
 using Script.Data.ValueObjects;
 using Script.Enums;
+using Script.Extensions;
 using Script.Keys;
 using Script.Signals;
 using Sirenix.OdinInspector;
@@ -14,8 +16,8 @@ namespace Script.Managers
         #region Self Variables
 
         #region Private Variables
-        
-        private LevelData _levelData;
+        private bool _isLevelFinished;
+        private CustomGridData _levelData;
         private FindLevelObjectivesCommand _findLevelObjectivesCommand;
         private CleanObjectivesCommand _cleanObjectivesCommand;
         [ShowInInspector] private byte _moveCount;
@@ -28,22 +30,22 @@ namespace Script.Managers
         
         private void Awake()
         {
-            Init();
             GetData();
+            Init();
+            
         }
 
         private void Init()
         {
-            _findLevelObjectivesCommand = new FindLevelObjectivesCommand (_objectives, _levelData.jsonLevel.grid);
+            _findLevelObjectivesCommand = new FindLevelObjectivesCommand (_objectives, _levelData);
             _cleanObjectivesCommand = new CleanObjectivesCommand(_objectives);
         }
 
         private void GetData()
         {
-            _levelData = CoreGameSignals.Instance.onGetLevelValue.Invoke();
-            _moveCount = _levelData.jsonLevel.move_count;
+            _levelData = GameData.CurrentLevelData;
+            _moveCount = GameData.SaveData.moveCount;
         }
-
         private void OnEnable()
         {
             SubscribeEvents();
@@ -56,20 +58,29 @@ namespace Script.Managers
             GridSignals.Instance.onBlastCompleted +=  OnBlastCompeted;
             LevelObjectivesSignals.Instance.onObjectiveCleaned += OnObjectivesCleaned;
             LevelObjectivesSignals.Instance.onGetLevelObjectives += () => _objectives;
+            LevelObjectivesSignals.Instance.onGetRemainingMoveCount += () => _moveCount;
         }
 
         private void OnRestartLevel()
         {
             _objectives.Clear();
-            _moveCount = _levelData.jsonLevel.move_count;
+            _moveCount = GameData.SaveData.moveCount;
             _findLevelObjectivesCommand.Execute();
             UISignals.Instance.onSetObjectiveUI?.Invoke(_objectives);
         }
 
         private void OnBlastCompeted()
         {
-            _moveCount--;
+            if (_moveCount == 0)
+            {
+                _isLevelFinished = true;
+            }
+            else
+            {
+                _moveCount--;
+            }
             UISignals.Instance.onMoveCountUpdate.Invoke(_moveCount);
+            
         }
 
         private void OnLevelSceneInitialize()
@@ -100,6 +111,15 @@ namespace Script.Managers
             {
                 LevelObjectivesSignals.Instance.onObjectiveCleaned -= OnObjectivesCleaned;
                 LevelObjectivesSignals.Instance.onGetLevelObjectives -= () => _objectives;
+                LevelObjectivesSignals.Instance.onGetRemainingMoveCount -= () => _moveCount;
+            }
+        }
+
+        private void OnApplicationQuit()
+        {
+            if (!_isLevelFinished)
+            {
+                CoreGameSignals.Instance.onSaveActiveGame.Invoke();
             }
         }
     }

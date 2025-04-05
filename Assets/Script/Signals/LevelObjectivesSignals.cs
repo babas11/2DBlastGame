@@ -13,5 +13,6 @@ namespace Script.Signals
         public UnityAction<CleanedObstacles> onObjectiveCleaned = delegate { };
         public UnityAction onObjectivesCompleted = delegate { };
         public Func<Dictionary<ObstaccleType,byte>> onGetLevelObjectives = delegate { return null; };
+        public Func<byte> onGetRemainingMoveCount = delegate { return 0; };
     }
 }

@@ -57,7 +57,7 @@ namespace Script.Strategies
         private void DamageObstaclesAround(List<IGridElement> matchingElements, IGridElement startElement)
         {
             var nearbyObstacles = FindObstaclesAroundElements(matchingElements);
-            if (nearbyObstacles.Count == 0) return;
+            //if (nearbyObstacles.Count == 0) return;
             ObstaccleType currentType;
             CleanedObstacles cleanedObstacles = new();
             Dictionary<ObstaccleType, byte> Obstacles = new();

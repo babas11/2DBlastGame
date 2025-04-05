@@ -125,14 +125,12 @@ namespace Script.Strategies
             );
             
 
-            // 4) Then do the "mega" explosion with synergy range
             seq.AppendCallback(() =>
             {
                 DamageSurroundingElements(mainTnt, SynergyRange);
                 
             });
             
-            // 5) After finishing this wave, gather the next wave
             List<IGridElement> nextWave = new List<IGridElement>();
             
             seq.OnComplete(() =>

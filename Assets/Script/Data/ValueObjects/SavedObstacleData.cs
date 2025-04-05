@@ -1,5 +1,6 @@
 using System;
 using UnityEngine;
+using UnityEngine.Serialization;
 
 namespace Script.Data.ValueObjects
 {
@@ -7,7 +8,7 @@ namespace Script.Data.ValueObjects
     public struct SavedObstacleData
     {
         public Vector2Int position;
-        public string obstacleType;
+        public string strType;
         public byte health;
         public InteractableType type;
     }

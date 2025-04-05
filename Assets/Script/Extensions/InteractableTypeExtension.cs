@@ -23,6 +23,8 @@ namespace Script.Extensions
                     return "bo";
                 case (InteractableType.stone):
                     return "s";
+                case (InteractableType.tnt):
+                    return "t";
                 default:
                     return null;
             }
@@ -37,6 +39,7 @@ namespace Script.Extensions
                 case "g":    return InteractableType.green;
                 case "r":    return InteractableType.red;
                 case "y":    return InteractableType.yellow;
+                case "t":    return InteractableType.tnt;
                 case "v":    return InteractableType.vase;
                 case "bo":   return InteractableType.box;
                 case "s":    return InteractableType.stone;  
@@ -45,19 +48,8 @@ namespace Script.Extensions
                     throw new ArgumentException($"This string value do not have a corresponding InteractableType : {stringValue}");
             }
         }
-        
-        public static ObstaccleType StringToObstacleType(this string stringValue)
-        {
-            switch (stringValue)
-            {
-                case "v":    return ObstaccleType.Vase;
-                case "bo":   return ObstaccleType.Box;
-                case "s":    return ObstaccleType.Stone;  
-                default:
-                    throw new ArgumentException($"This string value do not have a corresponding Obstacle Type : {stringValue}");
-            }
-        }
-        public static InteractableBehaviorType StringToPoolType(this string stringValue)
+
+        public static InteractableBehaviorType StringToBehaviourType(this string stringValue)
         {
             switch (stringValue)
             {
@@ -65,6 +57,7 @@ namespace Script.Extensions
                 case "g":    
                 case "r":    
                 case "y":
+                case "t":
                 case "rand":
                     return InteractableBehaviorType.Cube;
                 case "v":    
@@ -148,6 +141,22 @@ namespace Script.Extensions
                     return true;
                 default:
                     return false;
+            }
+        }
+        
+        public static GridElementUpdate CubeTypeToUpdateType(this CubeState cubeState)
+        {
+            switch (cubeState)
+            {
+                case CubeState.Tnt:
+                    return GridElementUpdate.UpdateToTnt;
+                case CubeState.DefaultState:
+                    return GridElementUpdate.UpdateToDefault;
+                case CubeState.TntState:
+                    return GridElementUpdate.UpdateToCubeTnt;
+                default:
+                    throw new ArgumentException($" CubeState do not have a corresponding GridElementUpdate : {cubeState}");
+                    
             }
         }
     }

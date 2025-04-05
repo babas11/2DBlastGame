@@ -4,12 +4,14 @@ using System.Linq;
 using Script.Enums;
 using Script.Keys;
 using Script.Signals;
+using UnityEngine;
 
 namespace Script.Commands.LevelObjective
 {
     public class CleanObjectivesCommand
     {
         private Dictionary<ObstaccleType, byte> _objectives;
+        private bool _objectivesCompleted;
         
         public CleanObjectivesCommand(Dictionary<ObstaccleType, byte> objectives)
         {
@@ -18,21 +20,19 @@ namespace Script.Commands.LevelObjective
 
         internal void Execute(CleanedObstacles cleanedObstacles,byte _moveCount)
         {
-
-            // If already 0, fail immediately and exit
+            if(_objectivesCompleted) return;
+            
             if (_moveCount == 0)
             {
                 CoreGameSignals.Instance.onLevelFail?.Invoke();
-                return; // Prevent underflow and unnecessary execution
+                return; 
             }
-
-            // Safe to decrement
-            _moveCount--;
-
-            // Subtract cleaned obstacles from objectives
+            else
+            {
+                _moveCount--;
+            }
             foreach (var type in cleanedObstacles.Obstacles.Keys)
             {
-                // Prevent underflow in objectives too!
                 var cleanedCount = cleanedObstacles.Obstacles[type];
                 if (_objectives.ContainsKey(type))
                 {
@@ -40,14 +40,13 @@ namespace Script.Commands.LevelObjective
                 }
             }
 
-            // Check for level success
             if (_objectives.All(x => x.Value == 0))
             {
+                _objectivesCompleted = true;
                 CoreGameSignals.Instance.onLevelSuccesful?.Invoke();
                 return;
             }
 
-            // If moveCount just hit 0 after decrement, fail level
             if (_moveCount == 0)
             {
                 CoreGameSignals.Instance.onLevelFail?.Invoke();

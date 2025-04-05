@@ -15,14 +15,14 @@ namespace Script.Commands.Grid
 {
     public class RePopulateGridCommand
     {
-        private JsonLevelData _data;
+        private CustomGridData _data;
         private CD_Grid _gridData;
         private Vector2Int _dimensions;
         private Transform _parentTransform;
 
         private GridManipulationUtilities<IGridElement> _gridManipulationUtilities;
 
-        public RePopulateGridCommand(JsonLevelData data, GridManipulationUtilities<IGridElement> gridManipulationUtilities, CD_Grid gridData, Transform parentTransform)
+        public RePopulateGridCommand(CustomGridData data, GridManipulationUtilities<IGridElement> gridManipulationUtilities, CD_Grid gridData, Transform parentTransform)
         {
             _data = data;
             _dimensions = new Vector2Int(data.grid_width, data.grid_height);

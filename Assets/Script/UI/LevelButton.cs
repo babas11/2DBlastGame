@@ -1,5 +1,6 @@
 using System;
 using DG.Tweening;
+using Script.Extensions;
 using Script.Signals;
 using TMPro;
 using UnityEngine;
@@ -21,7 +22,7 @@ namespace Script.UI
 
       public void Init()
       {
-         levelButtonText.text = CoreGameSignals.Instance.OnGetLevelIndex().ToString();
+         levelButtonText.text = GameData.CurrentLevel.ToString();
       }
       
       public void OnPointerDown(PointerEventData eventData)

@@ -31,14 +31,11 @@ namespace Script.Managers
         private void OnMainLevelInitialize()
         {
             CoreUISignals.Instance.onOpenPanel?.Invoke(UIPanelTypes.Start,0);
-            //UISignals.Instance.onSetMainLevelData?.Invoke((byte)CoreGameSignals.Instance.OnGetLevelIndex?.Invoke());
-            
         }
         public void OnLevelPlay()
         {
             CoreGameSignals.Instance.onLevelPlay?.Invoke();
         }
-
 
         
         private void OnLevelFail()
@@ -50,14 +47,7 @@ namespace Script.Managers
         {
             CoreUISignals.Instance.onOpenPanel?.Invoke(UIPanelTypes.Win,2);
         }
-
-
-        void OnReset()
-        {
-            CoreUISignals.Instance.onCloseAllPanels?.Invoke();
-            CoreUISignals.Instance.onOpenPanel?.Invoke(UIPanelTypes.Level,0);
-        }
-
+        
         private void UnsubscribeEvents()
         {
             if(CoreGameSignals.Instance != null)
@@ -87,16 +77,18 @@ namespace Script.Managers
                 case UIEventSubscriptionTypes.OnRestart:
                     UISignals.Instance.onRestartPressed?.Invoke();
                     break;
+                case UIEventSubscriptionTypes.OnMainMenu:
+                    OnNextLevel();
+                    break;
                 default:
                     throw new ArgumentOutOfRangeException(nameof(buttonType), buttonType, null);
             }
             
         }
-
         
         public void OnNextLevel()
         {
-            CoreGameSignals.Instance.onNextLevel?.Invoke();
+            CoreGameSignals.Instance.onMainLevel?.Invoke();
         }
         
         public void RestartLevel()

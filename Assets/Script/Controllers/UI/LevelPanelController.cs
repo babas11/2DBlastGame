@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using Script.Data.UnityObjects;
 using Script.Enums;
+using Script.Extensions;
 using Script.Keys;
 using Script.Signals;
 using TMPro;
@@ -47,7 +48,7 @@ namespace Script.Controllers.UI
         private void OnSetObjectiveUI(Dictionary<ObstaccleType, byte> arg0)
         {
             _objectives = arg0;
-            SetMoveCount(CoreGameSignals.Instance.onGetLevelValue.Invoke().jsonLevel.move_count);
+            SetMoveCount(GameData.SaveData.moveCount);
             CreateObjectiveItems();
         }
         private void CreateObjectiveItems()

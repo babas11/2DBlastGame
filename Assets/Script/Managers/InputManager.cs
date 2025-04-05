@@ -15,7 +15,7 @@ namespace Script.Managers
         #region Private Variables
 
         private InputData _data;
-        private bool _isAvailableForTouch, _isFirstTimeTouchTaken, _isTouching;
+        private bool _isAvailableForTouch, _isTouching;
         private float _tapTime;
 
         #endregion
@@ -40,22 +40,13 @@ namespace Script.Managers
 
         private void SubscribeEvents()
         {
-            if (CoreGameSignals.Instance != null)
-                CoreGameSignals.Instance.onResetActiveLevel += OnReset;
-            
             if (InputSignals.Instance != null)
             {
                 InputSignals.Instance.onEnableInput += OnEnableInput;
                 InputSignals.Instance.onDisableInput += OnDisableInput;
             }
         }
-
-        private void OnReset()
-        {
-            _isAvailableForTouch = false;
-            _isFirstTimeTouchTaken = false;
-            _isTouching = false;
-        }
+        
         private void OnEnableInput()
         {
             _isAvailableForTouch = true;
@@ -66,8 +57,6 @@ namespace Script.Managers
         }
         private void UnSubscribeEvents()
         {
-            if(CoreGameSignals.Instance != null)
-                CoreGameSignals.Instance.onResetActiveLevel -= OnReset;
             if (InputSignals.Instance != null)
             {
                 InputSignals.Instance.onEnableInput -= OnEnableInput;
@@ -84,21 +73,17 @@ namespace Script.Managers
             {
                 _isTouching = true;
                 _tapTime = Time.time;
-            
                 InputSignals.Instance.onInputTaken?.Invoke();
-                Debug.Log("Executed ---onInputTaken---");
             }
         
             if (Input.GetMouseButtonUp(0) && !IsPointerOverUIElement())
             {
                 _isTouching = false;
                 InputSignals.Instance.onInputReleased?.Invoke();
-                Debug.Log("Executed ---onInputReleased---");
             
                 float tapDuration = Time.time - _tapTime;
                 if (tapDuration > _data.maxValidInputTime)
                 {
-                    Debug.Log("Tap too long! Ignoring interaction.");
                     return;
                 }
             

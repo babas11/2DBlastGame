@@ -29,8 +29,11 @@ namespace Script.Controllers.Obstacle
             SetObstacleSprite();
         }
 
-        private void SetObstacleSprite()
+        internal void SetObstacleSprite(byte index = 0)
         {
+            if(index != 0)
+                _currentSpriteIndex = index;
+            
             spriteRenderer.sprite = _obstacleSprites[_currentSpriteIndex];
         }
         

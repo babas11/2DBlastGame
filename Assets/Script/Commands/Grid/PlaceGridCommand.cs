@@ -7,10 +7,10 @@ namespace Script.Commands.Grid
     public class PlaceGridCommand
     {
         private GridManager _manager;
-        private JsonLevelData _data;
+        private CustomGridData _data;
         private GridViewData _gridViewData;
         
-        public PlaceGridCommand(GridManager manager, JsonLevelData data, GridViewData gridViewData)
+        public PlaceGridCommand(GridManager manager, CustomGridData data, GridViewData gridViewData)
         {
             _gridViewData = gridViewData;
             _manager = manager;

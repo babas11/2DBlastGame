@@ -2,6 +2,7 @@ using Script.Commands.Grid;
 using Script.Controllers.Grid;
 using Script.Data.UnityObjects;
 using Script.Data.ValueObjects;
+using Script.Extensions;
 using Script.Interfaces;
 using Script.Signals;
 using Script.Utilities.Grid;
@@ -24,7 +25,7 @@ namespace Script.Managers
 
         #region Private Variables
 
-        [ShowInInspector] private LevelData levelData;
+        [ShowInInspector] private CustomGridData levelData;
         [ShowInInspector] private CD_Grid _gridData;
         [ShowInInspector] private Vector2Int _dimensions;
         private IGridElement[,] _grid;
@@ -51,20 +52,20 @@ namespace Script.Managers
 
         private void Init()
         {
-            levelData = CoreGameSignals.Instance.onGetLevelValue.Invoke();
-            _dimensions = new Vector2Int(levelData.jsonLevel.grid_width, levelData.jsonLevel.grid_height);
-            _grid = new IGridElement[_dimensions.x, _dimensions.y];
+            levelData = GameData.CurrentLevelData;
+            _dimensions = new Vector2Int(levelData.grid_width , levelData.grid_height);
+            _grid = new IGridElement[_dimensions.x , _dimensions.y ];
             
-            _placeGridCommand = new PlaceGridCommand(this, levelData.jsonLevel, _gridData.GridViewData);
+            _placeGridCommand = new PlaceGridCommand(this, levelData, _gridData.GridViewData);
             _gridManipulationUtilities = new GridManipulationUtilities<IGridElement>(_dimensions , transform,ref _grid);
             _gridFinder = new GridFinder(_gridManipulationUtilities);
-            _buidGridCommand = new BuildGridCommand(this, levelData.jsonLevel, ref _grid, _gridManipulationUtilities,
+            _buidGridCommand = new BuildGridCommand(this, GameData.SaveData, ref _grid, _gridManipulationUtilities,
                 _gridData);
             _fallElementCommand = new FallGridElementCommand(_gridData.GridViewData);
             _gridCubeStateCommand = new GridCubeStateCommand(_gridFinder, _dimensions, _gridData);
             _onridTouchCommand = new OnridTouchCommand(_gridManipulationUtilities, _gridFinder);
             onApplyGravity = new OnApplyGravity(_dimensions, _gridManipulationUtilities, _gridData.GridViewData);
-            _rePopulateGridCommand = new RePopulateGridCommand(levelData.jsonLevel, _gridManipulationUtilities,
+            _rePopulateGridCommand = new RePopulateGridCommand(levelData, _gridManipulationUtilities,
                 _gridData, _gridElementsParent);
         }
 
@@ -118,6 +119,7 @@ namespace Script.Managers
             CoreGameSignals.Instance.onLevelSceneInitialize += OnLevelSceneInitialize;
             CoreGameSignals.Instance.onRestartLevel += OnRestartLevel;
             GridSignals.Instance.onGridPlaced += OnGridPlaced;
+            GridSignals.Instance.onGetGridValue += OnGetGridValue;
             GridSignals.Instance.onElementsFallWithGroup += _fallElementCommand.Execute;
             GridSignals.Instance.onBlastCompleted += OnBlastCompleted;
             GridSignals.Instance.onSetCubeState += _gridCubeStateCommand.Execute;
@@ -161,6 +163,10 @@ namespace Script.Managers
             _gridCubeStateCommand.Execute();
             GridSignals.Instance.onSetSortOrder?.Invoke();
         }
+        private IGridElement[,] OnGetGridValue()
+        {
+            return _grid;
+        }
 
         private void OnDisable()
         {
@@ -173,6 +179,7 @@ namespace Script.Managers
                 CoreGameSignals.Instance.onLevelSceneInitialize -= OnLevelSceneInitialize;
             if (GridSignals.Instance != null)
             {
+                GridSignals.Instance.onGetGridValue -= OnGetGridValue;
                 GridSignals.Instance.onGridPlaced -= OnGridPlaced;
                 GridSignals.Instance.onElementsFallWithGroup -= _fallElementCommand.Execute;
                 GridSignals.Instance.onBlastCompleted -= OnBlastCompleted;
@@ -181,5 +188,7 @@ namespace Script.Managers
             if(InputSignals.Instance != null)
                 InputSignals.Instance.onGridTouch -= _onridTouchCommand.Execute;
         }
+
+        
     }
 }

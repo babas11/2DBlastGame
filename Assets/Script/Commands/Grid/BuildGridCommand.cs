@@ -15,87 +15,108 @@ namespace Script.Commands.Grid
 {
     public class BuildGridCommand
     {
-        private JsonLevelData _data;
+        private SaveFileData _data;
         private CD_Grid _gridData;
         private Vector2Int _dimensions;
-        private GridManipulationUtilities<IGridElement> gridManipulationUtilities;
-        
-        public BuildGridCommand(GridManager manager, JsonLevelData data, ref IGridElement[,] grid, GridManipulationUtilities<IGridElement> gridManipulationUtilities, CD_Grid gridData )
+        private GridManipulationUtilities<IGridElement> _gridUtils;
+
+        public BuildGridCommand(GridManager manager, SaveFileData data, ref IGridElement[,] grid,
+            GridManipulationUtilities<IGridElement> gridUtils, CD_Grid gridData)
         {
             _data = data;
-            _dimensions = new Vector2Int(data.grid_width, data.grid_height);
-            this.gridManipulationUtilities = gridManipulationUtilities;
+            _dimensions = new Vector2Int(_data.gridData.grid_width, _data.gridData.grid_height);
+            this._gridUtils = gridUtils;
             _gridData = gridData;
         }
 
         public void Execute(Transform parentTransform)
         {
-            Vector3 onScreenPosition;
-            Vector2Int matrixPosition;
-            IGridElement newGridElement;
-            float gridUnit = _gridData.GridViewData.GridUnit;
-            List<IGridElement> toAnimate = new List<IGridElement>();
-
-            int arrayIndex = 0;
-            for (int y = 0; y < _dimensions.y; y++)
+            foreach (var savedCube in _data.gridData.cubes)
             {
-                for (int x = 0; x < _dimensions.x; x++)
+                if (_gridUtils.IsEmpty(savedCube.position.x, savedCube.position.y))
                 {
-                    if (gridManipulationUtilities.IsEmpty(x,y))
-                    {
-                        matrixPosition = new Vector2Int(x, y);
-                        onScreenPosition = gridManipulationUtilities.GridPositionToWorldPosition(x, y);
-                        Vector3 offScreenPosition = new Vector3(onScreenPosition.x, onScreenPosition.y + (_dimensions.y + 1) * gridUnit , onScreenPosition.z);
-                       
-                        newGridElement = SetNewElementFromJson(_data,arrayIndex,matrixPosition,offScreenPosition,parentTransform);
-                        
-                        gridManipulationUtilities.PutItemAt(x, y, newGridElement);
-                        arrayIndex++;
-                        toAnimate.Add(newGridElement);
-                        // Animate the interactables in the current row to their positions
-                    }
+                    IGridElement newCube = SpawnCube(savedCube, parentTransform);
+                    _gridUtils.PutItemAt(savedCube.position.x, savedCube.position.y, newCube);
                 }
-                GridSignals.Instance.onElementsFallWithGroup?.Invoke(new FallingElementGroup(toAnimate,(_dimensions.y + 1) * gridUnit));
-                toAnimate.Clear();
+            }
+            foreach (var savedObstacle in _data.gridData.obstacles)
+            {
+                if (_gridUtils.IsEmpty(savedObstacle.position.x, savedObstacle.position.y))
+                {
+                    IGridElement newObstacle = SpawnObstacle(savedObstacle, parentTransform);
+                    _gridUtils.PutItemAt(savedObstacle.position.x, savedObstacle.position.y, newObstacle);
+                }
             }
             
+            MakeElementsFallByRow();
             GridSignals.Instance.onGridPlaced?.Invoke();
         }
 
-        private IGridElement SetNewElementFromJson(JsonLevelData data, int arrayIndex,Vector2Int matrixPosition,Vector3 worldPosition,Transform parentTransform)
+        private IGridElement SpawnCube(SavedCubeData savedCube, Transform parentTransform)
         {
-            IGridElement gridElement;
-            string elementKey = data.grid[arrayIndex];
-            switch (elementKey.StringToPoolType())
+            IGridElement element = PoolSignals.Instance.onGetCubeFromPool.Invoke();
+            element.ElementTransfom.SetParent(parentTransform);
+
+            var finalInteractableType = savedCube.strType.StringToInteractableType();
+            if (finalInteractableType == InteractableType.random || finalInteractableType == InteractableType.tnt )
             {
-                case InteractableBehaviorType.Cube:
-                    gridElement = PoolSignals.Instance.onGetCubeFromPool.Invoke();
-                    break;
-                case InteractableBehaviorType.Obstacle:
-                    gridElement = PoolSignals.Instance.onGetObstacleFromPool.Invoke();
-                    break;
-                default:
-                    throw new ArgumentException("Unassigned behavior type");
-                    break;
+                finalInteractableType = CreateRandomCubeType();
             }
-            
-            gridElement.ElementTransfom.SetParent(parentTransform);
-            InteractableType itemType = elementKey.StringToInteractableType();
-            
-            if (elementKey.StringToInteractableType() == InteractableType.random)
-            {
-                itemType = CreateRandomType();
-            }
-            
-            gridElement.SetGridElement(itemType,matrixPosition,worldPosition);
-            return gridElement;
+            Vector3 worldPos = _gridUtils.GridPositionToWorldPosition(
+                savedCube.position.x,
+                savedCube.position.y
+            );
+
+            Vector3 offScreenPos = worldPos + new Vector3(0, (_dimensions.y + 1) * _gridData.GridViewData.GridUnit, 0);
+            element.SetGridElement(finalInteractableType, savedCube.position, offScreenPos);
+            element.UpdateElement(savedCube.cubeState.CubeTypeToUpdateType());
+            return element;
         }
-        
-        private InteractableType CreateRandomType()
+
+        private IGridElement SpawnObstacle(SavedObstacleData savedObstacle, Transform parentTransform)
         {
-            int enumIdex = UnityEngine.Random.Range(0,Enum.GetValues(typeof(CubeType)).Length);
-            CubeType cubeType = (CubeType)enumIdex;
-            return cubeType.CubeTypeToInteractableType();
+            IGridElement element = PoolSignals.Instance.onGetObstacleFromPool.Invoke();
+            element.ElementTransfom.SetParent(parentTransform);
+
+            var finalInteractableType = savedObstacle.strType.StringToInteractableType();
+
+            Vector3 worldPos = _gridUtils.GridPositionToWorldPosition(
+                savedObstacle.position.x,
+                savedObstacle.position.y
+            );
+            Vector3 offScreenPos = worldPos + new Vector3(0, (_dimensions.y + 1) * _gridData.GridViewData.GridUnit, 0);
+
+            element.SetGridElement(finalInteractableType, savedObstacle.position, offScreenPos);
+            (element as ObstacleManager)?.SetHealth(savedObstacle.health,_data.DefaultLevel);
+
+            return element;
         }
+
+        private InteractableType CreateRandomCubeType()
+        {
+            int index = UnityEngine.Random.Range(0, Enum.GetValues(typeof(CubeType)).Length);
+            CubeType randomCube = (CubeType) index;
+            return randomCube.CubeTypeToInteractableType();
+        }
+        private void MakeElementsFallByRow()
+        {
+            for (int y = 0; y < _dimensions.y; y++)
+            {
+                List<IGridElement> rowElements = new List<IGridElement>();
+                for (int x = 0; x < _dimensions.x; x++)
+                {
+                    var elem = _gridUtils.GetItemAt(x, y);
+                    if (elem != null) rowElements.Add(elem);
+                }
+                if (rowElements.Count > 0)
+                {
+                    float distanceToFall = (_dimensions.y + 1) * _gridData.GridViewData.GridUnit;
+                    GridSignals.Instance.onElementsFallWithGroup?.Invoke(
+                        new FallingElementGroup(rowElements, distanceToFall)
+                    );
+                }
+            }
+        }
+
     }
 }

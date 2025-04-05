@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using Script.Data.ValueObjects;
 using Script.Enums;
 using Script.Extensions;
 
@@ -6,32 +7,28 @@ namespace Script.Commands.LevelObjective
 {
     public class FindLevelObjectivesCommand
     {
-        private List<string> _grid;
+        private CustomGridData _gridData;
         private byte _moveCount;
         private Dictionary<ObstaccleType, byte> _objectives;
-        
-        public FindLevelObjectivesCommand(Dictionary<ObstaccleType,byte> objectives, List<string> grid)
+
+        public FindLevelObjectivesCommand(Dictionary<ObstaccleType, byte> objectives, CustomGridData gridData)
         {
             _objectives = objectives;
-            _grid = grid;
+            _gridData = gridData;
         }
-        
+
         internal void Execute()
         {
-            foreach (var element in _grid)
+            foreach (var element in _gridData.obstacles)
             {
-                if(element.StringToInteractableType().IsObstacle())
+                ObstaccleType obstacleType = element.type.InteractableTypeToObstacleType();
+                if (!_objectives.ContainsKey(obstacleType))
                 {
-                    ObstaccleType obstacleType = element.StringToObstacleType();
-                    if(!_objectives.ContainsKey(obstacleType))
-                    {
-                        _objectives.Add(obstacleType, 1);
-                    }
-                    else
-                    {
-                        _objectives[obstacleType]++;
-                    }
-                    
+                    _objectives.Add(obstacleType, 1);
+                }
+                else
+                {
+                    _objectives[obstacleType]++;
                 }
             }
         }

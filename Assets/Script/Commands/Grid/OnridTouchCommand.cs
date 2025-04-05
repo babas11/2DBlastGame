@@ -23,8 +23,6 @@ namespace Script.Commands.Grid
         {
             IExplodeStrategy strategy = _explodeStrategyFactory.CreateStrategy(element.Type);
             strategy.Explode(element);
-            Debug.Log($"element pos:{element.MatrixPosition}");
-            Debug.Log($"element type:{element.Type}");
         }
     }
 }

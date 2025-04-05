@@ -30,7 +30,7 @@ namespace Script.Controllers.UI
 
         public void Init()
         {
-            levelButtonText.text = $"Level {CoreGameSignals.Instance.OnGetLevelIndex?.Invoke().ToString()}";
+            levelButtonText.text = $"Level {PlayerPrefs.GetInt("LevelIndex")}";
         }
         private void GetReferences()
         {
@@ -59,8 +59,13 @@ namespace Script.Controllers.UI
             Sequence seq = DOTween.Sequence();
             seq.Append(rectTransform.DOScale(Vector3.one * ScaleFactor, ScaleDuration).SetEase(Ease.OutBack));
             seq.Append(rectTransform.DOScale(Vector3.one, ScaleDuration).SetEase(Ease.OutBack));
-            seq.AppendCallback(() => _manager.OnLevelPlay());
+            seq.AppendCallback(OnButtonEnd);
             seq.Play();    
+        }
+
+        private void  OnButtonEnd()
+        {
+            _manager.OnLevelPlay();
         }
 
         private void OnDisable()

@@ -52,7 +52,6 @@ namespace Script.Handlers
             switch (type)
             {
                 case UIEventSubscriptionTypes.OnLevelPlay:
-                    // Store the lambda in _cachedClickAction
                     _cachedClickAction = () => _manager.OnButtonPressed(UIEventSubscriptionTypes.OnLevelPlay);
                     _levelButton.onClick.AddListener(_cachedClickAction);
                     break;
